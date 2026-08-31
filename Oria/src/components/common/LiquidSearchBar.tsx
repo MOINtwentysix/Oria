@@ -133,7 +133,7 @@ export const LiquidSearchBar: React.FC<LiquidSearchBarProps> = ({
           editable={!disabled}
           selectionColor={theme.colors.primary}
           autoCapitalize="none"
-          autoCompleteType="off"
+          autoComplete="off"
           autoCorrect={false}
           spellCheck={false}
         />

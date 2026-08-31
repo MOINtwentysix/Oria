@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 
 interface ErrorStateProps {
-  type: 'loading' | 'offline' | 'location-denied' | 'location-unavailable' | 'foursquare-error' | 'ai-unavailable' | 'no-places' | 'rate-limit' | 'empty-saved' | 'empty-list' | 'session-expired' | 'invalid-search' | 'network-timeout' | 'generic';
+  type: 'loading' | 'offline' | 'location-denied' | 'location-unavailable' | 'places-api-error' | 'ai-unavailable' | 'no-places' | 'rate-limit' | 'empty-saved' | 'empty-list' | 'session-expired' | 'invalid-search' | 'network-timeout' | 'generic';
   message?: string;
   onRetry?: () => void;
   onAction?: () => void;
@@ -17,6 +17,7 @@ const errorConfigs = {
   'location-denied': { icon: '📍', title: 'Location Access Needed', description: 'Enable location in Settings to discover nearby places' },
   'location-unavailable': { icon: '📍', title: 'Location Unavailable', description: 'Unable to get your current location. Please try again.' },
   'foursquare-error': { icon: '🗺️', title: 'Places Unavailable', description: 'Unable to load places. Please try again later.' },
+  'places-api-error': { icon: '🗺️', title: 'Places Unavailable', description: 'Unable to load places. Please try again later.' },
   'ai-unavailable': { icon: '✨', title: 'AI Unavailable', description: 'Oria AI is currently unavailable. Please try again.' },
   'no-places': { icon: '🔍', title: 'No Places Found', description: 'Try adjusting your search or filters' },
   'rate-limit': { icon: '⏱️', title: 'Too Many Requests', description: 'Please wait a moment and try again' },

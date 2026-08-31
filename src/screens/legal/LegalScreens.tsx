@@ -368,13 +368,13 @@ NEON (Database)
 - Privacy: https://neon.tech/privacy
 - Terms: https://neon.tech/terms
 
-FOURSQUARE PLACES API (Place Data)
-- Service: Place search, details, photos, categories
-- Provider: Foursquare Labs, Inc.
+OPENSTREETMAP (Place Data)
+- Service: Place search, details, categories via Overpass API & Nominatim
+- Provider: OpenStreetMap Foundation
 - Data Shared: Search queries, location coordinates
-- Privacy: https://foursquare.com/privacy
-- Terms: https://foursquare.com/terms
-- Attribution: Place data © Foursquare
+- Privacy: https://osmfoundation.org/wiki/Privacy_Policy
+- Terms: https://osmfoundation.org/wiki/Terms_of_Use
+- Attribution: © OpenStreetMap contributors
 
 MISTRAL AI (AI Recommendations)
 - Service: Large language model for recommendations

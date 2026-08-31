@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Place, SearchParams } from '@/types';
 import { useSearchStore, usePlacesStore } from '@/store';
-import { foursquareService } from '@/services/foursquare';
+import { openStreetMapService } from '@/services/openstreetmap';
 import { useLocation } from './useLocation';
 
 export const usePlaces = () => {
@@ -21,7 +21,7 @@ export const usePlaces = () => {
     setSearchError(null);
 
     try {
-      const result = await foursquareService.searchPlaces(params);
+      const result = await openStreetMapService.searchPlaces(params);
       setPlaces(result.results);
       return result.results;
     } catch (err: any) {
@@ -100,7 +100,7 @@ export const usePlaces = () => {
   const loadPlaceDetails = useCallback(async (placeId: string) => {
     setLoading(true);
     try {
-      const place = await foursquareService.getPlaceDetails(placeId);
+      const place = await openStreetMapService.getPlaceDetails(placeId);
       setSelectedPlace(place);
       return place;
     } catch (err: any) {
@@ -113,7 +113,7 @@ export const usePlaces = () => {
 
   const loadCategories = useCallback(async () => {
     try {
-      return await foursquareService.getCategories();
+      return await openStreetMapService.getCategories();
     } catch (err) {
       console.error('Failed to load categories:', err);
       return [];

@@ -1,14 +1,14 @@
 export const CATEGORIES = [
-  { id: 'cafes', name: 'Cafés', icon: '☕', color: 'primary', foursquareCategoryId: '13065' },
-  { id: 'restaurants', name: 'Restaurants', icon: '🍽️', color: 'secondary', foursquareCategoryId: '13065' },
-  { id: 'sports', name: 'Sport', icon: '🏀', color: 'accent', foursquareCategoryId: '18001' },
-  { id: 'photography', name: 'Photography', icon: '📸', color: 'primary', foursquareCategoryId: '10027' },
-  { id: 'entertainment', name: 'Entertainment', icon: '🎮', color: 'secondary', foursquareCategoryId: '10001' },
-  { id: 'nature', name: 'Nature', icon: '🌳', color: 'secondary', foursquareCategoryId: '16000' },
-  { id: 'culture', name: 'Culture', icon: '🎨', color: 'primary', foursquareCategoryId: '10000' },
-  { id: 'shopping', name: 'Shopping', icon: '🛍️', color: 'accent', foursquareCategoryId: '17000' },
-  { id: 'music', name: 'Music', icon: '🎵', color: 'primary', foursquareCategoryId: '10032' },
-  { id: 'sights', name: 'Sights', icon: '🏛️', color: 'secondary', foursquareCategoryId: '16000' },
+  { id: 'cafes', name: 'Cafés', icon: '☕', color: 'primary', osmTags: ['amenity=cafe', 'amenity=bar', 'amenity=pub'] },
+  { id: 'restaurants', name: 'Restaurants', icon: '🍽️', color: 'secondary', osmTags: ['amenity=restaurant', 'amenity=fast_food', 'amenity=biergarten'] },
+  { id: 'sports', name: 'Sport', icon: '🏀', color: 'accent', osmTags: ['leisure=sports_centre', 'leisure=fitness_centre', 'leisure=stadium', 'shop=sports'] },
+  { id: 'photography', name: 'Photography', icon: '📸', color: 'primary', osmTags: ['amenity=photo_studio', 'shop=photo'] },
+  { id: 'entertainment', name: 'Entertainment', icon: '🎮', color: 'secondary', osmTags: ['amenity=cinema', 'amenity=nightclub', 'leisure=amusement_arcade', 'leisure=playground'] },
+  { id: 'nature', name: 'Nature', icon: '🌳', color: 'secondary', osmTags: ['leisure=park', 'natural=wood', 'leisure=nature_reserve', 'landuse=forest', 'leisure=garden'] },
+  { id: 'culture', name: 'Culture', icon: '🎨', color: 'primary', osmTags: ['amenity=arts_centre', 'amenity=library', 'tourism=museum', 'tourism=gallery', 'amenity=theatre'] },
+  { id: 'shopping', name: 'Shopping', icon: '🛍️', color: 'accent', osmTags: ['shop=supermarket', 'shop=convenience', 'shop=clothes', 'shop=electronics', 'shop=mall', 'shop=bakery'] },
+  { id: 'music', name: 'Music', icon: '🎵', color: 'primary', osmTags: ['amenity=music_venue', 'shop=music', 'amenity=concert_hall'] },
+  { id: 'sights', name: 'Sights', icon: '🏛️', color: 'secondary', osmTags: ['tourism=museum', 'tourism=attraction', 'tourism=monument', 'tourism=viewpoint', 'historic=castle', 'historic=church'] },
 ];
 
 export const CATEGORY_COLORS = {
@@ -80,12 +80,13 @@ export const STORAGE_KEYS = {
 };
 
 export const API_ENDPOINTS = {
-  foursquare: {
-    base: 'https://api.foursquare.com/v3',
-    placesSearch: '/places/search',
-    placeDetails: '/places/',
-    placePhotos: '/places/{place_id}/photos',
-    categories: '/categories',
+  overpass: {
+    base: 'https://overpass-api.de/api/interpreter',
+  },
+  nominatim: {
+    base: 'https://nominatim.openstreetmap.org',
+    search: '/search',
+    reverse: '/reverse',
   },
   mistral: {
     base: 'https://api.mistral.ai/v1',
@@ -109,6 +110,7 @@ export const ERROR_MESSAGES = {
   locationUnavailable: 'Unable to get your current location. Please try again.',
   networkError: 'Network error. Please check your connection and try again.',
   foursquareError: 'Unable to load places. Please try again later.',
+  placesApiError: 'Unable to load places. Please try again later.',
   aiUnavailable: 'AI assistant is currently unavailable. Please try again.',
   noPlacesFound: 'No places found matching your search.',
   rateLimited: 'Too many requests. Please wait a moment and try again.',

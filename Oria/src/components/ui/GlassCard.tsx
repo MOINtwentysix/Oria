@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { useTheme, getTheme } from './ThemeProvider';
+import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -60,7 +60,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s0 = StyleSheet.create({
   container: {
     overflow: 'hidden',
   },
@@ -112,7 +112,7 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   );
 };
 
-const surfaceStyles = StyleSheet.create({
+const s1 = StyleSheet.create({
   surface: {
     overflow: 'hidden',
   },
@@ -164,7 +164,7 @@ export const GlassTabBar: React.FC<GlassTabBarProps> = ({
   );
 };
 
-const tabBarStyles = StyleSheet.create({
+const s2 = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -175,3 +175,4 @@ const tabBarStyles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
+const styles = { ...s0, ...s1, ...s2 };

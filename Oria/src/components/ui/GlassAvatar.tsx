@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Animated, Easing, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 
@@ -114,7 +114,6 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onPressCancel={handlePressOut}
       hitSlop={hitSlop}
       activeOpacity={1}
       style={animatedStyle}
@@ -144,7 +143,7 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s0 = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -243,7 +242,7 @@ export const GlassAvatarGroup: React.FC<GlassAvatarGroupProps> = ({
   );
 };
 
-const groupStyles = StyleSheet.create({
+const s1 = StyleSheet.create({
   groupContainer: {
     flexDirection: 'row',
   },
@@ -264,3 +263,4 @@ const groupStyles = StyleSheet.create({
     fontSize: 12,
   },
 });
+const styles = { ...s0, ...s1 };

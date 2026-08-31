@@ -170,7 +170,6 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onPressCancel={handlePressOut}
       disabled={disabled || loading}
       hitSlop={hitSlop}
       activeOpacity={1}

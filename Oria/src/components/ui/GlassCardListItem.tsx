@@ -98,7 +98,7 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
     return base[variant];
   };
 
-  const variantStyle = getVariantStyle();
+  const variantStyle: any = getVariantStyle();
 
   const paddingStyles = {
     none: { vertical: 0, horizontal: 0 },
@@ -139,7 +139,6 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
           onPress={onPress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          onPressCancel={handlePressOut}
           onLongPress={onLongPress}
           disabled={disabled}
           hitSlop={hitSlop}

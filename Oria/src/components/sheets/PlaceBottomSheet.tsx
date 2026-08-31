@@ -205,7 +205,7 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               </View>
             )}
 
-            {place.website && (
+{place.website && (
               <View style={styles.detailSection}>
                 <Text style={[
                   styles.detailLabel,
@@ -218,8 +218,9 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
                     styles.linkText,
                     { color: theme.colors.primary },
                   ]}>
-                  {place.website}
-                </Text>
+                    {place.website}
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
 
@@ -236,8 +237,9 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
                     styles.linkText,
                     { color: theme.colors.primary },
                   ]}>
-                  {place.phone}
-                </Text>
+                    {place.phone}
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
 

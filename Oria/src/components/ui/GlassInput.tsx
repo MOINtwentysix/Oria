@@ -20,6 +20,7 @@ interface GlassInputProps {
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   autoComplete?: string;
   disabled?: boolean;
+  autoFocus?: boolean;
   multiline?: boolean;
   numberOfLines?: number;
   maxLength?: number;
@@ -47,6 +48,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
   autoCapitalize = 'sentences',
   autoComplete,
   disabled = false,
+  autoFocus = false,
   multiline = false,
   numberOfLines,
   maxLength,
@@ -174,6 +176,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoComplete={autoComplete}
+          autoFocus={autoFocus}
           disabled={disabled}
           multiline={multiline}
           numberOfLines={numberOfLines}

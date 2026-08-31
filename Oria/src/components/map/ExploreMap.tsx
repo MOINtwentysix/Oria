@@ -115,7 +115,7 @@ const MapPin: React.FC<MapPinProps> = ({ place, selected, onPress, clusterCount 
   );
 };
 
-const pinStyles = StyleSheet.create({
+const s1 = StyleSheet.create({
   pinWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -303,7 +303,7 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s0 = StyleSheet.create({
   map: {
     flex: 1,
   },
@@ -361,7 +361,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
   );
 };
 
-const controlStyles = StyleSheet.create({
+const s2 = StyleSheet.create({
   controlsContainer: {
     position: 'absolute',
     top: 60,
@@ -396,3 +396,4 @@ const controlStyles = StyleSheet.create({
     borderColor: 'white',
   },
 });
+const styles = { ...s0, ...s1, ...s2 };

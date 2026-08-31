@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Image, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Image, ScrollView, TextInput } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton } from '@/components/ui';
@@ -130,7 +130,7 @@ export const LiquidSearchBar: React.FC<LiquidSearchBarProps> = ({
           onSubmitEditing={onSubmit}
           blurOnSubmit={blurOnSubmit}
           autoFocus={autoFocus}
-          disabled={disabled}
+          editable={!disabled}
           selectionColor={theme.colors.primary}
           autoCapitalize="none"
           autoCompleteType="off"
@@ -146,7 +146,7 @@ export const LiquidSearchBar: React.FC<LiquidSearchBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s0 = StyleSheet.create({
   container: {
     borderRadius: 20,
     flexDirection: 'row',
@@ -313,7 +313,7 @@ export const LiquidCategoryPill: React.FC<LiquidCategoryPillProps> = ({
   );
 };
 
-const pillStyles = StyleSheet.create({
+const s2 = StyleSheet.create({
   pillContainer: {
     flexDirection: 'row',
     gap: 10,
@@ -355,3 +355,4 @@ const pillStyles = StyleSheet.create({
     color: 'white',
   },
 });
+const styles = { ...s0, ...s2 };

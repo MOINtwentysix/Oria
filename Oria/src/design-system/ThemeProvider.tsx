@@ -58,3 +58,9 @@ export const useColorScheme = (): ColorScheme => {
   const { colorScheme } = useTheme();
   return colorScheme;
 };
+
+export const getTheme = (colorScheme: 'light' | 'dark') => ({
+  ...Theme,
+  colors: Colors[colorScheme],
+  glassStyles: colorScheme === 'dark' ? GlassStyles.dark : GlassStyles.light,
+});

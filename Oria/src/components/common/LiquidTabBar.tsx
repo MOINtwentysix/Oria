@@ -130,7 +130,7 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s0 = StyleSheet.create({
   tabContainer: {
     position: 'relative',
     overflow: 'hidden',
@@ -250,7 +250,7 @@ export const LiquidTabBarItem: React.FC<LiquidTabBarItemProps> = ({
   );
 };
 
-const itemStyles = StyleSheet.create({
+const s2 = StyleSheet.create({
   item: {
     flex: 1,
     flexDirection: 'column',
@@ -281,3 +281,4 @@ const itemStyles = StyleSheet.create({
     paddingHorizontal: 4,
   },
 });
+const styles = { ...s0, ...s2 };

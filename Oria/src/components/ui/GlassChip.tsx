@@ -157,7 +157,6 @@ export const GlassChip: React.FC<GlassChipProps> = ({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onPressCancel={handlePressOut}
       disabled={disabled}
       hitSlop={hitSlop}
       activeOpacity={1}

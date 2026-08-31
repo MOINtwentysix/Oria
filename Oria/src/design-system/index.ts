@@ -2,6 +2,7 @@ export * from './Colors';
 export * from './Layout';
 export * from './Typography';
 export * from './Animation';
+export * from './ThemeProvider';
 
 import { Colors } from './Colors';
 import { Spacing, BorderRadius, Shadows, GlassStyles, Layout } from './Layout';

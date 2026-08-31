@@ -38,7 +38,13 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
   const photoUrl = firstPhoto?.url || firstPhoto ? `${firstPhoto.prefix}original${firstPhoto.suffix}` : null;
 
   const category = place.categories[0];
-  const categoryColor = theme.colors[category?.color as keyof typeof theme.colors] || theme.colors.primary;
+  const matchingCategory = CATEGORIES.find(
+    (c) => category?.name?.toLowerCase().includes(c.name.toLowerCase())
+  );
+  const categoryColor =
+    (matchingCategory?.color
+      ? theme.colors[matchingCategory.color as keyof typeof theme.colors]
+      : undefined) || theme.colors.primary;
 
   const formatDistance = (meters?: number) => {
     if (!meters) return '';

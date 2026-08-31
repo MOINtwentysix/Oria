@@ -1,11 +1,23 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Image, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Image, ScrollView, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
-import MapView, { Marker, Callout, MapViewProps } from 'react-native-maps';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassCard, GlassButton, GlassChip, GlassAvatar } from '@/components/ui';
 import { Place, Coordinates } from '@/types';
 import { MAP_CONFIG } from '@/constants';
+
+let MapView: any = null;
+let Marker: any = null;
+let Callout: any = null;
+let MapViewProps: any = {};
+
+if (Platform.OS !== 'web') {
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+  Callout = Maps.Callout;
+  MapViewProps = Maps.MapViewProps || {};
+}
 
 interface MapPinProps {
   place: Place;
@@ -165,7 +177,7 @@ const s1 = StyleSheet.create({
   },
 });
 
-interface ExploreMapProps extends Omit<MapViewProps, 'children' | 'style'> {
+interface ExploreMapProps {
   places: Place[];
   selectedPlaceId: string | null;
   clusters: Map<string, Place[]>;
@@ -208,7 +220,16 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
-  const [mapRef, setMapRef] = React.useState<MapView | null>(null);
+  if (Platform.OS === 'web') {
+    return (
+      <View style={[{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#1E293B' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }, style]}>
+        <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '600' }}>Map</Text>
+        <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 4 }}>{places.length} places</Text>
+      </View>
+    );
+  }
+
+  const [mapRef, setMapRef] = React.useState<any>(null);
 
   const handleRegionChange = (region: any) => {
     onRegionChange(region);

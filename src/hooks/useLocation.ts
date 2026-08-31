@@ -1,7 +1,12 @@
-import { useEffect, useCallback, useRef } from 'react';
-import * as Location from 'expo-location';
+import { useEffect, useCallback, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import { Coordinates } from '@/types';
 import { useLocationStore } from '@/store';
+
+let Location: any = null;
+if (Platform.OS !== 'web') {
+  Location = require('expo-location');
+}
 
 export const useLocation = () => {
   const {
@@ -19,6 +24,14 @@ export const useLocation = () => {
   const lastUpdateRef = useRef<number>(0);
 
   const requestPermission = useCallback(async () => {
+    if (Platform.OS === 'web') {
+      if ('geolocation' in navigator) {
+        setLocationPermission('granted');
+        return true;
+      }
+      setLocationPermission('denied');
+      return false;
+    }
     const { status } = await Location.requestForegroundPermissionsAsync();
     const permission = status === 'granted' ? 'granted' : 'denied';
     setLocationPermission(permission);
@@ -27,6 +40,28 @@ export const useLocation = () => {
 
   const getCurrentLocation = useCallback(async (): Promise<Coordinates | null> => {
     try {
+      if (Platform.OS === 'web') {
+        return await new Promise<Coordinates>((resolve, reject) => {
+          if (!('geolocation' in navigator)) {
+            resolve(null);
+            return;
+          }
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const coords: Coordinates = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              };
+              setCurrentLocation(coords);
+              setLastKnownLocation(coords);
+              resolve(coords);
+            },
+            () => resolve(null),
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+          );
+        });
+      }
+
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
         maximumAge: 10000,
@@ -54,26 +89,48 @@ export const useLocation = () => {
     if (!hasPermission) return;
 
     try {
-      watchIdRef.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          distanceInterval: 100,
-          timeInterval: 5000,
-        },
-        (location) => {
-          const now = Date.now();
-          if (now - lastUpdateRef.current < 3000) return;
-          lastUpdateRef.current = now;
+      if (Platform.OS === 'web') {
+        if ('geolocation' in navigator) {
+          watchIdRef.current = navigator.geolocation.watchPosition(
+            (position) => {
+              const now = Date.now();
+              if (now - lastUpdateRef.current < 3000) return;
+              lastUpdateRef.current = now;
 
-          const coords: Coordinates = {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          };
+              const coords: Coordinates = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              };
 
-          setCurrentLocation(coords);
-          setLastKnownLocation(coords);
+              setCurrentLocation(coords);
+              setLastKnownLocation(coords);
+            },
+            () => {},
+            { enableHighAccuracy: true, distanceInterval: 100, timeInterval: 5000 }
+          ) as unknown as number;
         }
-      );
+      } else {
+        watchIdRef.current = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            distanceInterval: 100,
+            timeInterval: 5000,
+          },
+          (location) => {
+            const now = Date.now();
+            if (now - lastUpdateRef.current < 3000) return;
+            lastUpdateRef.current = now;
+
+            const coords: Coordinates = {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            };
+
+            setCurrentLocation(coords);
+            setLastKnownLocation(coords);
+          }
+        );
+      }
 
       setWatching(true);
     } catch (error) {
@@ -83,7 +140,11 @@ export const useLocation = () => {
 
   const stopWatching = useCallback(async () => {
     if (watchIdRef.current !== null) {
-      Location.removeWatch(watchIdRef.current);
+      if (Platform.OS === 'web') {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      } else {
+        Location.removeWatch(watchIdRef.current);
+      }
       watchIdRef.current = null;
       setWatching(false);
     }
@@ -91,6 +152,16 @@ export const useLocation = () => {
 
   useEffect(() => {
     const initLocation = async () => {
+      if (Platform.OS === 'web') {
+        if ('geolocation' in navigator) {
+          setLocationPermission('granted');
+          await getCurrentLocation();
+        } else {
+          setLocationPermission('denied');
+        }
+        return;
+      }
+
       const { status } = await Location.getForegroundPermissionsAsync();
       setLocationPermission(status === 'granted' ? 'granted' : 'undetermined');
 
@@ -123,6 +194,8 @@ export const useReverseGeocode = (latitude: number, longitude: number) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (Platform.OS === 'web') return;
+
     const geocode = async () => {
       setLoading(true);
       try {
@@ -150,5 +223,3 @@ export const useReverseGeocode = (latitude: number, longitude: number) => {
 
   return { address, loading };
 };
-
-import { useState } from 'react';

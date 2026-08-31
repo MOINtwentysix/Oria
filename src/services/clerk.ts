@@ -1,10 +1,28 @@
-import { Clerk } from '@clerk/clerk-expo';
 import { useEffect, useState } from 'react';
 import { User } from '@/types';
+import { Platform } from 'react-native';
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
 
-export const clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
+function createClerkInstance() {
+  try {
+    if (Platform.OS === 'web') {
+      const { Clerk } = require('@clerk/clerk-js');
+      return new Clerk(CLERK_PUBLISHABLE_KEY);
+    }
+    const { Clerk } = require('@clerk/clerk-expo');
+    return new Clerk(CLERK_PUBLISHABLE_KEY);
+  } catch {
+    return {
+      load: () => Promise.resolve(),
+      addListener: () => () => {},
+      signOut: () => Promise.resolve(),
+      session: null,
+    };
+  }
+}
+
+export const clerk = createClerkInstance();
 
 export interface ClerkUser {
   id: string;
@@ -23,31 +41,43 @@ export const useAuth = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = clerk.addListener(({ user: clerkUser }) => {
-      if (clerkUser) {
-        setUser({
-          id: clerkUser.id,
-          emailAddresses: clerkUser.emailAddresses,
-          firstName: clerkUser.firstName,
-          lastName: clerkUser.lastName,
-          imageUrl: clerkUser.imageUrl,
-          username: clerkUser.username,
-          createdAt: clerkUser.createdAt,
-          updatedAt: clerkUser.updatedAt,
-        });
-        setIsSignedIn(true);
-      } else {
-        setUser(null);
-        setIsSignedIn(false);
-      }
-      setIsLoaded(true);
-    });
+    let unsubscribe: (() => void) | undefined;
 
-    clerk.load().then(() => {
+    try {
+      unsubscribe = clerk.addListener(({ user: clerkUser }: any) => {
+        if (clerkUser) {
+          setUser({
+            id: clerkUser.id,
+            emailAddresses: clerkUser.emailAddresses,
+            firstName: clerkUser.firstName,
+            lastName: clerkUser.lastName,
+            imageUrl: clerkUser.imageUrl,
+            username: clerkUser.username,
+            createdAt: clerkUser.createdAt,
+            updatedAt: clerkUser.updatedAt,
+          });
+          setIsSignedIn(true);
+        } else {
+          setUser(null);
+          setIsSignedIn(false);
+        }
+        setIsLoaded(true);
+      });
+    } catch {
       setIsLoaded(true);
-    });
+    }
 
-    return unsubscribe;
+    clerk.load()
+      .then(() => {
+        setIsLoaded(true);
+      })
+      .catch(() => {
+        setIsLoaded(true);
+      });
+
+    return () => {
+      unsubscribe?.();
+    };
   }, []);
 
   const signOut = async () => {

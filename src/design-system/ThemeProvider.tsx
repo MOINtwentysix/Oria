@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Appearance, ColorSchemeName } from 'react-native';
+import { Colors } from './Colors';
+import { Spacing, BorderRadius, Shadows, GlassStyles, Layout } from './Layout';
+import { Typography, TextStyles } from './Typography';
+import { Animation, Transitions } from './Animation';
 
 type ColorScheme = 'light' | 'dark';
 
@@ -60,7 +64,14 @@ export const useColorScheme = (): ColorScheme => {
 };
 
 export const getTheme = (colorScheme: 'light' | 'dark') => ({
-  ...Theme,
   colors: Colors[colorScheme],
+  spacing: Spacing,
+  borderRadius: BorderRadius,
+  shadows: Shadows,
   glassStyles: colorScheme === 'dark' ? GlassStyles.dark : GlassStyles.light,
+  layout: Layout,
+  typography: Typography,
+  textStyles: TextStyles,
+  animation: Animation,
+  transitions: Transitions,
 });

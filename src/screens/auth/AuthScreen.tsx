@@ -4,13 +4,13 @@ import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassInput } from '@/components/ui';
 import { useAuth } from '@/services/clerk';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const AuthScreen: React.FC = () => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const { clerk, isLoaded, isSignedIn } = useAuth();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const [mode, setMode] = React.useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = React.useState('');

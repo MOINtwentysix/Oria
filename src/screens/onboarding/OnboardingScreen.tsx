@@ -7,13 +7,13 @@ import { LiquidTabBar } from '@/components/common';
 import { useAuth } from '@/services/clerk';
 import { useUIStore } from '@/store';
 import { CATEGORIES, ONBOARDING_STEPS, RADIUS_OPTIONS, INTERESTS_OPTIONS } from '@/constants';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const OnboardingScreen: React.FC = () => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const { tabBarVisible, setTabBarVisible, onboardingComplete, setOnboardingComplete, onboardingStep, setOnboardingStep } = useUIStore();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const [interests, setInterests] = React.useState<string[]>([]);
   const [radius, setRadius] = React.useState(5000);

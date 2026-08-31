@@ -8,7 +8,7 @@ import { AIChatMessage, AIChatInput, AIModeCard, TripPlanView } from '@/componen
 import { useAuth } from '@/services/clerk';
 import { useUIStore, useAIStore } from '@/store';
 import { Place, AIMessage, PlaceCard } from '@/types';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { useLocation } from '@/hooks/useLocation';
 import { usePlaces } from '@/hooks/usePlaces';
 import { useAI } from '@/hooks/useAI';
@@ -21,7 +21,7 @@ export const AIScreen: React.FC = () => {
   const { messages, loading, error, streaming, currentConversation, askOria, streamAskOria, planTrip, planFromList, clear, setCurrentConversation } = useAIStore();
   const { currentLocation } = useLocation();
   const { places: nearbyPlaces, searchNearby } = usePlaces();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const [inputValue, setInputValue] = React.useState('');
   const [mode, setMode] = React.useState<'chat' | 'trip' | 'list'>('chat');

@@ -7,7 +7,7 @@ import { LiquidTabBar } from '@/components/common';
 import { useAuth } from '@/services/clerk';
 import { useUIStore, useSavedStore } from '@/store';
 import { SavedList, SavedPlace } from '@/types';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const SavedScreen: React.FC = () => {
   const { colorScheme } = useTheme();
@@ -15,7 +15,7 @@ export const SavedScreen: React.FC = () => {
   const { user, isSignedIn } = useAuth();
   const { tabBarVisible, setTabBarVisible } = useUIStore();
   const { lists, savedPlaces, loading, error, loadLists, loadSavedPlaces, createList, setActiveList } = useSavedStore();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [activeList, setActiveListState] = React.useState<SavedList | null>(null);

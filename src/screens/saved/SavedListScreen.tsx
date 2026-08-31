@@ -7,7 +7,7 @@ import { LiquidTabBar } from '@/components/common';
 import { useAuth } from '@/services/clerk';
 import { useUIStore, useSavedStore } from '@/store';
 import { SavedList, SavedListItem } from '@/types';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { RefreshControl } from 'react-native';
 
 export const SavedListScreen: React.FC = () => {
@@ -16,7 +16,7 @@ export const SavedListScreen: React.FC = () => {
   const { user, isSignedIn } = useAuth();
   const { tabBarVisible, setTabBarVisible, bottomSheetVisible, setBottomSheetVisible } = useUIStore();
   const { lists, activeList, loading, error, loadListItems, addListItem, removeListItem, reorderListItems, inviteToList, removeListMember, updateMemberRole } = useSavedStore();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [items, setItems] = React.useState<SavedListItem[]>([]);

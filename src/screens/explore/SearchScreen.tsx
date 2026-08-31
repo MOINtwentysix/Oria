@@ -9,7 +9,7 @@ import { useSearchStore } from '@/store';
 import { useAuth } from '@/services/clerk';
 import { useUIStore } from '@/store';
 import { CATEGORIES, ERROR_MESSAGES } from '@/constants';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { usePlaces } from '@/hooks/usePlaces';
 import { PlaceBottomSheet } from '@/components/sheets';
 
@@ -19,7 +19,7 @@ export const SearchScreen: React.FC = () => {
   const { user, isSignedIn } = useAuth();
   const { query, selectedCategories, filters, recentSearches, suggestions, loading, error, setQuery, setSelectedCategories, setFilters, addRecentSearch, clearRecentSearches, setSuggestions } = useSearchStore();
   const { bottomSheetVisible, setBottomSheetVisible, tabBarVisible, setTabBarVisible } = useUIStore();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const { places, selectedPlace, clusters, searchByQuery, loadPlaceDetails, selectPlace } = usePlaces();
 

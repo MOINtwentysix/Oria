@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Lin
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard } from '@/components/ui';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 interface LegalScreenProps {
   title: string;
@@ -14,7 +14,7 @@ interface LegalScreenProps {
 export const LegalScreen: React.FC<LegalScreenProps> = ({ title, content, lastUpdated }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
-  const router = useRouter();
+  const router = useAppNavigation();
 
   return (
     <SafeAreaView style={styles.container}>

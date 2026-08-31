@@ -7,7 +7,7 @@ import { LiquidTabBar } from '@/components/common';
 import { useAuth } from '@/services/clerk';
 import { useUIStore, useUserStore } from '@/store';
 import { CATEGORIES } from '@/constants';
-import { useNavigation, useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const ExploreScreen: React.FC = () => {
   const { colorScheme } = useTheme();
@@ -17,8 +17,7 @@ export const ExploreScreen: React.FC = () => {
   const { currentLocation, loading: locationLoading, getCurrentLocation } = useLocation();
   const { places, selectedPlace, clusters, loading: placesLoading, searchNearby, loadPlaceDetails, selectPlace } = usePlaces();
 
-  const router = useRouter();
-  const navigation = useNavigation();
+  const router = useAppNavigation();
 
   React.useEffect(() => {
     setTabBarVisible(true);

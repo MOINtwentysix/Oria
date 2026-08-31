@@ -41,7 +41,6 @@
       "output": "single"
     },
     "plugins": [
-      "expo-router",
       "expo-location",
       "expo-image-picker",
       [
@@ -55,9 +54,6 @@
     ],
     "scheme": "oria",
     "extra": {
-      "router": {
-        "origin": false
-      },
       "eas": {
         "projectId": "your-eas-project-id"
       }

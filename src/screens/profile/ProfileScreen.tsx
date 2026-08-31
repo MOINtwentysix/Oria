@@ -6,7 +6,7 @@ import { GlassButton, GlassCard, GlassAvatar, GlassChip } from '@/components/ui'
 import { LiquidTabBar } from '@/components/common';
 import { useAuth } from '@/services/clerk';
 import { useUIStore, useUserStore } from '@/store';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const ProfileScreen: React.FC = () => {
   const { colorScheme } = useTheme();
@@ -14,7 +14,7 @@ export const ProfileScreen: React.FC = () => {
   const { user, isSignedIn, signOut } = useAuth();
   const { user: appUser, preferences, updatePreferences, logout } = useUserStore();
   const { tabBarVisible, setTabBarVisible, theme: uiTheme, setTheme } = useUIStore();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   React.useEffect(() => {
     setTabBarVisible(true);

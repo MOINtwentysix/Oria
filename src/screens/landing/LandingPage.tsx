@@ -4,13 +4,13 @@ import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard } from '@/components/ui';
 import { useAuth } from '@/services/clerk';
-import { useRouter } from 'expo-router';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const LandingPage: React.FC = () => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const { isSignedIn } = useAuth();
-  const router = useRouter();
+  const router = useAppNavigation();
 
   const handleGetStarted = () => {
     if (isSignedIn) {

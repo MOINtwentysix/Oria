@@ -13,6 +13,7 @@ interface GlassAvatarProps {
   borderWidth?: number;
   onPress?: () => void;
   hitSlop?: number;
+  children?: React.ReactNode;
 }
 
 export const GlassAvatar: React.FC<GlassAvatarProps> = ({
@@ -25,6 +26,7 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({
   borderWidth = 2,
   onPress,
   hitSlop = 8,
+  children,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
@@ -138,6 +140,7 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({
             </Text>
           </View>
         )}
+        {children}
       </BlurView>
     </PressableWrapper>
   );

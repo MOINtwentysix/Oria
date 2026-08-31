@@ -141,7 +141,7 @@ export const GlassChip: React.FC<GlassChipProps> = ({
     styles.text,
     {
       fontSize: s.fontSize,
-      fontWeight: '600',
+      fontWeight: '600' as const,
       color: variantStyle.textColor,
     },
   ];
@@ -195,7 +195,7 @@ export const GlassChip: React.FC<GlassChipProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s0 = StyleSheet.create({
   container: {
     overflow: 'hidden',
   },
@@ -290,3 +290,5 @@ const categoryIconStyles = StyleSheet.create({
     color: 'white',
   },
 });
+
+const styles = { ...s0, ...categoryIconStyles };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TextInput, Text, Animated, Easing } from 'react-native';
+import { StyleSheet, View, TextInput, Text, Animated, Easing, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 
@@ -18,7 +18,7 @@ interface GlassInputProps {
   secureTextEntry?: boolean;
   keyboardType?: any;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
-  autoComplete?: string;
+  autoComplete?: React.ComponentProps<typeof TextInput>['autoComplete'];
   disabled?: boolean;
   autoFocus?: boolean;
   multiline?: boolean;

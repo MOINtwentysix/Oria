@@ -1,5 +1,5 @@
 {
-  "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 npx expo export -p web",
+  "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 npx expo export -p web --clear",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
   "rewrites": [

@@ -2,4 +2,7 @@
   "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 npx expo export -p web",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
+  "nodeVersion": "20",
+  "memory": 4096,
+  "timeout": 300
 }

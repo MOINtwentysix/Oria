@@ -3,7 +3,6 @@
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": null,
-  "nodeVersion": "20",
   "memory": 4096,
   "timeout": 300,
   "rewrites": [

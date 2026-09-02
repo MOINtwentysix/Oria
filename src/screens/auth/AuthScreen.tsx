@@ -55,19 +55,6 @@ export const AuthScreen: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = async (strategy: 'google' | 'apple') => {
-    setError('');
-    setLoading(true);
-    try {
-      await clerk.signIn({ strategy: `oauth_${strategy}` });
-      router.replace('/explore');
-    } catch (err: any) {
-      setError(err.message || 'Social login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -178,52 +165,6 @@ export const AuthScreen: React.FC = () => {
               </GlassButton>
             </View>
           </GlassCard>
-
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={[
-              styles.dividerText,
-              { color: theme.colors.textTertiary },
-            ]}>
-              or continue with
-            </Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <View style={styles.socialButtons}>
-            <TouchableOpacity
-              onPress={() => handleSocialLogin('google')}
-              disabled={loading}
-              style={styles.socialButton}
-              hitSlop={8}
-            >
-              <Image
-                source={require('@/assets/google-icon.png')}
-                style={styles.socialIcon}
-                resizeMode="contain"
-              />
-              <Text style={[
-                styles.socialButtonText,
-                { color: theme.colors.text },
-              ]}>
-                Google
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleSocialLogin('apple')}
-              disabled={loading}
-              style={styles.socialButton}
-              hitSlop={8}
-            >
-              <Text style={styles.socialIcon}>🍎</Text>
-              <Text style={[
-                styles.socialButtonText,
-                { color: theme.colors.text },
-              ]}>
-                Apple
-              </Text>
-            </TouchableOpacity>
-          </View>
 
           <View style={styles.footer}>
             <Text style={[
@@ -357,31 +298,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     whiteSpace: 'nowrap',
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  socialIcon: {
-    width: 20,
-    height: 20,
-  },
-  socialButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
   },
   footer: {
     alignItems: 'center',

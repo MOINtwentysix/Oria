@@ -2,7 +2,7 @@
   "expo": {
     "name": "Oria",
     "slug": "Oria",
-    "version": "1.0.0",
+    "version": "1.0.0-beta-1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -55,9 +55,9 @@
     "scheme": "oria",
     "extra": {
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "a00886a3-2a57-493b-844a-aef09f6225cf"
       }
     },
-    "owner": "your-expo-username"
+    "owner": "mointwentysix"
   }
 }

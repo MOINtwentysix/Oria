@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bash scripts/build-web.sh",
+  "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 NODE_OPTIONS='--max-old-space-size=4096' npx expo export -p web",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": null,
@@ -7,6 +7,12 @@
     {
       "source": "/((?!_expo|assets|favicon.ico|metadata.json|.*\\.).*)",
       "destination": "/"
+    }
+  ],
+  "env": [
+    {
+      "key": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK",
+      "value": "1"
     }
   ]
 }

@@ -6,6 +6,16 @@ const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '
 
 function createClerkInstance() {
   try {
+    // If no publishable key is set, return a mock instance for development
+    if (!CLERK_PUBLISHABLE_KEY) {
+      return {
+        load: () => Promise.resolve(),
+        addListener: () => () => {},
+        signOut: () => Promise.resolve(),
+        session: null,
+      };
+    }
+    
     if (Platform.OS === 'web') {
       const { Clerk } = require('@clerk/clerk-js');
       return new Clerk(CLERK_PUBLISHABLE_KEY);

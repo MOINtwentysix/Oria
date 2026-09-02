@@ -1,19 +1,20 @@
 import { registerRootComponent } from 'expo';
 import App from './App';
 
-// Platform-specific entry point
-// @ts-ignore - document is available in web, but not in native
+// Register the root component for native platforms
+registerRootComponent(App);
+
+// For web, we need to manually mount the app
 if (typeof document !== 'undefined') {
-  // Web platform
-  // @ts-ignore - dynamic imports work at runtime
-  import('react').then(({ default: React }) => {
-    // @ts-ignore - dynamic imports work at runtime
-    import('react-dom/client').then(({ default: ReactDOM }) => {
-      const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-      root.render(React.createElement(App));
+  // @ts-ignore - react-dom/client is available in web environment
+  import('react-dom/client').then(({ createRoot }) => {
+    // @ts-ignore - React is available in web environment
+    import('react').then(({ createElement }) => {
+      const root = document.getElementById('root');
+      if (root) {
+        const reactRoot = createRoot(root);
+        reactRoot.render(createElement(App));
+      }
     });
   });
-} else {
-  // Native platforms (iOS, Android, Expo Go)
-  registerRootComponent(App);
 }

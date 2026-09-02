@@ -1,20 +1,11 @@
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 npx expo export -p web",
+  "outputDirectory": "dist",
+  "installCommand": "npm install --legacy-peer-deps",
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist",
-        "installCommand": "npm install --legacy-peer-deps",
-        "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 npx expo export -p web"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/((?!_expo|assets|favicon.ico|metadata.json|.*\\.).*)",
-      "dest": "/"
+      "source": "/((?!_expo|assets|favicon.ico|metadata.json|.*\\.).*)",
+      "destination": "/"
     }
   ]
 }

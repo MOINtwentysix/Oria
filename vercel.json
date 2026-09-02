@@ -9,10 +9,7 @@
       "destination": "/"
     }
   ],
-  "env": [
-    {
-      "key": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK",
-      "value": "1"
-    }
-  ]
+  "env": {
+    "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
+  }
 }

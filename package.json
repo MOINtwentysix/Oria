@@ -1,6 +1,6 @@
 {
   "name": "oria",
-  "version": "1.0.0",
+  "version": "1.0.0-beta-1",
   "main": "index.ts",
   "dependencies": {
     "@clerk/clerk-expo": "^2.20.0",
@@ -22,7 +22,7 @@
     "expo-device": "^57.0.1",
     "expo-image-picker": "^57.0.14",
     "expo-linking": "^57.0.8",
-    "expo-location": "^57.0.14",
+    "expo-location": "^57.0.15",
     "expo-router": "^57.0.18",
     "expo-sharing": "^57.0.16",
     "expo-status-bar": "~57.0.1",

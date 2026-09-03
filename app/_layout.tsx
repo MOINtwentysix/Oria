@@ -27,7 +27,16 @@ export default function RootLayout() {
 
   // Show loading state while auth is loading
   if (!isLoaded) {
-    return null;
+    return (
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          {/* Simple loading indicator */}
+          <div style={{ flex: 1, backgroundColor: '#F7F9FC', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+            <p style={{ fontSize: 16, color: '#666' }}>Loading...</p>
+          </div>
+        </QueryClientProvider>
+      </ThemeProvider>
+    );
   }
 
   return (

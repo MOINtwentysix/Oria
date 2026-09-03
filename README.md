@@ -1,2 +1,2 @@
 # Oria
-Discover what‘s around you ✨🗺️✨
+Discover what‘s around you ✨🗺️

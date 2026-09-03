@@ -4,6 +4,9 @@ import { Platform } from 'react-native';
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
 
+// Singleton Clerk instance for non-Web platforms
+let clerkSingleton: any = null;
+
 function createClerkInstance() {
   try {
     // If no publishable key is set, return a mock instance for development
@@ -17,11 +20,21 @@ function createClerkInstance() {
     }
     
     if (Platform.OS === 'web') {
-      const { Clerk } = require('@clerk/clerk-js');
-      return new Clerk(CLERK_PUBLISHABLE_KEY);
+      // For web, we need to use Clerk from @clerk/clerk-js
+      // But we need to handle SSR properly
+      if (typeof window !== 'undefined') {
+        const { Clerk } = require('@clerk/clerk-js');
+        return new Clerk(CLERK_PUBLISHABLE_KEY);
+      }
+      return null;
     }
-    const { Clerk } = require('@clerk/clerk-expo');
-    return new Clerk(CLERK_PUBLISHABLE_KEY);
+    
+    // For native platforms
+    if (!clerkSingleton) {
+      const { Clerk } = require('@clerk/clerk-expo');
+      clerkSingleton = new Clerk(CLERK_PUBLISHABLE_KEY);
+    }
+    return clerkSingleton;
   } catch {
     return {
       load: () => Promise.resolve(),
@@ -32,7 +45,18 @@ function createClerkInstance() {
   }
 }
 
-export const clerk = createClerkInstance();
+// Get clerk instance - returns null on server for web
+function getClerkInstance() {
+  if (Platform.OS === 'web' && typeof window === 'undefined') {
+    return null;
+  }
+  if (!clerkSingleton && Platform.OS !== 'web') {
+    clerkSingleton = createClerkInstance();
+  }
+  return clerkSingleton || createClerkInstance();
+}
+
+export const clerk = getClerkInstance();
 
 export interface ClerkUser {
   id: string;
@@ -51,10 +75,18 @@ export const useAuth = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
+    const clerkInstance = getClerkInstance();
+    
+    // On web, if clerk is null (SSR), set loaded to true immediately
+    if (!clerkInstance) {
+      setIsLoaded(true);
+      return;
+    }
+
     let unsubscribe: (() => void) | undefined;
 
     try {
-      unsubscribe = clerk.addListener(({ user: clerkUser }: any) => {
+      unsubscribe = clerkInstance.addListener(({ user: clerkUser }: any) => {
         if (clerkUser) {
           setUser({
             id: clerkUser.id,
@@ -77,7 +109,7 @@ export const useAuth = () => {
       setIsLoaded(true);
     }
 
-    clerk.load()
+    clerkInstance.load()
       .then(() => {
         setIsLoaded(true);
       })
@@ -91,7 +123,10 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    await clerk.signOut();
+    const clerkInstance = getClerkInstance();
+    if (clerkInstance) {
+      await clerkInstance.signOut();
+    }
   };
 
   return {
@@ -99,13 +134,15 @@ export const useAuth = () => {
     isLoaded,
     isSignedIn,
     signOut,
-    clerk,
+    clerk: getClerkInstance(),
   };
 };
 
 export const getAuthToken = async (): Promise<string | null> => {
   try {
-    const session = await clerk.session?.getToken({ template: 'oria' });
+    const clerkInstance = getClerkInstance();
+    if (!clerkInstance) return null;
+    const session = await clerkInstance.session?.getToken({ template: 'oria' });
     return session || null;
   } catch {
     return null;

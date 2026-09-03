@@ -4,7 +4,6 @@ import { ClerkProvider } from '@clerk/expo';
 import { ThemeProvider } from '@/design-system/ThemeProvider';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/services/queryClient';
-import { useAuth } from '@/services/clerk';
 import { useUIStore } from '@/store';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
@@ -14,9 +13,9 @@ if (!publishableKey) {
 }
 
 export default function RootLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
   const { onboardingComplete } = useUIStore();
   const router = useRouter();
+  const { isLoaded, isSignedIn } = useAuth();
 
   // Wait for auth to be loaded before rendering
   React.useEffect(() => {

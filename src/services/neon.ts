@@ -18,9 +18,9 @@ export const initializeDatabase = async () => {
         clerk_id TEXT UNIQUE NOT NULL,
         email TEXT NOT NULL,
         username TEXT UNIQUE,
-        first_name TEXT,
-        last_name TEXT,
-        image_url TEXT,
+        firstName TEXT,
+        lastName TEXT,
+        imageUrl TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
@@ -248,16 +248,16 @@ export const initializeDatabase = async () => {
 
 export const db = {
   users: {
-    create: async (data: { clerk_id: string; email: string; username?: string; first_name?: string; last_name?: string; image_url?: string }) => {
+    create: async (data: { clerk_id: string; email: string; username?: string; firstName?: string; lastName?: string; imageUrl?: string }) => {
       const result = await sql`
-        INSERT INTO users (clerk_id, email, username, first_name, last_name, image_url)
-        VALUES (${data.clerk_id}, ${data.email}, ${data.username}, ${data.first_name}, ${data.last_name}, ${data.image_url})
+        INSERT INTO users (clerk_id, email, username, firstName, lastName, imageUrl)
+        VALUES (${data.clerk_id}, ${data.email}, ${data.username}, ${data.firstName}, ${data.lastName}, ${data.imageUrl})
         ON CONFLICT (clerk_id) DO UPDATE SET
           email = EXCLUDED.email,
           username = EXCLUDED.username,
-          first_name = EXCLUDED.first_name,
-          last_name = EXCLUDED.last_name,
-          image_url = EXCLUDED.image_url,
+          firstName = EXCLUDED.firstName,
+          lastName = EXCLUDED.lastName,
+          imageUrl = EXCLUDED.imageUrl,
           updated_at = NOW()
         RETURNING *
       `;
@@ -271,14 +271,14 @@ export const db = {
       const result = await sql`SELECT * FROM users WHERE id = ${id}`;
       return result[0];
     },
-    update: async (id: string, data: Partial<{ email: string; username: string; first_name: string; last_name: string; image_url: string }>) => {
+    update: async (id: string, data: Partial<{ email: string; username: string; firstName: string; lastName: string; imageUrl: string }>) => {
       const result = await sql`
         UPDATE users SET
           email = COALESCE(${data.email}, email),
           username = COALESCE(${data.username}, username),
-          first_name = COALESCE(${data.first_name}, first_name),
-          last_name = COALESCE(${data.last_name}, last_name),
-          image_url = COALESCE(${data.image_url}, image_url),
+          firstName = COALESCE(${data.firstName}, firstName),
+          lastName = COALESCE(${data.lastName}, lastName),
+          imageUrl = COALESCE(${data.imageUrl}, imageUrl),
           updated_at = NOW()
         WHERE id = ${id}
         RETURNING *
@@ -475,7 +475,7 @@ export const db = {
     },
     getMembers: async (listId: string) => {
       const result = await sql`
-        SELECT slm.*, u.email, u.first_name, u.last_name, u.image_url, u.username
+        SELECT slm.*, u.email, u.firstName, u.lastName, u.imageUrl, u.username
         FROM saved_list_members slm
         JOIN users u ON u.id = slm.user_id
         WHERE slm.list_id = ${listId}

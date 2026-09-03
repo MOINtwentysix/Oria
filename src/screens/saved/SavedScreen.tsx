@@ -14,7 +14,7 @@ export const SavedScreen: React.FC = () => {
   const theme = getTheme(colorScheme);
   const { user, isSignedIn } = useAuth();
   const { tabBarVisible, setTabBarVisible } = useUIStore();
-  const { lists, savedPlaces, loading, error, loadLists, loadSavedPlaces, createList, setActiveList } = useSavedStore();
+  const { lists, savedPlaces, loading, error, loadLists, createList, setActiveList } = useSavedStore();
   const router = useAppNavigation();
 
   const [showCreateModal, setShowCreateModal] = React.useState(false);
@@ -22,11 +22,11 @@ export const SavedScreen: React.FC = () => {
 
   React.useEffect(() => {
     setTabBarVisible(true);
-    if (isSignedIn) {
+    if (isSignedIn && user) {
       loadLists();
-      loadSavedPlaces(user?.id || '');
+      (user.id);
     }
-  }, [isSignedIn, loadLists, loadSavedPlaces, user?.id]);
+  }, [isSignedIn, loadLists, , user?.id]);
 
   const handleCreateList = (name: string, description?: string, isShared = false) => {
     if (user) {
@@ -90,7 +90,7 @@ export const SavedScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={() => { loadLists(); loadSavedPlaces(user.id); }} />
+        <RefreshControl refreshing={loading} onRefresh={() => { if (user) { loadLists(); (user.id); } }} />
       }>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
@@ -119,7 +119,7 @@ export const SavedScreen: React.FC = () => {
             </View>
           ) : lists.length === 0 ? (
             <View style={styles.emptyLists}>
-              <GlassCard variant="glass" style={styles.emptyListsCard}>
+              <GlassCard variant="light" style={styles.emptyListsCard}>
                 <View style={styles.emptyListsContent}>
                   <Text style={styles.emptyListsIcon}>❤️</Text>
                   <Text style={[
@@ -154,7 +154,7 @@ export const SavedScreen: React.FC = () => {
               )}
               ListEmptyComponent={
                 <View style={styles.emptyLists}>
-                  <GlassCard variant="glass" style={styles.emptyListsCard}>
+                  <GlassCard variant="light" style={styles.emptyListsCard}>
                     <View style={styles.emptyListsContent}>
                       <Text style={styles.emptyListsIcon}>❤️</Text>
                       <Text style={[

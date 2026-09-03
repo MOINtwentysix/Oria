@@ -33,10 +33,8 @@ export const SavedListScreen: React.FC = () => {
   }, [list, loadListItems]);
 
   const handleRemoveItem = (itemId: string) => {
-    if (list) {
-      removeListItem(list.id, itemId);
-      setItems(prev => prev.filter(i => i.id !== itemId));
-    }
+    removeListItem(itemId);
+    setItems(prev => prev.filter(i => i.id !== itemId));
   };
 
   const handleInvite = () => {
@@ -189,7 +187,7 @@ export const SavedListScreen: React.FC = () => {
         <View style={styles.content}>
           {items.length === 0 ? (
             <View style={styles.emptyList}>
-              <GlassCard variant="glass" style={styles.emptyListCard}>
+              <GlassCard variant="light" style={styles.emptyListCard}>
                 <View style={styles.emptyListContent}>
                   <Text style={styles.emptyListIcon}>📍</Text>
                   <Text style={[
@@ -204,7 +202,7 @@ export const SavedListScreen: React.FC = () => {
                   ]}>
                     Search for places and save them here
                   </Text>
-                  <GlassButton variant="primary" size="md" onPress={() => router.push('/search')}>
+                  <GlassButton size="md" onPress={() => router.push('/search')}>
                     Find Places
                   </GlassButton>
                 </View>

@@ -6,6 +6,7 @@ const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '
 
 // Flag to check if we're on the server (for web)
 const isServer = typeof window === 'undefined';
+declare const window: any;
 
 function createClerkInstance() {
   // On server side for web, return null
@@ -154,8 +155,8 @@ export const mapClerkUserToAppUser = (clerkUser: ClerkUser): Partial<User> => {
     clerk_id: clerkUser.id,
     email: clerkUser.emailAddresses[0]?.emailAddress || '',
     username: clerkUser.username,
-    first_name: clerkUser.firstName,
-    last_name: clerkUser.lastName,
-    image_url: clerkUser.imageUrl,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    imageUrl: clerkUser.imageUrl,
   };
 };

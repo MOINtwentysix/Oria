@@ -68,7 +68,7 @@ export const getTheme = (colorScheme: 'light' | 'dark') => ({
   spacing: Spacing,
   borderRadius: BorderRadius,
   shadows: Shadows,
-  glassStyles: colorScheme === 'dark' ? GlassStyles.dark : GlassStyles.light,
+  glassStyles: GlassStyles,
   layout: Layout,
   typography: Typography,
   textStyles: TextStyles,

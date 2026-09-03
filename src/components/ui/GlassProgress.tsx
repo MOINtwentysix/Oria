@@ -59,7 +59,8 @@ export const GlassProgress: React.FC<GlassProgressProps> = ({
   if (variant === 'circular' || variant === 'ring') {
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference * (1 - anim._value);
+    const progressValue = anim as any;
+    const strokeDashoffset = circumference * (1 - progressValue._value);
 
     return (
       <View style={[
@@ -261,7 +262,7 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
   }, []);
 
   const shimmerStyle = {
-    position: 'absolute',
+    position: 'absolute' as const,
     top: 0,
     left: 0,
     right: 0,
@@ -284,8 +285,8 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
       case 'circular':
         return (
           <View style={[
-            styles.skeleton,
-            { width, height: width, borderRadius: width / 2, backgroundColor: baseColor },
+            skeletonStyles.skeleton,
+            { width: typeof width === 'number' ? width : '100%', height: typeof width === 'number' ? width : 48, borderRadius: typeof width === 'number' ? width / 2 : 8, backgroundColor: baseColor },
             style,
           ]}>
             <Animated.View style={shimmerStyle} />
@@ -294,7 +295,7 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
       case 'rectangular':
         return (
           <View style={[
-            styles.skeleton,
+            skeletonStyles.skeleton,
             { width, height, borderRadius, backgroundColor: baseColor },
             style,
           ]}>
@@ -304,30 +305,30 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
       case 'card':
         return (
           <View style={[
-            styles.skeletonCard,
+            skeletonStyles.skeletonCard,
             style,
           ]}>
             <View style={[
-              styles.skeleton,
+              skeletonStyles.skeleton,
               { width: '100%', height: 200, borderRadius: 16, backgroundColor: baseColor },
             ]}>
               <Animated.View style={shimmerStyle} />
             </View>
-            <View style={styles.skeletonCardContent}>
+            <View style={skeletonStyles.skeletonCardContent}>
               <View style={[
-                styles.skeleton,
+                skeletonStyles.skeleton,
                 { width: '60%', height: 20, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8 },
               ]}>
                 <Animated.View style={shimmerStyle} />
               </View>
               <View style={[
-                styles.skeleton,
+                skeletonStyles.skeleton,
                 { width: '40%', height: 14, borderRadius: 4, backgroundColor: baseColor, marginBottom: 16 },
               ]}>
                 <Animated.View style={shimmerStyle} />
               </View>
               <View style={[
-                styles.skeleton,
+                skeletonStyles.skeleton,
                 { width: '80%', height: 14, borderRadius: 4, backgroundColor: baseColor },
               ]}>
                 <Animated.View style={shimmerStyle} />
@@ -338,24 +339,24 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
       case 'list-item':
         return (
           <View style={[
-            styles.skeletonListItem,
+            skeletonStyles.skeletonListItem,
             style,
           ]}>
             <View style={[
-              styles.skeleton,
+              skeletonStyles.skeleton,
               { width: 56, height: 56, borderRadius: 12, backgroundColor: baseColor },
             ]}>
               <Animated.View style={shimmerStyle} />
             </View>
-            <View style={styles.skeletonListItemContent}>
+            <View style={skeletonStyles.skeletonListItemContent}>
               <View style={[
-                styles.skeleton,
+                skeletonStyles.skeleton,
                 { width: '50%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 6 },
               ]}>
                 <Animated.View style={shimmerStyle} />
               </View>
               <View style={[
-                styles.skeleton,
+                skeletonStyles.skeleton,
                 { width: '70%', height: 14, borderRadius: 4, backgroundColor: baseColor },
               ]}>
                 <Animated.View style={shimmerStyle} />
@@ -366,19 +367,19 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
       default:
         return (
           <View style={[
-            styles.skeletonContainer,
+            skeletonStyles.skeletonContainer,
             style,
           ]}>
             {Array.from({ length: lines }).map((_, i) => (
               <View key={i} style={[
-                styles.skeleton,
+                skeletonStyles.skeleton,
                 {
-                  width: i === lines - 1 ? width * 0.7 : width,
+                  width: i === lines - 1 ? (typeof width === 'string' ? '70%' : (typeof width === 'number' ? width * 0.7 : 48 * 0.7)) : (typeof width === 'number' ? width : '100%'),
                   height: lineHeight,
                   borderRadius,
                   backgroundColor: baseColor,
-                  marginBottom: i < lines - 1 ? spacing : 0,
-                },
+                  marginBottom: i < lines - 1 ? 8 : 0,
+                }
               ]}>
                 <Animated.View style={shimmerStyle} />
               </View>
@@ -396,7 +397,7 @@ const skeletonStyles = StyleSheet.create({
     overflow: 'hidden',
   },
   skeletonContainer: {
-    gap: spacing,
+    gap: 8,
   },
   skeletonCard: {
     borderRadius: 16,

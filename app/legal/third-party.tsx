@@ -34,7 +34,7 @@ export default function ThirdPartyServicesScreen() {
             </Text>
           </View>
 
-          <GlassCard variant="glass" style={styles.contentCard}>
+          <GlassCard variant="light" style={styles.contentCard}>
             <Text style={[
               styles.legalContent,
               { color: theme.colors.text },
@@ -103,7 +103,7 @@ Each service has its own privacy policy and terms of service. Your use of Oria c
             </Text>
           </GlassCard>
 
-          <GlassCard variant="glass" style={styles.noticeCard}>
+          <GlassCard variant="light" style={styles.noticeCard}>
             <View style={styles.noticeHeader}>
               <Text style={styles.noticeIcon}>\u26a0\ufe0f</Text>
               <Text style={[
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   legalContent: {
     fontSize: 14,
     lineHeight: 22,
-    whiteSpace: 'pre-wrap',
+    
   },
   noticeCard: {
     padding: 16,

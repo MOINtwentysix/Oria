@@ -116,8 +116,8 @@ export const GlassInput: React.FC<GlassInputProps> = ({
   const inputContainerStyle = [
     styles.inputContainer,
     {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
       gap: theme.spacing.sm,
     },
   ];
@@ -177,15 +177,14 @@ export const GlassInput: React.FC<GlassInputProps> = ({
           autoCapitalize={autoCapitalize}
           autoComplete={autoComplete}
           autoFocus={autoFocus}
-          disabled={disabled}
+          editable={!disabled && editable}
           multiline={multiline}
           numberOfLines={numberOfLines}
           maxLength={maxLength}
-          onFocus={(e) => { setFocused(true); onFocus?.(); }}
-          onBlur={(e) => { setFocused(false); onBlur?.(); }}
+          onFocus={onFocus}
+          onBlur={onBlur}
           onSubmitEditing={onSubmitEditing}
           blurOnSubmit={blurOnSubmit}
-          editable={editable}
           placeholderTextColor={theme.colors.textTertiary}
           selectionColor={theme.colors.primary}
           caretHidden={disabled}

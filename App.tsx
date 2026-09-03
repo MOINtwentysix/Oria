@@ -5,7 +5,7 @@ import { ExpoRoot } from 'expo-router';
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ExpoRoot />
+      <ExpoRoot context={{} as any} />
     </GestureHandlerRootView>
   );
 }

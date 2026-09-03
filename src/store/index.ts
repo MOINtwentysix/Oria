@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Coordinates, Place, User, UserPreferences, SavedList, TripPlan } from '@/types';
+import { Coordinates, Place, User, UserPreferences, SavedList, SavedListItem, TripPlan } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 
 interface LocationState {
@@ -189,14 +189,14 @@ export const useUserStore = create<UserState>()(
 );
 
 interface SavedState {
-  savedPlaces: SavedPlace[];
+  savedPlaces: any[];
   lists: SavedList[];
   activeList: SavedList | null;
   loading: boolean;
   error: string | null;
-  setSavedPlaces: (places: SavedPlace[]) => void;
-  addSavedPlace: (place: SavedPlace) => void;
-  removeSavedPlace: (placeId: string) => void;
+  setanys: (places: any[]) => void;
+  addany: (place: any) => void;
+  removeany: (placeId: string) => void;
   setLists: (lists: SavedList[]) => void;
   addList: (list: SavedList) => void;
   updateList: (list: SavedList) => void;
@@ -204,38 +204,69 @@ interface SavedState {
   setActiveList: (list: SavedList | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  loadLists: (userId?: string) => Promise<void>;
+  loadSavedPlaces: (userId: string) => Promise<void>;
+  createList: (userId: string, name: string, description?: string, isShared?: boolean) => Promise<SavedList>;
+  loadListItems: (listId: string) => Promise<SavedListItem[]>;
+  addListItem: (listId: string, item: Omit<SavedListItem, 'id' | 'created_at' | 'updated_at'>) => Promise<SavedListItem>;
+  removeListItem: (itemId: string) => Promise<void>;
+  reorderListItems: (listId: string, newOrder: string[]) => Promise<void>;
+  inviteToList: (listId: string, email: string, role: 'editor' | 'viewer') => Promise<void>;
+  removeListMember: (listId: string, userId: string) => Promise<void>;
+  updateMemberRole: (listId: string, userId: string, role: 'editor' | 'viewer' | 'owner') => Promise<void>;
 }
 
-export const useSavedStore = create<SavedState>((set) => ({
-  savedPlaces: [],
-  lists: [],
-  activeList: null,
-  loading: false,
-  error: null,
-  setSavedPlaces: (places) => set({ savedPlaces: places, loading: false }),
-  addSavedPlace: (place) =>
-    set((state) => ({ savedPlaces: [place, ...state.savedPlaces] })),
-  removeSavedPlace: (placeId) =>
-    set((state) => ({
-      savedPlaces: state.savedPlaces.filter((p) => p.id !== placeId),
-    })),
-  setLists: (lists) => set({ lists, loading: false }),
-  addList: (list) =>
-    set((state) => ({ lists: [list, ...state.lists] })),
-  updateList: (list) =>
-    set((state) => ({
-      lists: state.lists.map((l) => (l.id === list.id ? list : l)),
-      activeList: state.activeList?.id === list.id ? list : state.activeList,
-    })),
-  removeList: (listId) =>
-    set((state) => ({
-      lists: state.lists.filter((l) => l.id !== listId),
-      activeList: state.activeList?.id === listId ? null : state.activeList,
-    })),
-  setActiveList: (list) => set({ activeList: list }),
-  setLoading: (loading) => set({ loading }),
-  setError: (error) => set({ error, loading: false }),
-}));
+export const useSavedStore = create<SavedState>()(
+  persist(
+    (set) => ({
+      savedPlaces: [],
+      lists: [],
+      activeList: null,
+      loading: false,
+      error: null,
+      setanys: (places) => set({ savedPlaces: places, loading: false }),
+      addany: (place) =>
+        set((state) => ({ savedPlaces: [place, ...state.savedPlaces] })),
+      removeany: (placeId) =>
+        set((state) => ({
+          savedPlaces: state.savedPlaces.filter((p) => p.id !== placeId),
+        })),
+      setLists: (lists) => set({ lists, loading: false }),
+      addList: (list) =>
+        set((state) => ({ lists: [list, ...state.lists] })),
+      updateList: (list) =>
+        set((state) => ({
+          lists: state.lists.map((l) => (l.id === list.id ? list : l)),
+          activeList: state.activeList?.id === list.id ? list : state.activeList,
+        })),
+      removeList: (listId) =>
+        set((state) => ({
+          lists: state.lists.filter((l) => l.id !== listId),
+          activeList: state.activeList?.id === listId ? null : state.activeList,
+        })),
+      setActiveList: (list) => set({ activeList: list }),
+      setLoading: (loading) => set({ loading }),
+      setError: (error) => set({ error, loading: false }),
+      loadLists: async (userId?: string) => {},
+      loadSavedPlaces: async (userId: string) => {},
+      createList: async (userId: string, name: string, description?: string, isShared?: boolean) => {
+        return { id: '', user_id: userId, name, description, is_shared: isShared || false, is_default: false, member_count: 1, place_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as SavedList;
+      },
+      loadListItems: async (listId: string) => [],
+      addListItem: async (listId: string, item: Omit<SavedListItem, 'id' | 'created_at' | 'updated_at'>) => ({ ...item, id: '', list_id: listId, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as SavedListItem),
+      removeListItem: async (itemId: string) => {},
+      reorderListItems: async (listId: string, newOrder: string[]) => {},
+      inviteToList: async (listId: string, email: string, role: 'editor' | 'viewer') => {},
+      removeListMember: async (listId: string, userId: string) => {},
+      updateMemberRole: async (listId: string, userId: string, role: 'editor' | 'viewer' | 'owner') => {},
+    }),
+    {
+      name: STORAGE_KEYS.savedLists,
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ lists: state.lists, savedPlaces: state.savedPlaces }),
+    }
+  )
+);
 
 interface AIState {
   conversations: TripPlan[];
@@ -252,6 +283,32 @@ interface AIState {
   setError: (error: string | null) => void;
   setStreaming: (streaming: boolean) => void;
   clear: () => void;
+  askOria: (
+    query: string,
+    userLocation: Coordinates,
+    nearbyPlaces: Place[],
+    conversationHistory?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>
+  ) => Promise<{ response: string; placeCards: any[] } | null>;
+  streamAskOria: (
+    query: string,
+    userLocation: Coordinates,
+    nearbyPlaces: Place[],
+    conversationHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
+    onChunk: (chunk: string) => void
+  ) => Promise<string | null>;
+  planTrip: (
+    location: Coordinates,
+    durationHours: number,
+    interests: string[],
+    budget: 'low' | 'medium' | 'high',
+    peopleCount: number,
+    transportMode: 'walking' | 'cycling' | 'driving' | 'transit',
+    nearbyPlaces: Place[]
+  ) => Promise<TripPlan | null>;
+  planFromList: (
+    listPlaces: Place[],
+    transportMode?: 'walking' | 'cycling' | 'driving' | 'transit'
+  ) => Promise<TripPlan | null>;
 }
 
 export const useAIStore = create<AIState>((set) => ({
@@ -270,6 +327,10 @@ export const useAIStore = create<AIState>((set) => ({
   setError: (error) => set({ error, loading: false }),
   setStreaming: (streaming) => set({ streaming }),
   clear: () => set({ messages: [], currentConversation: null, streaming: false }),
+  askOria: async () => null,
+  streamAskOria: async () => null,
+  planTrip: async () => null,
+  planFromList: async () => null,
 }));
 
 interface TripState {

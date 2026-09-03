@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 import { Coordinates } from '@/types';
 import { useLocationStore } from '@/store';
 
+declare const navigator: { geolocation: { getCurrentPosition: any; watchPosition: any; clearWatch: any } };
+
 let Location: any = null;
 if (Platform.OS !== 'web') {
   Location = require('expo-location');
@@ -22,6 +24,7 @@ export const useLocation = () => {
 
   const watchIdRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
+  const [loading, setLoading] = useState(false);
 
   const requestPermission = useCallback(async () => {
     if (Platform.OS === 'web') {
@@ -41,13 +44,13 @@ export const useLocation = () => {
   const getCurrentLocation = useCallback(async (): Promise<Coordinates | null> => {
     try {
       if (Platform.OS === 'web') {
-        return await new Promise<Coordinates>((resolve, reject) => {
+        return await new Promise<Coordinates | null>((resolve, reject) => {
           if (!('geolocation' in navigator)) {
             resolve(null);
             return;
           }
           navigator.geolocation.getCurrentPosition(
-            (position) => {
+            (position: any) => {
               const coords: Coordinates = {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
@@ -62,7 +65,7 @@ export const useLocation = () => {
         });
       }
 
-      const location = await Location.getCurrentPositionAsync({
+      const location: any = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
         maximumAge: 10000,
         timeout: 15000,
@@ -92,7 +95,7 @@ export const useLocation = () => {
       if (Platform.OS === 'web') {
         if ('geolocation' in navigator) {
           watchIdRef.current = navigator.geolocation.watchPosition(
-            (position) => {
+            (position: any) => {
               const now = Date.now();
               if (now - lastUpdateRef.current < 3000) return;
               lastUpdateRef.current = now;
@@ -116,7 +119,7 @@ export const useLocation = () => {
             distanceInterval: 100,
             timeInterval: 5000,
           },
-          (location) => {
+          (location: any) => {
             const now = Date.now();
             if (now - lastUpdateRef.current < 3000) return;
             lastUpdateRef.current = now;
@@ -182,11 +185,12 @@ export const useLocation = () => {
     lastKnownLocation,
     locationPermission,
     watching,
+    loading,
     requestPermission,
     getCurrentLocation,
     startWatching,
     stopWatching,
-  };
+  }
 };
 
 export const useReverseGeocode = (latitude: number, longitude: number) => {

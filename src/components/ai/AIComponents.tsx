@@ -521,10 +521,10 @@ export const TripPlanView: React.FC<TripPlanViewProps> = ({
         </View>
 
         <View style={styles.tripActions}>
-          <GlassButton variant="glass" size="sm" onPress={onViewRoute}>
+          <GlassButton size="sm" onPress={onViewRoute}>
             View Route
           </GlassButton>
-          <GlassButton variant="primary" size="sm" onPress={onOpenInGoogleMaps}>
+          <GlassButton size="sm" onPress={onOpenInGoogleMaps}>
             Google Maps
           </GlassButton>
         </View>
@@ -611,7 +611,7 @@ export const TripPlanView: React.FC<TripPlanViewProps> = ({
               {(trip.route.distance_meters / 1000).toFixed(1)} km • {Math.round(trip.route.duration_seconds / 60)} min
             </Text>
           </View>
-          <GlassButton variant="primary" size="sm" onPress={onOpenInGoogleMaps}>
+          <GlassButton size="sm" onPress={onOpenInGoogleMaps}>
             Open in Google Maps
           </GlassButton>
         </View>

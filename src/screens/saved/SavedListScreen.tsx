@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput } from '@/components/ui';
 import { LiquidTabBar } from '@/components/common';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore, useSavedStore } from '@/store';
 import { SavedList, SavedListItem } from '@/types';
 import { useAppNavigation } from '@/hooks/useAppNavigation';

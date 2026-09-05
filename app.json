@@ -14,7 +14,9 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Oria needs your location to show nearby places and calculate routes.",
         "NSCameraUsageDescription": "Oria needs camera access for profile photos.",
         "NSPhotoLibraryUsageDescription": "Oria needs photo library access for profile photos and place images.",
-        "UIBackgroundModes": ["location"],
+        "UIBackgroundModes": [
+          "location"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -49,7 +51,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "scheme": "oria",
     "extra": {

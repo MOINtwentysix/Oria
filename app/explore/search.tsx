@@ -6,7 +6,7 @@ import { GlassButton, GlassCard, GlassChip, GlassInput } from '@/components/ui';
 import { LiquidSearchBar, LiquidCategoryPill } from '@/components/common';
 import { LiquidTabBar } from '@/components/common';
 import { useSearchStore } from '@/store';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore } from '@/store';
 import { CATEGORIES, ERROR_MESSAGES } from '@/constants';
 import { useRouter } from 'expo-router';

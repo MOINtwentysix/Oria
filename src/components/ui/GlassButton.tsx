@@ -33,7 +33,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
-  const [pressAnim] = React.useState(new Animated.Value(0));
+  const [pressAnim] = React.useState(new Animated.Value(1));
 
   const handlePressIn = () => {
     if (!disabled && !loading) {

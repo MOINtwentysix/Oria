@@ -60,7 +60,7 @@ App Store Provider: Apple Inc.
 Google Play Provider: Google LLC
 
 Hosting: Neon (PostgreSQL), Vercel/Expo
-Authentication: Clerk
+Authentication: M26 Account SSO
 Place Data: Foursquare Labs, Inc.
 AI Provider: Mistral AI
 Routing: OpenStreetMap contributors / OSRM

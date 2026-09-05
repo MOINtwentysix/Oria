@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput } from '@/components/ui';
 import { LiquidTabBar } from '@/components/common';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore } from '@/store';
 import { CATEGORIES, ONBOARDING_STEPS, RADIUS_OPTIONS, INTERESTS_OPTIONS } from '@/constants';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
@@ -31,7 +31,7 @@ export const OnboardingScreen: React.FC = () => {
       setOnboardingStep(onboardingStep + 1);
     } else {
       setOnboardingComplete(true);
-      router.replace('/explore');
+      router.replace('/auth');
     }
   };
 

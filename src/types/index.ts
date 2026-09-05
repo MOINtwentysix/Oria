@@ -156,7 +156,7 @@ export interface SearchContext {
 
 export interface User {
   id: string;
-  clerk_id: string;
+  account_id: string;
   email: string;
   username?: string;
   firstName?: string;

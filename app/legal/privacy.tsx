@@ -43,7 +43,7 @@ export default function PrivacyPolicyScreen() {
 PRIVACY POLICY FOR ORIA
 
 1. INFORMATION WE COLLECT
-- Account Information: When you create an account, we collect your name, email address, and authentication credentials via Clerk.
+- Account Information: When you create an account, we collect your name, email address, and authentication credentials via the M26 Account SSO service.
 - Location Data: With your permission, we collect precise location data to show nearby places and calculate routes.
 - Usage Data: We collect information about how you use the app, including searches, saved places, and AI interactions.
 - Device Information: We collect device identifiers, OS version, and app version for analytics and debugging.
@@ -56,7 +56,7 @@ PRIVACY POLICY FOR ORIA
 
 3. DATA SHARING
 - We do NOT sell your personal data
-- We share data with service providers: Clerk (auth), Neon (database), Foursquare (places), Mistral (AI), OSRM (routing)
+- We share data with service providers: M26 Account SSO (auth), Neon (database), Foursquare (places), Mistral (AI), OSRM (routing)
 - We may share anonymized, aggregated data for analytics
 - We comply with legal requests when required by law
 

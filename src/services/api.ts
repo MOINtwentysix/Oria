@@ -98,7 +98,7 @@ export const apiClient = new ApiClient();
 export const api = {
   auth: {
     me: () => apiClient.get('/auth/me'),
-    sync: (clerkData: any) => apiClient.post('/auth/sync', clerkData),
+    sync: (accountData: any) => apiClient.post('/auth/sync', accountData),
     refresh: () => apiClient.post('/auth/refresh'),
   },
   places: {

@@ -44,7 +44,7 @@ COOKIE POLICY FOR ORIA
 Oria uses cookies and similar technologies for:
 
 ESSENTIAL COOKIES (Always Active)
-- Authentication tokens (Clerk)
+- Authentication tokens (M26 Account SSO)
 - Session management
 - Security (CSRF protection)
 - Load balancing
@@ -60,7 +60,7 @@ ANALYTICS COOKIES (Optional)
 - Performance monitoring
 
 THIRD-PARTY COOKIES
-- Clerk authentication cookies
+- M26 Account SSO session
 - Expo/React Native storage (AsyncStorage)
 - No advertising cookies
 

@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Lin
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard } from '@/components/ui';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useRouter } from 'expo-router';
 
 export default function LandingPage() {
@@ -66,10 +66,10 @@ export default function LandingPage() {
             </Text>
             <View style={styles.featureGrid}>
 {[
-                { icon: '\ud83d\uddfa\ufe0f', title: 'Interactive Map', desc: 'Beautiful, fluid map experience' },
-                { icon: '\ud83d\udd0d', title: 'Smart Search', desc: 'Find exactly what you are looking for' },
-                { icon: '\ud83c\udff7\ufe0f', title: 'Categories', desc: '10+ categories to explore' },
-                { icon: '\ud83d\udccd', title: 'My Location', desc: 'Instantly center on your position' },
+                { icon: '🗺️', title: 'Interactive Map', desc: 'Beautiful, fluid map experience' },
+                { icon: '🔍', title: 'Smart Search', desc: 'Find exactly what you are looking for' },
+                { icon: '🏷️', title: 'Categories', desc: '10+ categories to explore' },
+                { icon: '📍', title: 'My Location', desc: 'Instantly center on your position' },
               ].map((feature, index) => (
                 <View key={index} style={styles.featureCard}>
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
@@ -105,10 +105,10 @@ export default function LandingPage() {
             </Text>
             <View style={styles.featureGrid}>
               {[
-                { icon: '\ud83d\udcf8', title: 'Photos & Details', desc: 'High-quality images and info' },
-                { icon: '\u2b50', title: 'Ratings & Reviews', desc: 'Know before you go' },
-                { icon: '\ud83d\udd50', title: 'Opening Hours', desc: 'Real-time open status' },
-                { icon: '\ud83d\udcbe', title: 'One-Tap Save', desc: 'Add to lists instantly' },
+                { icon: '📸', title: 'Photos & Details', desc: 'High-quality images and info' },
+                { icon: '⭐', title: 'Ratings & Reviews', desc: 'Know before you go' },
+                { icon: '🕐', title: 'Opening Hours', desc: 'Real-time open status' },
+                { icon: '💾', title: 'One-Tap Save', desc: 'Add to lists instantly' },
               ].map((feature, index) => (
                 <View key={index} style={styles.featureCard}>
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
@@ -144,10 +144,10 @@ export default function LandingPage() {
             </Text>
             <View style={styles.featureGrid}>
               {[
-                { icon: '\ud83d\udcac', title: 'Ask Oria', desc: 'Natural language place search' },
-                { icon: '\ud83d\uddfa\ufe0f', title: 'Plan My Trip', desc: 'AI-generated itineraries' },
-                { icon: '\ud83d\udd0d', title: 'Find Something', desc: 'Describe what you want' },
-                { icon: '\ud83c\udfb2', title: 'Surprise Me', desc: 'Random discoveries' },
+                { icon: '💬', title: 'Ask Oria', desc: 'Natural language place search' },
+                { icon: '🗺️', title: 'Plan My Trip', desc: 'AI-generated itineraries' },
+                { icon: '🔍', title: 'Find Something', desc: 'Describe what you want' },
+                { icon: '🎲', title: 'Surprise Me', desc: 'Random discoveries' },
               ].map((feature, index) => (
                 <View key={index} style={styles.featureCard}>
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
@@ -183,10 +183,10 @@ export default function LandingPage() {
             </Text>
             <View style={styles.featureGrid}>
               {[
-                { icon: '\ud83d\udc65', title: 'Collaborative Lists', desc: 'Multiple editors, real-time sync' },
-                { icon: '\ud83d\udd10', title: 'Role-Based Access', desc: 'Owner, Editor, Viewer permissions' },
-                { icon: '\ud83d\udce4', title: 'Easy Sharing', desc: 'Invite via link or email' },
-                { icon: '\u2728', title: 'Group Trip Planning', desc: 'AI plans from shared lists' },
+                { icon: '👥', title: 'Collaborative Lists', desc: 'Multiple editors, real-time sync' },
+                { icon: '🔐', title: 'Role-Based Access', desc: 'Owner, Editor, Viewer permissions' },
+                { icon: '📤', title: 'Easy Sharing', desc: 'Invite via link or email' },
+                { icon: '✨', title: 'Group Trip Planning', desc: 'AI plans from shared lists' },
               ].map((feature, index) => (
                 <View key={index} style={styles.featureCard}>
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
@@ -222,10 +222,10 @@ export default function LandingPage() {
             </Text>
             <View style={styles.featureGrid}>
               {[
-                { icon: '\ud83d\uddfa\ufe0f', title: 'Smart Routing', desc: 'OSM-based route optimization' },
-                { icon: '\u23f1\ufe0f', title: 'Time-Aware', desc: 'Realistic travel times' },
-                { icon: '\ud83d\ude97', title: 'Multi-Modal', desc: 'Walk, bike, drive, or transit' },
-                { icon: '\u2197\ufe0f', title: 'Google Maps Export', desc: 'One-tap navigation' },
+                { icon: '🗺️', title: 'Smart Routing', desc: 'OSM-based route optimization' },
+                { icon: '⏱️', title: 'Time-Aware', desc: 'Realistic travel times' },
+                { icon: '🚗', title: 'Multi-Modal', desc: 'Walk, bike, drive, or transit' },
+                { icon: '↗️', title: 'Google Maps Export', desc: 'One-tap navigation' },
               ].map((feature, index) => (
                 <View key={index} style={styles.featureCard}>
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
@@ -261,10 +261,10 @@ export default function LandingPage() {
             </Text>
             <View style={styles.featureGrid}>
 {[
-                { icon: '\ud83d\udd12', title: 'Encrypted Data', desc: 'End-to-end encryption' },
-                { icon: '\ud83d\udeab', title: 'No Tracking', desc: 'We do not follow you around' },
-                { icon: '\ud83d\udccb', title: 'Data Control', desc: 'Export or delete anytime' },
-                { icon: '\ud83c\udf0d', title: 'GDPR Compliant', desc: 'European privacy standards' },
+                { icon: '🔒', title: 'Encrypted Data', desc: 'End-to-end encryption' },
+                { icon: '🚫', title: 'No Tracking', desc: 'We do not follow you around' },
+                { icon: '📋', title: 'Data Control', desc: 'Export or delete anytime' },
+                { icon: '🌍', title: 'GDPR Compliant', desc: 'European privacy standards' },
               ].map((feature, index) => (
                 <View key={index} style={styles.featureCard}>
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
@@ -308,7 +308,7 @@ export default function LandingPage() {
               styles.footerText,
               { color: theme.colors.textTertiary },
             ]}>
-              \u00a9 2026 Oria. All rights reserved.
+              © 2026 Oria. All rights reserved.
             </Text>
             <View style={styles.footerLinks}>
               <TouchableOpacity onPress={() => router.push('/legal/privacy')} hitSlop={8}>
@@ -406,7 +406,9 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     width: '48%',
-    aspectRatio: 1,
+    maxWidth: 260,
+    minWidth: 150,
+    aspectRatio: 1.15,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',

@@ -72,8 +72,6 @@ STATE MANAGEMENT & DATA
 - @tanstack/react-query (MIT) - https://github.com/TanStack/query
 
 AUTHENTICATION
-- @clerk/clerk-expo (MIT) - https://github.com/clerk/clerk-sdk-react-native
-- @clerk/expo (MIT) - https://github.com/clerk/clerk-sdk-react-native
 
 UTILITIES
 - axios (MIT) - https://github.com/axios/axios

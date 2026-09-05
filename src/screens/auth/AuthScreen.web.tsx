@@ -1,9 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Text, Platform } from 'react-native';
+import { StyleSheet, View, Text, Platform, TouchableOpacity } from 'react-native';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { useAuth } from '@/services/clerk';
+import { useAuth, useSSO } from '@/services/auth';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
-import { SignIn, SignUp } from '@clerk/expo/web';
 
 export const AuthScreen: React.FC = () => {
   const { colorScheme } = useTheme();
@@ -11,10 +10,10 @@ export const AuthScreen: React.FC = () => {
   const { isLoaded, isSignedIn } = useAuth();
   const router = useAppNavigation();
 
-  const [mode, setMode] = React.useState<'signin' | 'signup'>('signin');
+  const { startSSOFlow } = useSSO();
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
-  // <SignIn /> / <SignUp /> are web-only. This file is resolved for web via
-  // Metro's platform resolution (.web.tsx). Native builds use AuthScreen.tsx.
   if (Platform.OS !== 'web') {
     return null;
   }
@@ -44,27 +43,13 @@ export const AuthScreen: React.FC = () => {
           </Text>
         </View>
 
-        <View style={styles.modeToggle}>
-          <View
-            style={[styles.modeButton, { backgroundColor: mode === 'signin' ? theme.colors.primary : 'transparent' }]}
-            onClick={() => { setMode('signin'); }}
-          >
-            <Text style={[styles.modeButtonText, { color: mode === 'signin' ? 'white' : theme.colors.textSecondary }]}>
-              Sign In
-            </Text>
-          </View>
-          <View
-            style={[styles.modeButton, { backgroundColor: mode === 'signup' ? theme.colors.primary : 'transparent' }]}
-            onClick={() => { setMode('signup'); }}
-          >
-            <Text style={[styles.modeButtonText, { color: mode === 'signup' ? 'white' : theme.colors.textSecondary }]}>
-              Sign Up
-            </Text>
-          </View>
-        </View>
-
         <View style={styles.card}>
-          {mode === 'signin' ? <SignIn routing="path" path="/auth" /> : <SignUp routing="path" path="/auth" />}
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>M26 Account</Text>
+          <Text style={[styles.cardText, { color: theme.colors.textSecondary }]}>Sign in securely with your central account.</Text>
+          {error ? <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text> : null}
+          <TouchableOpacity onPress={async () => { setLoading(true); setError(''); try { await startSSOFlow(); } catch (err: any) { setError(err.message || 'Social sign-in failed'); setLoading(false); } }} style={[styles.ssoButton, { backgroundColor: theme.colors.primary }]}>
+            <Text style={styles.ssoButtonText}>{loading ? 'Connecting...' : 'Continue with M26 Account'}</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -74,7 +59,7 @@ export const AuthScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    minHeight: '100vh',
+    minHeight: 600,
   },
   content: {
     width: '100%',
@@ -125,12 +110,37 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
+    padding: 24,
+    gap: 12,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  cardText: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  errorText: {
+    fontSize: 14,
+  },
+  ssoButton: {
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    cursor: 'pointer',
+  },
+  ssoButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '100vh',
+    minHeight: 600,
   },
   loadingText: {
     fontSize: 16,

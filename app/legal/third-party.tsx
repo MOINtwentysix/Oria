@@ -43,12 +43,10 @@ THIRD PARTY SERVICES
 
 Oria integrates with the following third-party services:
 
-CLERK (Authentication)
+M26 ACCOUNT SSO (Authentication)
 - Service: User authentication, sessions, social login
-- Provider: Clerk Inc.
+- Provider: M26 Account
 - Data Shared: Email, name, profile image, device info
-- Privacy: https://clerk.com/privacy
-- Terms: https://clerk.com/terms
 
 NEON (Database)
 - Service: PostgreSQL database hosting

@@ -6,7 +6,7 @@
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  clerk_id TEXT UNIQUE NOT NULL,
+  account_id TEXT UNIQUE NOT NULL,
   email TEXT NOT NULL,
   username TEXT UNIQUE,
   first_name TEXT,
@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- =============================================================================
 -- INDEXES
 -- =============================================================================
-CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);
+CREATE INDEX IF NOT EXISTS idx_users_account_id ON users(account_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);

@@ -73,7 +73,7 @@ Oria integrates with:
 - Foursquare Places API (place data)
 - Mistral AI (AI recommendations)
 - OpenStreetMap/OSRM (routing)
-- Clerk (authentication)
+- M26 Account SSO (authentication)
 - Neon (database)
 Your use of Oria constitutes acceptance of their terms.
 

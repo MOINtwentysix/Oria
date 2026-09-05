@@ -49,7 +49,7 @@ Oria is a modern location discovery application built with:
 - React Native & Expo
 - TypeScript
 - Neon PostgreSQL
-- Clerk Authentication
+- M26 Account SSO
 - Foursquare Places API
 - Mistral AI
 - OpenStreetMap / OSRM

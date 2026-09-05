@@ -15,7 +15,7 @@ export const initializeDatabase = async () => {
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        clerk_id TEXT UNIQUE NOT NULL,
+        account_id TEXT UNIQUE NOT NULL,
         email TEXT NOT NULL,
         username TEXT UNIQUE,
         firstName TEXT,
@@ -248,11 +248,11 @@ export const initializeDatabase = async () => {
 
 export const db = {
   users: {
-    create: async (data: { clerk_id: string; email: string; username?: string; firstName?: string; lastName?: string; imageUrl?: string }) => {
+    create: async (data: { account_id: string; email: string; username?: string; firstName?: string; lastName?: string; imageUrl?: string }) => {
       const result = await sql`
-        INSERT INTO users (clerk_id, email, username, firstName, lastName, imageUrl)
-        VALUES (${data.clerk_id}, ${data.email}, ${data.username}, ${data.firstName}, ${data.lastName}, ${data.imageUrl})
-        ON CONFLICT (clerk_id) DO UPDATE SET
+        INSERT INTO users (account_id, email, username, firstName, lastName, imageUrl)
+        VALUES (${data.account_id}, ${data.email}, ${data.username}, ${data.firstName}, ${data.lastName}, ${data.imageUrl})
+        ON CONFLICT (account_id) DO UPDATE SET
           email = EXCLUDED.email,
           username = EXCLUDED.username,
           firstName = EXCLUDED.firstName,
@@ -263,8 +263,8 @@ export const db = {
       `;
       return result[0];
     },
-    findByClerkId: async (clerkId: string) => {
-      const result = await sql`SELECT * FROM users WHERE clerk_id = ${clerkId}`;
+    findByAccountId: async (accountId: string) => {
+      const result = await sql`SELECT * FROM users WHERE account_id = ${accountId}`;
       return result[0];
     },
     findById: async (id: string) => {

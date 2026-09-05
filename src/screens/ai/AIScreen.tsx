@@ -5,7 +5,7 @@ import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput } from '@/components/ui';
 import { LiquidTabBar } from '@/components/common';
 import { AIChatMessage, AIChatInput, AIModeCard, TripPlanView } from '@/components/ai/AIComponents';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore, useAIStore } from '@/store';
 import { Place, AIMessage, PlaceCard } from '@/types';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
@@ -126,7 +126,7 @@ export const AIScreen: React.FC = () => {
             Oria AI
           </Text>
           <TouchableOpacity onPress={() => router.push('/profile')} hitSlop={12} style={styles.avatarButton}>
-            <GlassAvatar name={user?.firstName} uri={user?.imageUrl} size="sm" />
+            <GlassAvatar name={user?.firstName ?? undefined} uri={user?.imageUrl ?? undefined} size="sm" />
           </TouchableOpacity>
         </View>
       </View>

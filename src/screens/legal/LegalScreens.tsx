@@ -84,7 +84,7 @@ export const PrivacyPolicyScreen: React.FC = () => (
 PRIVACY POLICY FOR ORIA
 
 1. INFORMATION WE COLLECT
-- Account Information: When you create an account, we collect your name, email address, and authentication credentials via Clerk.
+- Account Information: When you create an account, we collect your name, email address, and authentication credentials via the M26 Account SSO service.
 - Location Data: With your permission, we collect precise location data to show nearby places and calculate routes.
 - Usage Data: We collect information about how you use the app, including searches, saved places, and AI interactions.
 - Device Information: We collect device identifiers, OS version, and app version for analytics and debugging.
@@ -97,7 +97,7 @@ PRIVACY POLICY FOR ORIA
 
 3. DATA SHARING
 - We do NOT sell your personal data
-- We share data with service providers: Clerk (auth), Neon (database), Foursquare (places), Mistral (AI), OSRM (routing)
+- We share data with service providers: M26 Account SSO (auth), Neon (database), Foursquare (places), Mistral (AI), OSRM (routing)
 - We may share anonymized, aggregated data for analytics
 - We comply with legal requests when required by law
 
@@ -168,7 +168,7 @@ Oria integrates with:
 - Foursquare Places API (place data)
 - Mistral AI (AI recommendations)
 - OpenStreetMap/OSRM (routing)
-- Clerk (authentication)
+- M26 Account SSO (authentication)
 - Neon (database)
 Your use of Oria constitutes acceptance of their terms.
 
@@ -234,7 +234,7 @@ App Store Provider: Apple Inc.
 Google Play Provider: Google LLC
 
 Hosting: Neon (PostgreSQL), Vercel/Expo
-Authentication: Clerk
+Authentication: M26 Account SSO
 Place Data: Foursquare Labs, Inc.
 AI Provider: Mistral AI
 Routing: OpenStreetMap contributors / OSRM
@@ -255,7 +255,7 @@ COOKIE POLICY FOR ORIA
 Oria uses cookies and similar technologies for:
 
 ESSENTIAL COOKIES (Always Active)
-- Authentication tokens (Clerk)
+- Authentication tokens (M26 Account SSO)
 - Session management
 - Security (CSRF protection)
 - Load balancing
@@ -271,7 +271,7 @@ ANALYTICS COOKIES (Optional)
 - Performance monitoring
 
 THIRD-PARTY COOKIES
-- Clerk authentication cookies
+- M26 Account SSO session cookies
 - Expo/React Native storage (AsyncStorage)
 - No advertising cookies
 
@@ -333,8 +333,6 @@ STATE MANAGEMENT & DATA
 - @neondatabase/serverless (Apache-2.0) - https://github.com/neondatabase/serverless
 
 AUTHENTICATION
-- @clerk/clerk-expo (MIT) - https://github.com/clerk/clerk-sdk-react-native
-- @clerk/expo (MIT) - https://github.com/clerk/clerk-sdk-react-native
 
 UTILITIES
 - axios (MIT) - https://github.com/axios/axios
@@ -354,12 +352,10 @@ THIRD PARTY SERVICES
 
 Oria integrates with the following third-party services:
 
-CLERK (Authentication)
+M26 ACCOUNT SSO (Authentication)
 - Service: User authentication, sessions, social login
-- Provider: Clerk Inc.
+- Provider: M26 Account
 - Data Shared: Email, name, profile image, device info
-- Privacy: https://clerk.com/privacy
-- Terms: https://clerk.com/terms
 
 NEON (Database)
 - Service: PostgreSQL database hosting
@@ -430,7 +426,7 @@ Oria is a modern location discovery application built with:
 - React Native & Expo
 - TypeScript
 - Neon PostgreSQL
-- Clerk Authentication
+- M26 Account SSO
 - Foursquare Places API
 - Mistral AI
 - OpenStreetMap / OSRM

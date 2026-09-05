@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip } from '@/components/ui';
 import { LiquidTabBar } from '@/components/common';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore, useSavedStore } from '@/store';
 import { SavedList, SavedPlace } from '@/types';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
@@ -221,6 +221,8 @@ export const SavedScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+export default SavedScreen;
 
 import { RefreshControl } from 'react-native';
 import { SavedListCard } from '@/components/lists/SavedListComponents';

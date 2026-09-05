@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassCardListItem } from '@/components/ui';
 import { LiquidTabBar } from '@/components/common';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore, useUserStore } from '@/store';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 
@@ -293,6 +293,8 @@ export const ProfileScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F9FC' },

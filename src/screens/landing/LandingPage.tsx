@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Ima
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard } from '@/components/ui';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const LandingPage: React.FC = () => {

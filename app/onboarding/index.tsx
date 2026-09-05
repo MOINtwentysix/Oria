@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Ani
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassChip } from '@/components/ui';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore } from '@/store';
 import { CATEGORIES, ONBOARDING_STEPS, RADIUS_OPTIONS } from '@/constants';
 import { useRouter } from 'expo-router';
@@ -29,7 +29,7 @@ export default function OnboardingScreen() {
       setOnboardingStep(onboardingStep + 1);
     } else {
       setOnboardingComplete(true);
-      router.replace('/explore');
+      router.replace('/auth');
     }
   };
 
@@ -66,10 +66,10 @@ export default function OnboardingScreen() {
             </Text>
             <View style={styles.welcomeFeatures}>
               {[
-                { icon: '\ud83d\uddfa\ufe0f', title: 'Explore', desc: 'Interactive map with places' },
-                { icon: '\u2728', title: 'Oria AI', desc: 'Smart recommendations' },
-                { icon: '\u2764\ufe0f', title: 'Save & Share', desc: 'Lists with friends' },
-                { icon: '\ud83d\uddfa\ufe0f', title: 'Plan Trips', desc: 'AI-powered itineraries' },
+                { icon: '🗺️', title: 'Explore', desc: 'Interactive map with places' },
+                { icon: '✨', title: 'Oria AI', desc: 'Smart recommendations' },
+                { icon: '❤️', title: 'Save & Share', desc: 'Lists with friends' },
+                { icon: '🗺️', title: 'Plan Trips', desc: 'AI-powered itineraries' },
               ].map((feature, index) => (
                 <View key={index} style={styles.welcomeFeature}>
                   <Text style={styles.welcomeFeatureIcon}>{feature.icon}</Text>
@@ -209,7 +209,7 @@ export default function OnboardingScreen() {
               Oria needs your location to show nearby places and calculate routes
             </Text>
             <View style={styles.locationIllustration}>
-              <Text style={styles.locationIllustrationIcon}>\ud83d\udccd</Text>
+              <Text style={styles.locationIllustrationIcon}>📍</Text>
             </View>
             <GlassCard variant="light" style={styles.locationCard}>
               <View style={styles.locationCardContent}>
@@ -223,10 +223,10 @@ export default function OnboardingScreen() {
                   styles.locationCardText,
                   { color: theme.colors.textSecondary },
                 ]}>
-                  \u2022 Show places near you
-                  \u2022 Calculate walking/driving routes
-                  \u2022 Plan trips from your location
-                  \u2022 Enable "Nearby" searches
+                  • Show places near you
+                  • Calculate walking/driving routes
+                  • Plan trips from your location
+                  • Enable "Nearby" searches
                 </Text>
               </View>
             </GlassCard>
@@ -238,7 +238,7 @@ export default function OnboardingScreen() {
                 setLocationGranted(true);
               }}
             >
-              {locationGranted ? 'Location Enabled \u2713' : 'Enable Location'}
+              {locationGranted ? 'Location Enabled ✓' : 'Enable Location'}
             </GlassButton>
           </View>
         );
@@ -320,7 +320,7 @@ export default function OnboardingScreen() {
       case 5: // Complete
         return (
           <View style={styles.completeContent}>
-            <Text style={styles.completeIcon}>\ud83c\udf89</Text>
+            <Text style={styles.completeIcon}>🎉</Text>
             <Text style={[
               styles.completeTitle,
               { color: theme.colors.text },

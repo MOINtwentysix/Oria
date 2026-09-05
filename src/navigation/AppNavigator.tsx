@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useAuth } from '@/services/clerk';
+import { useAuth } from '@/services/auth';
 import { useUIStore } from '@/store';
 import { ExploreScreen } from '@/screens/explore/ExploreScreen';
 import { SearchScreen } from '@/screens/explore/SearchScreen';

@@ -1,22 +1,18 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { GlassButton, GlassCard, GlassInput } from '@/components/ui';
-import { useAuth, useSignIn, useSignUp } from '@/services/clerk';
+import { GlassButton, GlassCard } from '@/components/ui';
+import { useAuth, useSSO } from '@/services/auth';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const AuthScreen: React.FC = () => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const { isLoaded, isSignedIn } = useAuth();
-  const { signIn, setActive: setActiveSignIn } = useSignIn();
-  const { signUp, setActive: setActiveSignUp } = useSignUp();
+  const { startSSOFlow } = useSSO();
   const router = useAppNavigation();
 
-  const [mode, setMode] = React.useState<'signin' | 'signup'>('signin');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
@@ -40,32 +36,19 @@ export const AuthScreen: React.FC = () => {
     );
   }
 
-  const handleSubmit = async () => {
+  const handleSSO = async (strategy: 'oauth_google' | 'oauth_apple') => {
     setError('');
     setLoading(true);
     try {
-      if (mode === 'signin') {
-        const res = await signIn.password({ emailAddress: email, password });
-        if (res.error) {
-          setError(res.error.message || 'Authentication failed');
-          return;
-        }
-        if (signIn.status === 'complete' && signIn.createdSessionId) {
-          await setActiveSignIn({ session: signIn.createdSessionId });
-        }
+      const { createdSessionId, setActive } = await startSSOFlow({ strategy });
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+        router.replace('/explore');
       } else {
-        const res = await signUp.password({ emailAddress: email, password });
-        if (res.error) {
-          setError(res.error.message || 'Authentication failed');
-          return;
-        }
-        if (signUp.status === 'complete' && signUp.createdSessionId) {
-          await setActiveSignUp({ session: signUp.createdSessionId });
-        }
+        setError('The social sign-in flow needs to be completed.');
       }
-      router.replace('/explore');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Social sign-in failed');
     } finally {
       setLoading(false);
     }
@@ -91,37 +74,6 @@ export const AuthScreen: React.FC = () => {
             </Text>
           </View>
 
-          <View style={styles.modeToggle}>
-            <TouchableOpacity
-              onPress={() => { setMode('signin'); setError(''); }}
-              style={[
-                styles.modeButton,
-                { backgroundColor: mode === 'signin' ? theme.colors.primary : 'transparent' },
-              ]}
-            >
-              <Text style={[
-                styles.modeButtonText,
-                { color: mode === 'signin' ? 'white' : theme.colors.textSecondary },
-              ]}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => { setMode('signup'); setError(''); }}
-              style={[
-                styles.modeButton,
-                { backgroundColor: mode === 'signup' ? theme.colors.primary : 'transparent' },
-              ]}
-            >
-              <Text style={[
-                styles.modeButtonText,
-                { color: mode === 'signup' ? 'white' : theme.colors.textSecondary },
-              ]}>
-                Sign Up
-              </Text>
-            </TouchableOpacity>
-          </View>
-
           {error && (
             <GlassCard variant="light" style={styles.errorCard}>
               <View style={styles.errorContent}>
@@ -138,46 +90,23 @@ export const AuthScreen: React.FC = () => {
 
           <GlassCard variant="light" style={styles.formCard}>
             <View style={styles.form}>
-              <GlassInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="email@example.com"
-                label="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                style={styles.formInput}
-              />
-              <GlassInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                label="Password"
-                secureTextEntry
-                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                style={styles.formInput}
-              />
-              {mode === 'signup' && (
-                <GlassInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="••••••••"
-                  label="Confirm Password"
-                  secureTextEntry
-                  autoComplete="new-password"
-                  style={styles.formInput}
-                />
-              )}
-
               <GlassButton
-
                 size="lg"
                 fullWidth
-                onPress={handleSubmit}
+                onPress={() => handleSSO('oauth_google')}
                 loading={loading}
                 style={styles.submitButton}
               >
-                {mode === 'signin' ? 'Sign In' : 'Create Account'}
+                Continue with Google
+              </GlassButton>
+              <GlassButton
+                size="lg"
+                fullWidth
+                onPress={() => handleSSO('oauth_apple')}
+                loading={loading}
+                style={styles.submitButton}
+              >
+                Continue with Apple
               </GlassButton>
             </View>
           </GlassCard>

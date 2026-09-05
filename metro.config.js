@@ -14,7 +14,6 @@ config.resolver.extraNodeModules = (request) => {
   }
   if (request.startsWith('@/')) {
     const rest = request.slice(2);
-    // Check if it's an asset file
     if (rest.startsWith('assets/')) {
       return path.join(assetsDir, rest.slice(7));
     }
@@ -27,6 +26,13 @@ config.resolver.extraNodeModules = (request) => {
     return path.join(assetsDir, request.slice(7));
   }
   return null;
+};
+
+config.resolver.platforms = ['web', 'native', 'ios', 'android'];
+
+config.transformer = {
+  ...config.transformer,
+  unstable_allowRequireContext: true,
 };
 
 module.exports = config;

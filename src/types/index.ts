@@ -81,8 +81,8 @@ export interface PlaceTip {
 
 export interface PlaceUser {
   id: string;
-  first_name: string;
-  last_name?: string;
+  firstName: string;
+  lastName?: string;
   photo?: PlacePhoto;
 }
 
@@ -159,9 +159,9 @@ export interface User {
   clerk_id: string;
   email: string;
   username?: string;
-  first_name?: string;
-  last_name?: string;
-  image_url?: string;
+  firstName?: string;
+  lastName?: string;
+  imageUrl?: string;
   created_at: string;
   updated_at: string;
   preferences?: UserPreferences;

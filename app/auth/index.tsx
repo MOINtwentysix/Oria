@@ -102,7 +102,7 @@ export default function AuthScreen() {
           </View>
 
           {error && (
-            <GlassCard variant="glass" style={styles.errorCard}>
+            <GlassCard variant="light" style={styles.errorCard}>
               <View style={styles.errorContent}>
                 <Text style={styles.errorIcon}>\u26a0\ufe0f</Text>
                 <Text style={[
@@ -115,7 +115,7 @@ export default function AuthScreen() {
             </GlassCard>
           )}
 
-          <GlassCard variant="glass" style={styles.formCard}>
+          <GlassCard variant="light" style={styles.formCard}>
             <View style={styles.form}>
               <GlassInput
                 value={email}
@@ -149,7 +149,7 @@ export default function AuthScreen() {
               )}
 
               <GlassButton
-                variant="primary"
+
                 size="lg"
                 fullWidth
                 onPress={handleSubmit}
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   dividerText: {
     fontSize: 13,
     fontWeight: '500',
-    whiteSpace: 'nowrap',
+    
   },
   footer: {
     alignItems: 'center',

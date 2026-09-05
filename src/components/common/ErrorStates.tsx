@@ -63,12 +63,12 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         </Text>
         <View style={styles.actions}>
           {onRetry && (
-            <GlassButton variant="primary" size="md" onPress={onRetry}>
+            <GlassButton size="md" onPress={onRetry}>
               Try Again
             </GlassButton>
           )}
           {onAction && actionLabel && (
-            <GlassButton variant="secondary" size="md" onPress={onAction}>
+            <GlassButton size="md" onPress={onAction}>
               {actionLabel}
             </GlassButton>
           )}
@@ -144,7 +144,7 @@ export const EmptyState: React.FC<{
           {description}
         </Text>
         {actionLabel && onAction && (
-          <GlassButton variant="primary" size="md" onPress={onAction} style={styles.emptyAction}>
+          <GlassButton size="md" onPress={onAction} style={styles.emptyAction}>
             {actionLabel}
           </GlassButton>
         )}

@@ -4,10 +4,16 @@ import { Platform } from 'react-native';
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
 
-// Singleton Clerk instance for non-Web platforms
-let clerkSingleton: any = null;
+// Flag to check if we're on the server (for web)
+const isServer = typeof window === 'undefined';
+declare const window: any;
 
 function createClerkInstance() {
+  // On server side for web, return null
+  if (Platform.OS === 'web' && isServer) {
+    return null;
+  }
+  
   try {
     // If no publishable key is set, return a mock instance for development
     if (!CLERK_PUBLISHABLE_KEY) {
@@ -20,21 +26,12 @@ function createClerkInstance() {
     }
     
     if (Platform.OS === 'web') {
-      // For web, we need to use Clerk from @clerk/clerk-js
-      // But we need to handle SSR properly
-      if (typeof window !== 'undefined') {
-        const { Clerk } = require('@clerk/clerk-js');
-        return new Clerk(CLERK_PUBLISHABLE_KEY);
-      }
-      return null;
+      const { Clerk } = require('@clerk/clerk-js');
+      return new Clerk(CLERK_PUBLISHABLE_KEY);
     }
     
-    // For native platforms
-    if (!clerkSingleton) {
-      const { Clerk } = require('@clerk/clerk-expo');
-      clerkSingleton = new Clerk(CLERK_PUBLISHABLE_KEY);
-    }
-    return clerkSingleton;
+    const { Clerk } = require('@clerk/clerk-expo');
+    return new Clerk(CLERK_PUBLISHABLE_KEY);
   } catch {
     return {
       load: () => Promise.resolve(),
@@ -45,18 +42,22 @@ function createClerkInstance() {
   }
 }
 
-// Get clerk instance - returns null on server for web
-function getClerkInstance() {
-  if (Platform.OS === 'web' && typeof window === 'undefined') {
+// Get clerk instance - safe for SSR
+export function getClerk() {
+  if (isServer && Platform.OS === 'web') {
     return null;
   }
-  if (!clerkSingleton && Platform.OS !== 'web') {
-    clerkSingleton = createClerkInstance();
+  if (!clerkInstance) {
+    clerkInstance = createClerkInstance();
   }
-  return clerkSingleton || createClerkInstance();
+  return clerkInstance;
 }
 
-export const clerk = getClerkInstance();
+// Singleton instance
+let clerkInstance: any = null;
+
+// Re-export for backward compatibility
+export const clerk = getClerk();
 
 export interface ClerkUser {
   id: string;
@@ -75,9 +76,9 @@ export const useAuth = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
-    const clerkInstance = getClerkInstance();
+    const clerkInstance = getClerk();
     
-    // On web, if clerk is null (SSR), set loaded to true immediately
+    // If no clerk instance (SSR), mark as loaded immediately
     if (!clerkInstance) {
       setIsLoaded(true);
       return;
@@ -123,7 +124,7 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    const clerkInstance = getClerkInstance();
+    const clerkInstance = getClerk();
     if (clerkInstance) {
       await clerkInstance.signOut();
     }
@@ -134,13 +135,13 @@ export const useAuth = () => {
     isLoaded,
     isSignedIn,
     signOut,
-    clerk: getClerkInstance(),
+    clerk: getClerk(),
   };
 };
 
 export const getAuthToken = async (): Promise<string | null> => {
   try {
-    const clerkInstance = getClerkInstance();
+    const clerkInstance = getClerk();
     if (!clerkInstance) return null;
     const session = await clerkInstance.session?.getToken({ template: 'oria' });
     return session || null;
@@ -154,8 +155,8 @@ export const mapClerkUserToAppUser = (clerkUser: ClerkUser): Partial<User> => {
     clerk_id: clerkUser.id,
     email: clerkUser.emailAddresses[0]?.emailAddress || '',
     username: clerkUser.username,
-    first_name: clerkUser.firstName,
-    last_name: clerkUser.lastName,
-    image_url: clerkUser.imageUrl,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    imageUrl: clerkUser.imageUrl,
   };
 };

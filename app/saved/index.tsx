@@ -22,9 +22,9 @@ export const SavedScreen: React.FC = () => {
 
   React.useEffect(() => {
     setTabBarVisible(true);
-    if (isSignedIn) {
+    if (isSignedIn && user) {
       loadLists();
-      loadSavedPlaces(user?.id || '');
+      loadSavedPlaces(user.id);
     }
   }, [isSignedIn, loadLists, loadSavedPlaces, user?.id]);
 
@@ -90,7 +90,7 @@ export const SavedScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={() => { loadLists(); loadSavedPlaces(user.id); }} />
+        <RefreshControl refreshing={loading} onRefresh={() => { if (user) { loadLists(); loadSavedPlaces(user.id); } }} />
       }>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
@@ -119,7 +119,7 @@ export const SavedScreen: React.FC = () => {
             </View>
           ) : lists.length === 0 ? (
             <View style={styles.emptyLists}>
-              <GlassCard variant="glass" style={styles.emptyListsCard}>
+              <GlassCard variant="light" style={styles.emptyListsCard}>
                 <View style={styles.emptyListsContent}>
                   <Text style={styles.emptyListsIcon}>❤️</Text>
                   <Text style={[
@@ -154,7 +154,7 @@ export const SavedScreen: React.FC = () => {
               )}
               ListEmptyComponent={
                 <View style={styles.emptyLists}>
-                  <GlassCard variant="glass" style={styles.emptyListsCard}>
+                  <GlassCard variant="light" style={styles.emptyListsCard}>
                     <View style={styles.emptyListsContent}>
                       <Text style={styles.emptyListsIcon}>❤️</Text>
                       <Text style={[

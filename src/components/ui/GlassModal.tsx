@@ -59,7 +59,7 @@ export const GlassModal: React.FC<GlassModalProps> = ({
     }
   }, [visible]);
 
-  if (!visible && anim._value === 0) {
+  if (!visible) {
     return null;
   }
 
@@ -293,7 +293,7 @@ export const GlassBottomSheet: React.FC<GlassBottomSheetProps> = ({
   visible,
   onClose,
   children,
-  snapPoints = ['25%', '50%', '90%'],
+  snapPoints = [25, 50, 90],
   initialSnap = 0,
   style,
   contentStyle,
@@ -308,7 +308,7 @@ export const GlassBottomSheet: React.FC<GlassBottomSheetProps> = ({
   return (
     <Animated.View
       style={[
-        styles.sheetContainer,
+        sheetStyles.sheetContainer,
         { opacity: visible ? 1 : 0 },
         style,
       ]}
@@ -316,14 +316,14 @@ export const GlassBottomSheet: React.FC<GlassBottomSheetProps> = ({
     >
       <TouchableOpacity
         onPress={onClose}
-        style={styles.overlay}
+        style={sheetStyles.overlay}
         activeOpacity={1}
       />
 
       <BlurView
         intensity={95}
         style={[
-          styles.sheet,
+          sheetStyles.sheet,
           {
             backgroundColor: backgroundColor || (colorScheme === 'dark' ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)'),
           },
@@ -335,12 +335,12 @@ export const GlassBottomSheet: React.FC<GlassBottomSheetProps> = ({
             onPress={onClose}
             hitSlop={20}
             style={[
-              styles.handleWrapper,
+              sheetStyles.handleWrapper,
               handleStyle,
             ]}
           >
             <View style={[
-              styles.handle,
+              sheetStyles.handle,
               {
                 backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.3)',
               },
@@ -349,7 +349,7 @@ export const GlassBottomSheet: React.FC<GlassBottomSheetProps> = ({
         )}
 
         <View style={[
-          styles.content,
+          sheetStyles.content,
           contentStyle,
         ]}>
           {children}

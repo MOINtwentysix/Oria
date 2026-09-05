@@ -286,7 +286,7 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
 
             <View style={styles.secondaryActions}>
               <GlassButton
-                variant="glass"
+
                 size="md"
                 onPress={() => onDirections(place)}
                 icon={<Text style={styles.actionIcon}>🧭</Text>}
@@ -295,7 +295,7 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               </GlassButton>
 
               <GlassButton
-                variant="glass"
+
                 size="md"
                 onPress={() => onShare(place)}
                 icon={<Text style={styles.actionIcon}>↗️</Text>}

@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+// @ts-ignore - expo-secure-store types
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
@@ -142,7 +143,8 @@ export const api = {
     messages: {
       list: (conversationId: string) => apiClient.get(`/ai/conversations/${conversationId}/messages`),
       send: (conversationId: string, data: { content: string; model?: string }) => apiClient.post(`/ai/conversations/${conversationId}/messages`, data),
-      stream: (conversationId: string, data: { content: string; model?: string }) => apiClient.post(`/ai/conversations/${conversationId}/messages/stream`, data, { responseType: 'stream' }),
+      // @ts-ignore - stream response type
+      stream: (conversationId: string, data: { content: string; model?: string }) => apiClient.post(`/ai/conversations/${conversationId}/messages/stream`, data, { responseType: 'stream' } as any),
     },
     ask: (data: { query: string; location?: { lat: number; lng: number }; radius?: number; categories?: string[] }) => apiClient.post('/ai/ask', data),
     planTrip: (data: { location: { lat: number; lng: number }; duration: number; interests: string[]; budget?: string; people: number; transport: string }) => apiClient.post('/ai/plan-trip', data),

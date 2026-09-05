@@ -91,7 +91,7 @@ export const ExploreScreen: React.FC = () => {
               </TouchableOpacity>
               {isSignedIn && (
                 <TouchableOpacity onPress={() => router.push('/profile')} hitSlop={12} style={styles.avatarButton}>
-                  <GlassAvatar name={user?.first_name} uri={user?.image_url} size="sm" />
+                  <GlassAvatar name={user?.firstName} uri={user?.imageUrl} size="sm" />
                 </TouchableOpacity>
               )}
             </View>

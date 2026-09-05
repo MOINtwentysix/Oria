@@ -214,7 +214,7 @@ export const OnboardingScreen: React.FC = () => {
             <View style={styles.locationIllustration}>
               <Text style={styles.locationIllustrationIcon}>📍</Text>
             </View>
-            <GlassCard variant="glass" style={styles.locationCard}>
+            <GlassCard variant="light" style={styles.locationCard}>
               <View style={styles.locationCardContent}>
                 <Text style={[
                   styles.locationCardTitle,
@@ -238,7 +238,8 @@ export const OnboardingScreen: React.FC = () => {
               size="lg"
               fullWidth
               onPress={async () => {
-                const { requestPermission } = await import('@/hooks/useLocation');
+                const { useLocation } = await import('@/hooks/useLocation');
+                const { requestPermission } = useLocation();
                 const granted = await requestPermission();
                 setLocationGranted(granted);
               }}
@@ -263,7 +264,7 @@ export const OnboardingScreen: React.FC = () => {
             ]}>
               Review your preferences
             </Text>
-            <GlassCard variant="glass" style={styles.confirmCard}>
+            <GlassCard variant="light" style={styles.confirmCard}>
               <View style={styles.confirmSection}>
                 <Text style={[
                   styles.confirmSectionTitle,
@@ -338,7 +339,7 @@ export const OnboardingScreen: React.FC = () => {
             ]}>
               Start exploring amazing places around you
             </Text>
-            <GlassButton variant="primary" size="xl" fullWidth onPress={handleNext}>
+            <GlassButton size="xl" fullWidth onPress={handleNext}>
               Start Exploring
             </GlassButton>
           </View>
@@ -398,7 +399,7 @@ export const OnboardingScreen: React.FC = () => {
             Back
           </GlassButton>
           <GlassButton
-            variant="primary"
+
             size="lg"
             onPress={handleNext}
             disabled={onboardingStep === 1 && interests.length === 0}

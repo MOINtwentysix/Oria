@@ -113,7 +113,7 @@ export const useRouting = () => {
     setLoading(true);
     try {
       const response = await api.trips.list();
-      setTrips(response.data);
+      setTrips(response.data as any as any);
     } catch (err: any) {
       setError(err.message);
     } finally {

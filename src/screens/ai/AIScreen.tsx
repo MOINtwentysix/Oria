@@ -107,7 +107,7 @@ export const AIScreen: React.FC = () => {
           ]}>
             Get personalized recommendations and plan trips
           </Text>
-          <GlassButton variant="primary" size="lg" onPress={() => router.push('/auth')}>
+          <GlassButton size="lg" onPress={() => router.push('/auth')}>
             Sign In
           </GlassButton>
         </View>
@@ -126,7 +126,7 @@ export const AIScreen: React.FC = () => {
             Oria AI
           </Text>
           <TouchableOpacity onPress={() => router.push('/profile')} hitSlop={12} style={styles.avatarButton}>
-            <GlassAvatar name={user?.first_name} uri={user?.image_url} size="sm" />
+            <GlassAvatar name={user?.firstName} uri={user?.imageUrl} size="sm" />
           </TouchableOpacity>
         </View>
       </View>

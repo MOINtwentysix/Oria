@@ -504,7 +504,7 @@ export const CreateListModal: React.FC<CreateListModalProps> = ({
             <GlassButton variant="ghost" size="lg" onPress={onClose}>
               Cancel
             </GlassButton>
-            <GlassButton variant="primary" size="lg" onPress={handleCreate}>
+            <GlassButton size="lg" onPress={handleCreate}>
               Create List
             </GlassButton>
           </View>
@@ -612,7 +612,7 @@ interface ShareListModalProps {
   list: SavedList;
   onClose: () => void;
   onInvite: (email: string, role: 'editor' | 'viewer') => void;
-  members: Array<{ id: string; user_id: string; role: string; email: string; first_name?: string; last_name?: string; image_url?: string }>;
+  members: Array<{ id: string; user_id: string; role: string; email: string; firstName?: string; lastName?: string; imageUrl?: string }>;
   onRemoveMember: (memberId: string) => void;
   onChangeRole: (memberId: string, role: 'editor' | 'viewer') => void;
   style?: any;
@@ -730,7 +730,7 @@ export const ShareListModal: React.FC<ShareListModalProps> = ({
                 </GlassChip>
               </View>
 
-              <GlassButton variant="primary" size="md" onPress={handleInvite} disabled={!email.trim()}>
+              <GlassButton size="md" onPress={handleInvite} disabled={!email.trim()}>
                 Send Invite
               </GlassButton>
 
@@ -761,10 +761,10 @@ export const ShareListModal: React.FC<ShareListModalProps> = ({
                     Owner
                   </Text>
                   <GlassCardListItem
-                    title={`${owner.first_name || ''} ${owner.last_name || ''}`.trim() || owner.email}
+                    title={`${owner.firstName || ''} ${owner.lastName || ''}`.trim() || owner.email}
                     subtitle="Owner"
-                    leftIcon={<GlassAvatar name={owner.first_name} uri={owner.image_url} size="sm" />}
-                    variant="glass"
+                    leftIcon={<GlassAvatar name={owner.firstName} uri={owner.imageUrl} size="sm" />}
+
                     padding="sm"
                     divider={false}
                   />
@@ -782,10 +782,10 @@ export const ShareListModal: React.FC<ShareListModalProps> = ({
                   {editors.map((member) => (
                     <GlassCardListItem
                       key={member.id}
-                      title={`${member.first_name || ''} ${member.last_name || ''}`.trim() || member.email}
+                      title={`${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email}
                       subtitle="Editor"
-                      leftIcon={<GlassAvatar name={member.first_name} uri={member.image_url} size="sm" />}
-                      variant="glass"
+                      leftIcon={<GlassAvatar name={member.firstName} uri={member.imageUrl} size="sm" />}
+
                       padding="sm"
                       divider={false}
                       trailing={
@@ -830,10 +830,10 @@ export const ShareListModal: React.FC<ShareListModalProps> = ({
                   {viewers.map((member) => (
                     <GlassCardListItem
                       key={member.id}
-                      title={`${member.first_name || ''} ${member.last_name || ''}`.trim() || member.email}
+                      title={`${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email}
                       subtitle="Viewer"
-                      leftIcon={<GlassAvatar name={member.first_name} uri={member.image_url} size="sm" />}
-                      variant="glass"
+                      leftIcon={<GlassAvatar name={member.firstName} uri={member.imageUrl} size="sm" />}
+
                       padding="sm"
                       divider={false}
                       trailing={

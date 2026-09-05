@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassInput } from '@/components/ui';
@@ -107,7 +107,7 @@ export const AuthScreen: React.FC = () => {
           </View>
 
           {error && (
-            <GlassCard variant="glass" style={styles.errorCard}>
+            <GlassCard variant="light" style={styles.errorCard}>
               <View style={styles.errorContent}>
                 <Text style={styles.errorIcon}>⚠️</Text>
                 <Text style={[
@@ -120,7 +120,7 @@ export const AuthScreen: React.FC = () => {
             </GlassCard>
           )}
 
-          <GlassCard variant="glass" style={styles.formCard}>
+          <GlassCard variant="light" style={styles.formCard}>
             <View style={styles.form}>
               <GlassInput
                 value={email}
@@ -154,7 +154,7 @@ export const AuthScreen: React.FC = () => {
               )}
 
               <GlassButton
-                variant="primary"
+
                 size="lg"
                 fullWidth
                 onPress={handleSubmit}
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   dividerText: {
     fontSize: 13,
     fontWeight: '500',
-    whiteSpace: 'nowrap',
+    
   },
   footer: {
     alignItems: 'center',

@@ -4,82 +4,75 @@ import { api } from '@/services/api';
 import { SavedPlace, SavedList, SavedListItem } from '@/types';
 
 export const useSaved = () => {
-  const { savedPlaces, lists, activeList, loading, error, setSavedPlaces, addSavedPlace, removeSavedPlace, setLists, addList, updateList, removeList, setActiveList, setLoading, setError } = useSavedStore();
+  const { savedPlaces, lists, activeList, loading, error, setLists, addList, updateList, removeList, setActiveList, setLoading, setError } = useSavedStore();
 
   const loadSavedPlaces = useCallback(async (userId: string, listId?: string) => {
     setLoading(true);
     try {
       const response = await api.saved.places.list();
-      setSavedPlaces(response.data);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [setSavedPlaces, setLoading, setError]);
+  }, [setLoading, setError]);
 
   const savePlace = useCallback(async (userId: string, placeId: string, placeData: any, listId?: string, notes?: string) => {
     try {
       const response = await api.saved.places.add({ place_id: placeId, list_id: listId, notes });
-      addSavedPlace(response.data);
       return response.data;
     } catch (err: any) {
       setError(err.message);
       return null;
     }
-  }, [addSavedPlace, setError]);
+  }, [setError]);
 
   const unsavePlace = useCallback(async (userId: string, placeId: string, listId?: string) => {
     try {
       await api.saved.places.remove(placeId);
-      removeSavedPlace(placeId);
     } catch (err: any) {
       setError(err.message);
     }
-  }, [removeSavedPlace, setError]);
+  }, [setError]);
 
   const loadLists = useCallback(async (userId: string) => {
     setLoading(true);
     try {
       const response = await api.saved.lists.list();
-      setLists(response.data);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [setLists, setLoading, setError]);
+  }, [setLoading, setError]);
 
   const createList = useCallback(async (userId: string, name: string, description?: string, isShared = false) => {
     try {
       const response = await api.saved.lists.create({ name, description, is_shared: isShared });
-      addList(response.data);
       return response.data;
     } catch (err: any) {
       setError(err.message);
       return null;
     }
-  }, [addList, setError]);
+  }, [setError]);
 
-  const updateList = useCallback(async (listId: string, data: { name?: string; description?: string; isShared?: boolean; coverImage?: string }) => {
+  const updateListHook = useCallback(async (listId: string, data: { name?: string; description?: string; isShared?: boolean; coverImage?: string }) => {
     try {
       const response = await api.saved.lists.update(listId, data);
-      updateList(response.data);
       return response.data;
     } catch (err: any) {
       setError(err.message);
       return null;
     }
-  }, [updateList, setError]);
+  }, [setError]);
 
   const deleteList = useCallback(async (listId: string) => {
     try {
       await api.saved.lists.delete(listId);
-      removeList(listId);
     } catch (err: any) {
       setError(err.message);
     }
-  }, [removeList, setError]);
+  }, [setError]);
 
   const loadListItems = useCallback(async (listId: string) => {
     try {

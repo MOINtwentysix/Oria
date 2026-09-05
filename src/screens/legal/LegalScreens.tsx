@@ -43,7 +43,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({ title, content, lastUp
             </View>
           )}
 
-          <GlassCard variant="glass" style={styles.contentCard}>
+          <GlassCard variant="light" style={styles.contentCard}>
             <Text style={[
               styles.legalContent,
               { color: theme.colors.text },
@@ -52,7 +52,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({ title, content, lastUp
             </Text>
           </GlassCard>
 
-          <GlassCard variant="glass" style={styles.noticeCard}>
+          <GlassCard variant="light" style={styles.noticeCard}>
             <View style={styles.noticeHeader}>
               <Text style={styles.noticeIcon}>⚠️</Text>
               <Text style={[
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   legalContent: {
     fontSize: 14,
     lineHeight: 22,
-    whiteSpace: 'pre-wrap',
+    
   },
   noticeCard: {
     padding: 16,

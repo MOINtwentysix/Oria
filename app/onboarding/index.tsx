@@ -212,7 +212,7 @@ export default function OnboardingScreen() {
             <View style={styles.locationIllustration}>
               <Text style={styles.locationIllustrationIcon}>\ud83d\udccd</Text>
             </View>
-            <GlassCard variant="glass" style={styles.locationCard}>
+            <GlassCard variant="light" style={styles.locationCard}>
               <View style={styles.locationCardContent}>
                 <Text style={[
                   styles.locationCardTitle,
@@ -259,7 +259,7 @@ export default function OnboardingScreen() {
             ]}>
               Review your preferences
             </Text>
-            <GlassCard variant="glass" style={styles.confirmCard}>
+            <GlassCard variant="light" style={styles.confirmCard}>
               <View style={styles.confirmSection}>
                 <Text style={[
                   styles.confirmSectionTitle,
@@ -334,7 +334,7 @@ export default function OnboardingScreen() {
             ]}>
               Start exploring amazing places around you
             </Text>
-            <GlassButton variant="primary" size="xl" fullWidth onPress={handleNext}>
+            <GlassButton size="xl" fullWidth onPress={handleNext}>
               Start Exploring
             </GlassButton>
           </View>
@@ -394,7 +394,7 @@ export default function OnboardingScreen() {
             Back
           </GlassButton>
           <GlassButton
-            variant="primary"
+
             size="lg"
             onPress={handleNext}
             disabled={onboardingStep === 1 && interests.length === 0}

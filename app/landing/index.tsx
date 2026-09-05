@@ -38,7 +38,7 @@ export default function LandingPage() {
             ]}>
               Discover what's around you.
             </Text>
-            <GlassButton variant="primary" size="xl" fullWidth onPress={handleGetStarted} style={styles.heroCta}>
+            <GlassButton size="xl" fullWidth onPress={handleGetStarted} style={styles.heroCta}>
               Get Started
             </GlassButton>
             <TouchableOpacity onPress={() => router.push('/auth')} style={styles.heroSignIn}>
@@ -298,7 +298,7 @@ export default function LandingPage() {
             ]}>
               Join thousands discovering amazing places with Oria
             </Text>
-            <GlassButton variant="primary" size="xl" fullWidth onPress={handleGetStarted} style={styles.ctaButton}>
+            <GlassButton size="xl" fullWidth onPress={handleGetStarted} style={styles.ctaButton}>
               Get Started Free
             </GlassButton>
           </View>

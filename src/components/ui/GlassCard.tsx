@@ -29,6 +29,10 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     ? theme.glassStyles.heavy
     : variant === 'heavyDark'
     ? theme.glassStyles.heavyDark
+    : variant === 'dark'
+    ? theme.glassStyles.dark
+    : variant === 'light'
+    ? theme.glassStyles.light
     : colorScheme === 'dark'
     ? theme.glassStyles.dark
     : theme.glassStyles.light;
@@ -91,6 +95,10 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
     ? theme.glassStyles.heavy
     : variant === 'heavyDark'
     ? theme.glassStyles.heavyDark
+    : variant === 'dark'
+    ? theme.glassStyles.dark
+    : variant === 'light'
+    ? theme.glassStyles.light
     : colorScheme === 'dark'
     ? theme.glassStyles.dark
     : theme.glassStyles.light;
@@ -140,6 +148,10 @@ export const GlassTabBar: React.FC<GlassTabBarProps> = ({
     ? theme.glassStyles.heavy
     : variant === 'heavyDark'
     ? theme.glassStyles.heavyDark
+    : variant === 'dark'
+    ? theme.glassStyles.dark
+    : variant === 'light'
+    ? theme.glassStyles.light
     : colorScheme === 'dark'
     ? theme.glassStyles.dark
     : theme.glassStyles.light;

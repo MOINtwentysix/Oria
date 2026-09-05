@@ -30,7 +30,7 @@ export default function ImprintScreen() {
               styles.lastUpdatedText,
               { color: theme.colors.textTertiary },
             ]}>
-              Last updated: August 2026
+              Last updated: September 2026
             </Text>
           </View>
 

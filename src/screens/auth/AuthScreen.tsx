@@ -3,13 +3,15 @@ import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image, ScrollVi
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassInput } from '@/components/ui';
-import { useAuth } from '@/services/clerk';
+import { useAuth, useSignIn, useSignUp } from '@/services/clerk';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const AuthScreen: React.FC = () => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
-  const { clerk, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { signIn, setActive: setActiveSignIn } = useSignIn();
+  const { signUp, setActive: setActiveSignUp } = useSignUp();
   const router = useAppNavigation();
 
   const [mode, setMode] = React.useState<'signin' | 'signup'>('signin');
@@ -43,9 +45,23 @@ export const AuthScreen: React.FC = () => {
     setLoading(true);
     try {
       if (mode === 'signin') {
-        await clerk.signIn({ strategy: 'email_password', identifier: email, password });
+        const res = await signIn.password({ emailAddress: email, password });
+        if (res.error) {
+          setError(res.error.message || 'Authentication failed');
+          return;
+        }
+        if (signIn.status === 'complete' && signIn.createdSessionId) {
+          await setActiveSignIn({ session: signIn.createdSessionId });
+        }
       } else {
-        await clerk.signUp({ strategy: 'email_password', emailAddress: email, password });
+        const res = await signUp.password({ emailAddress: email, password });
+        if (res.error) {
+          setError(res.error.message || 'Authentication failed');
+          return;
+        }
+        if (signUp.status === 'complete' && signUp.createdSessionId) {
+          await setActiveSignUp({ session: signUp.createdSessionId });
+        }
       }
       router.replace('/explore');
     } catch (err: any) {

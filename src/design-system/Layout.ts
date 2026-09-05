@@ -79,9 +79,14 @@ export const Shadows = {
 
 export const GlassStyles = {
   light: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 2,
   },
   dark: {
     backgroundColor: 'rgba(30, 41, 59, 0.7)',
@@ -89,9 +94,14 @@ export const GlassStyles = {
     borderWidth: 1,
   },
   heavy: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderColor: '#E2E8F0',
     borderWidth: 1.5,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 3,
   },
   heavyDark: {
     backgroundColor: 'rgba(30, 41, 59, 0.85)',

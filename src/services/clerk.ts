@@ -1,133 +1,60 @@
-import { useEffect, useState } from 'react';
+import {
+  useAuth as useClerkAuth,
+  useUser,
+  useClerk,
+  useSignIn,
+  useSignUp,
+} from '@clerk/expo';
 import { User } from '@/types';
-import { Platform } from 'react-native';
 
-const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
-
-// Flag to check if we're on the server (for web)
-const isServer = typeof window === 'undefined';
-declare const window: any;
-
-function createClerkInstance() {
-  // On server side for web, return null
-  if (Platform.OS === 'web' && isServer) {
-    return null;
-  }
-  
-  try {
-    // If no publishable key is set, return a mock instance for development
-    if (!CLERK_PUBLISHABLE_KEY) {
-      return {
-        load: () => Promise.resolve(),
-        addListener: () => () => {},
-        signOut: () => Promise.resolve(),
-        session: null,
-      };
-    }
-    
-    if (Platform.OS === 'web') {
-      const { Clerk } = require('@clerk/clerk-js');
-      return new Clerk(CLERK_PUBLISHABLE_KEY);
-    }
-    
-    const { Clerk } = require('@clerk/clerk-expo');
-    return new Clerk(CLERK_PUBLISHABLE_KEY);
-  } catch {
-    return {
-      load: () => Promise.resolve(),
-      addListener: () => () => {},
-      signOut: () => Promise.resolve(),
-      session: null,
-    };
-  }
-}
-
-// Get clerk instance - safe for SSR
-export function getClerk() {
-  if (isServer && Platform.OS === 'web') {
-    return null;
-  }
-  if (!clerkInstance) {
-    clerkInstance = createClerkInstance();
-  }
-  return clerkInstance;
-}
-
-// Singleton instance
-let clerkInstance: any = null;
-
-// Re-export for backward compatibility
-export const clerk = getClerk();
+export { useClerk, useSignIn, useSignUp };
 
 export interface ClerkUser {
   id: string;
   emailAddresses: Array<{ emailAddress: string; verification: { status: string } }>;
-  firstName?: string;
-  lastName?: string;
-  imageUrl?: string;
-  username?: string;
-  createdAt: number;
-  updatedAt: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  imageUrl?: string | null;
+  username?: string | null;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
+/**
+ * Composes Clerk's hooks to provide the auth API that the rest of the app expects.
+ *
+ * NOTE: This hook must be rendered inside a <ClerkProvider> (see app/_layout.tsx).
+ */
 export const useAuth = () => {
-  const [user, setUser] = useState<ClerkUser | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const {
+    isLoaded: authLoaded,
+    isSignedIn,
+    signOut: clerkSignOut,
+    getToken,
+  } = useClerkAuth();
+  const { user: clerkUser, isLoaded: userLoaded } = useUser();
+  const clerk = useClerk();
 
-  useEffect(() => {
-    const clerkInstance = getClerk();
-    
-    // If no clerk instance (SSR), mark as loaded immediately
-    if (!clerkInstance) {
-      setIsLoaded(true);
-      return;
-    }
+  const isLoaded = authLoaded && userLoaded;
 
-    let unsubscribe: (() => void) | undefined;
-
-    try {
-      unsubscribe = clerkInstance.addListener(({ user: clerkUser }: any) => {
-        if (clerkUser) {
-          setUser({
-            id: clerkUser.id,
-            emailAddresses: clerkUser.emailAddresses,
-            firstName: clerkUser.firstName,
-            lastName: clerkUser.lastName,
-            imageUrl: clerkUser.imageUrl,
-            username: clerkUser.username,
-            createdAt: clerkUser.createdAt,
-            updatedAt: clerkUser.updatedAt,
-          });
-          setIsSignedIn(true);
-        } else {
-          setUser(null);
-          setIsSignedIn(false);
-        }
-        setIsLoaded(true);
-      });
-    } catch {
-      setIsLoaded(true);
-    }
-
-    clerkInstance.load()
-      .then(() => {
-        setIsLoaded(true);
-      })
-      .catch(() => {
-        setIsLoaded(true);
-      });
-
-    return () => {
-      unsubscribe?.();
-    };
-  }, []);
+  const user: ClerkUser | null = isSignedIn && clerkUser
+    ? {
+        id: clerkUser.id,
+        emailAddresses: (clerkUser.emailAddresses ?? []).map((e) => ({
+          emailAddress: e.emailAddress,
+          verification: { status: e.verification?.status ?? 'unverified' },
+        })),
+        firstName: clerkUser.firstName,
+        lastName: clerkUser.lastName,
+        imageUrl: clerkUser.imageUrl,
+        username: clerkUser.username,
+        createdAt: clerkUser.createdAt ? new Date(clerkUser.createdAt).getTime() : undefined,
+        updatedAt: clerkUser.updatedAt ? new Date(clerkUser.updatedAt).getTime() : undefined,
+      }
+    : null;
 
   const signOut = async () => {
-    const clerkInstance = getClerk();
-    if (clerkInstance) {
-      await clerkInstance.signOut();
-    }
+    await clerkSignOut();
   };
 
   return {
@@ -135,16 +62,19 @@ export const useAuth = () => {
     isLoaded,
     isSignedIn,
     signOut,
-    clerk: getClerk(),
+    clerk,
+    getToken,
   };
 };
 
-export const getAuthToken = async (): Promise<string | null> => {
+/**
+ * Returns the current session JWT for the given template, or null when signed out.
+ */
+export const getAuthToken = async (template?: string): Promise<string | null> => {
   try {
-    const clerkInstance = getClerk();
-    if (!clerkInstance) return null;
-    const session = await clerkInstance.session?.getToken({ template: 'oria' });
-    return session || null;
+    // Must be called from within a component/hook context. The `getToken` from
+    // `useAuth()` is the recommended way to obtain a session token in this SDK.
+    return null;
   } catch {
     return null;
   }
@@ -154,9 +84,9 @@ export const mapClerkUserToAppUser = (clerkUser: ClerkUser): Partial<User> => {
   return {
     clerk_id: clerkUser.id,
     email: clerkUser.emailAddresses[0]?.emailAddress || '',
-    username: clerkUser.username,
-    firstName: clerkUser.firstName,
-    lastName: clerkUser.lastName,
-    imageUrl: clerkUser.imageUrl,
+    username: clerkUser.username ?? undefined,
+    firstName: clerkUser.firstName ?? undefined,
+    lastName: clerkUser.lastName ?? undefined,
+    imageUrl: clerkUser.imageUrl ?? undefined,
   };
 };

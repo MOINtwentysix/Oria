@@ -52,18 +52,17 @@ export default function OnboardingScreen() {
       case 0: // Welcome
         return (
           <View style={styles.welcomeContent}>
-            <Text style={styles.welcomeIcon}>\u2728</Text>
             <Text style={[
-              styles.welcomeTitle,
+              styles.welcomeIcon,
               { color: theme.colors.text },
             ]}>
-              Welcome to Oria
+              Oria
             </Text>
             <Text style={[
               styles.welcomeSubtitle,
               { color: theme.colors.textSecondary },
             ]}>
-              Discover what's around you. Find amazing places, save favorites, plan trips, and share with friends.
+              Discover what's around you ✨🗺️
             </Text>
             <View style={styles.welcomeFeatures}>
               {[

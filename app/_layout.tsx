@@ -21,14 +21,17 @@ function RootLayoutContent() {
 
   // Wait for auth to be loaded before rendering
   React.useEffect(() => {
-    if (isLoaded) {
-      // Redirect based on auth and onboarding status
-      if (isSignedIn && onboardingComplete) {
-        router.replace('/explore');
-      } else if (isSignedIn) {
-        router.replace('/onboarding');
-      } else {
-        router.replace('/landing');
+    if (isLoaded && typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      // Only redirect if user is at root path, not when navigating through browser
+      if (currentPath === '/' || currentPath === '/index') {
+        if (isSignedIn && onboardingComplete) {
+          router.replace('/explore');
+        } else if (isSignedIn) {
+          router.replace('/onboarding');
+        } else {
+          router.replace('/landing');
+        }
       }
     }
   }, [isLoaded, isSignedIn, onboardingComplete, router]);

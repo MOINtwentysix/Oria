@@ -4,6 +4,30 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const AUTH_TOKEN_KEY = 'auth_token';
+
+function getStoredToken() {
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
+  }
+  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+}
+
+function storeToken(token: string) {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+    return Promise.resolve();
+  }
+  return SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+}
+
+function removeStoredToken() {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    return Promise.resolve();
+  }
+  return SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+}
 
 class ApiClient {
   private client: AxiosInstance;
@@ -24,7 +48,7 @@ class ApiClient {
 
   private async loadToken() {
     try {
-      const token = await SecureStore.getItemAsync('auth_token');
+      const token = await getStoredToken();
       if (token) {
         this.token = token;
         this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -59,13 +83,13 @@ class ApiClient {
   async setToken(token: string) {
     this.token = token;
     this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    await SecureStore.setItemAsync('auth_token', token);
+    await storeToken(token);
   }
 
   async clearToken() {
     this.token = null;
     delete this.client.defaults.headers.common['Authorization'];
-    await SecureStore.deleteItemAsync('auth_token');
+    await removeStoredToken();
   }
 
   getClient(): AxiosInstance {

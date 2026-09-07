@@ -221,10 +221,31 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
   const theme = getTheme(colorScheme);
 
   if (Platform.OS === 'web') {
+    const center = userLocation || { latitude: 52.52, longitude: 13.405 };
+    const marker = places[0]?.location || center;
+    const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${marker.longitude - 0.04}%2C${marker.latitude - 0.025}%2C${marker.longitude + 0.04}%2C${marker.latitude + 0.025}&layer=mapnik&marker=${marker.latitude}%2C${marker.longitude}`;
+
     return (
-      <View style={[{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#1E293B' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }, style]}>
-        <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '600' }}>Map</Text>
-        <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 4 }}>{places.length} places</Text>
+      <View style={[styles.webMap, style]}>
+        {React.createElement('iframe', {
+          title: 'OpenStreetMap',
+          src: mapUrl,
+          style: { border: 0, width: '100%', height: '100%' },
+          loading: 'lazy',
+        })}
+        <View style={styles.webMapAttribution}>
+          <Text style={styles.webMapAttributionText}>© OpenStreetMap contributors</Text>
+        </View>
+        {places.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.webPlaceList} contentContainerStyle={styles.webPlaceListContent}>
+            {places.slice(0, 8).map((place) => (
+              <TouchableOpacity key={place.id} onPress={() => onPlacePress(place)} style={[styles.webPlaceCard, place.id === selectedPlaceId && styles.webPlaceCardSelected]}>
+                <Text numberOfLines={1} style={styles.webPlaceName}>{place.name}</Text>
+                <Text numberOfLines={1} style={styles.webPlaceCategory}>{place.categories[0]?.name || 'Place'}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
       </View>
     );
   }
@@ -327,6 +348,57 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
 const s0 = StyleSheet.create({
   map: {
     flex: 1,
+  },
+  webMap: {
+    flex: 1,
+    minHeight: 360,
+    overflow: 'hidden',
+    backgroundColor: '#DDE7E5',
+  },
+  webMapAttribution: {
+    position: 'absolute',
+    right: 8,
+    bottom: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+  },
+  webMapAttributionText: {
+    fontSize: 10,
+    color: '#334155',
+  },
+  webPlaceList: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 12,
+  },
+  webPlaceListContent: {
+    gap: 8,
+  },
+  webPlaceCard: {
+    width: 150,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    shadowColor: '#000',
+    shadowOpacity: 0.14,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  webPlaceCardSelected: {
+    borderWidth: 2,
+    borderColor: '#0066CC',
+  },
+  webPlaceName: {
+    color: '#0F172A',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  webPlaceCategory: {
+    color: '#64748B',
+    fontSize: 11,
+    marginTop: 3,
   },
 });
 

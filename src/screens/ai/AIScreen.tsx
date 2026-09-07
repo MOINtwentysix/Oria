@@ -18,7 +18,8 @@ export const AIScreen: React.FC = () => {
   const theme = getTheme(colorScheme);
   const { user, isSignedIn } = useAuth();
   const { tabBarVisible, setTabBarVisible } = useUIStore();
-  const { messages, loading, error, streaming, currentConversation, askOria, streamAskOria, planTrip, planFromList, clear, setCurrentConversation } = useAIStore();
+  const { messages, loading, error, streaming, currentConversation, setCurrentConversation, addMessage } = useAIStore();
+  const { streamAskOria, planTrip } = useAI();
   const { currentLocation } = useLocation();
   const { places: nearbyPlaces, searchNearby } = usePlaces();
   const router = useAppNavigation();
@@ -48,16 +49,24 @@ export const AIScreen: React.FC = () => {
       content: query,
       created_at: new Date().toISOString(),
     };
+    addMessage(userMessage);
 
-    await streamAskOria(
+    const response = await streamAskOria(
       query,
       currentLocation || { latitude: 52.52, longitude: 13.405 },
       nearbyPlaces,
       messages.map(m => ({ role: m.role, content: m.content })),
-      (chunk) => {
-        // Handle streaming chunks
-      }
+      () => undefined
     );
+    if (response) {
+      addMessage({
+        id: `msg-${Date.now()}-assistant`,
+        conversation_id: currentConversation?.id || '',
+        role: 'assistant',
+        content: response,
+        created_at: new Date().toISOString(),
+      });
+    }
   };
 
   const handlePlaceCardPress = (card: PlaceCard) => {

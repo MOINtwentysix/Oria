@@ -44,7 +44,7 @@ export const SEARCH_MAX_RESULTS = 50;
 export const SEARCH_RADIUS_DEFAULT = 5000;
 
 export const AI_CONFIG = {
-  model: 'mistral-large-latest',
+  model: 'mistral-small-2',
   maxTokens: 2048,
   temperature: 0.7,
   topP: 0.9,

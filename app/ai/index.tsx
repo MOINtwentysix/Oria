@@ -6,7 +6,7 @@ import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput } from '@/co
 import { LiquidTabBar } from '@/components/common';
 import { AIChatMessage, AIChatInput, AIModeCard, TripPlanView } from '@/components/ai/AIComponents';
 import { useAuth } from '@/services/auth';
-import { useUIStore, useAIStore } from '@/store';
+import { useUIStore } from '@/store';
 import { Place, AIMessage, PlaceCard } from '@/types';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { useLocation } from '@/hooks/useLocation';
@@ -18,7 +18,7 @@ export const AIScreen: React.FC = () => {
   const theme = getTheme(colorScheme);
   const { user, isSignedIn } = useAuth();
   const { tabBarVisible, setTabBarVisible } = useUIStore();
-  const { messages, loading, error, streaming, currentConversation, askOria, streamAskOria, planTrip, planFromList, clear, setCurrentConversation } = useAIStore();
+  const { messages, loading, error, streaming, currentConversation, streamAskOria, planTrip, addMessage } = useAI();
   const { currentLocation } = useLocation();
   const { places: nearbyPlaces, searchNearby } = usePlaces();
   const router = useAppNavigation();
@@ -49,15 +49,23 @@ export const AIScreen: React.FC = () => {
       created_at: new Date().toISOString(),
     };
 
-    await streamAskOria(
+    addMessage(userMessage);
+    const response = await streamAskOria(
       query,
       currentLocation || { latitude: 52.52, longitude: 13.405 },
       nearbyPlaces,
       messages.map(m => ({ role: m.role, content: m.content })),
-      (chunk) => {
-        // Handle streaming chunks
-      }
+      () => undefined
     );
+    if (response) {
+      addMessage({
+        id: `msg-${Date.now()}-assistant`,
+        conversation_id: currentConversation?.id || '',
+        role: 'assistant',
+        content: response,
+        created_at: new Date().toISOString(),
+      });
+    }
   };
 
   const handlePlaceCardPress = (card: PlaceCard) => {

@@ -187,7 +187,7 @@ export const ProfileScreen: React.FC = () => {
             <GlassCard variant="light" style={styles.settingsCard}>
               <GlassCardListItem
                 title="AI Model"
-                subtitle="mistral-large-latest"
+                subtitle="mistral-small-2"
                 leftIcon={<Text style={styles.settingIcon}>🤖</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
 

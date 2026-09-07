@@ -1,7 +1,8 @@
 import { Place, Coordinates, TripPlan, TripStop, Route, RouteWaypoint } from '@/types';
 
-const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || '';
+const MISTRAL_API_KEY = process.env.EXPO_PUBLIC_MISTRAL_API_KEY || process.env.MISTRAL_API_KEY || '';
 const MISTRAL_BASE_URL = 'https://api.mistral.ai/v1';
+const MISTRAL_MODEL = process.env.EXPO_PUBLIC_MISTRAL_MODEL || 'mistral-small-2';
 
 interface MistralMessage {
   role: 'system' | 'user' | 'assistant';
@@ -106,7 +107,7 @@ RULES:
     ];
 
     const request: MistralChatRequest = {
-      model: 'mistral-large-latest',
+      model: MISTRAL_MODEL,
       messages: fullMessages,
       temperature: options.temperature ?? 0.7,
       top_p: 0.9,
@@ -142,7 +143,7 @@ RULES:
     ];
 
     const request: MistralChatRequest = {
-      model: 'mistral-large-latest',
+      model: MISTRAL_MODEL,
       messages: fullMessages,
       temperature: options.temperature ?? 0.7,
       top_p: 0.9,

@@ -142,7 +142,7 @@ export default function SearchScreen() {
                     style={styles.recentChip}
                     hitSlop={8}
                   >
-                    <Text style={styles.recentChipIcon}>\ud83d\udd50</Text>
+                    <Text style={styles.recentChipIcon}>@</Text>
                     <Text style={[styles.recentChipText, { color: theme.colors.text }]}>
                       {search}
                     </Text>
@@ -164,7 +164,7 @@ export default function SearchScreen() {
                   style={styles.suggestionChip}
                   hitSlop={8}
                 >
-                  <Text style={styles.suggestionChipIcon}>\ud83d\udd0d</Text>
+                  <Text style={styles.suggestionChipIcon}>?</Text>
                   <Text style={[styles.suggestionChipText, { color: theme.colors.text }]}>
                     {suggestion}
                   </Text>
@@ -213,7 +213,7 @@ export default function SearchScreen() {
                         {!place.photos[0] && (
                           <View style={[styles.resultImagePlaceholder, { backgroundColor: theme.colors.backgroundTertiary }]}>
                             <Text style={styles.resultImagePlaceholderText}>
-                              {place.categories[0]?.icon || '\ud83d\udccd'}
+                              {place.categories[0]?.icon || '*'}
                             </Text>
                           </View>
                         )}
@@ -247,7 +247,7 @@ export default function SearchScreen() {
                           {place.distance !== undefined && (
                             <View style={styles.resultDistance}>
                               <Text style={[styles.resultDistanceText, { color: theme.colors.primary }]}>
-                                \ud83d\udccd {(place.distance / 1000).toFixed(1)} km
+                                {Math.round(place.distance)} m
                               </Text>
                             </View>
                           )}
@@ -274,10 +274,10 @@ export default function SearchScreen() {
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>\ud83d\uddfa\ufe0f</Text>, selectedIcon: <Text style={styles.tabIcon}>\ud83d\uddfa\ufe0f</Text> },
-          { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>\u2728</Text>, selectedIcon: <Text style={styles.tabIcon}>\u2728</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>\u2764\ufe0f</Text>, selectedIcon: <Text style={styles.tabIcon}>\u2764\ufe0f</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>\ud83d\udc64</Text>, selectedIcon: <Text style={styles.tabIcon}>\ud83d\udc64</Text> },
+          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>M</Text>, selectedIcon: <Text style={styles.tabIcon}>M</Text> },
+          { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>AI</Text>, selectedIcon: <Text style={styles.tabIcon}>AI</Text> },
+          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>S</Text>, selectedIcon: <Text style={styles.tabIcon}>S</Text> },
+          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>P</Text>, selectedIcon: <Text style={styles.tabIcon}>P</Text> },
         ]}
         activeTab="explore"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}

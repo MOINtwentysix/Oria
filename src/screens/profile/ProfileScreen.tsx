@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Linking from 'expo-linking';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
@@ -9,6 +10,7 @@ import { useUIStore, useUserStore } from '@/store';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const ProfileScreen: React.FC = () => {
+  const accountSettingsUrl = 'https://accounts.moin26.dev/user';
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const { user, isSignedIn, signOut } = useAuth();
@@ -92,14 +94,14 @@ export const ProfileScreen: React.FC = () => {
             <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Account</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <GlassCardListItem
-                title="Edit Profile"
-                subtitle="Name, photo, username"
+                title="Account Settings"
+                subtitle="Name, photo, password, and security"
                 leftIcon={<Text style={styles.settingIcon}>✏️</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/profile/edit')}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
                 title="Email & Security"
@@ -109,7 +111,7 @@ export const ProfileScreen: React.FC = () => {
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/profile/security')}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
                 title="Connected Accounts"
@@ -119,7 +121,7 @@ export const ProfileScreen: React.FC = () => {
 
                 padding="md"
                 divider={false}
-                onPress={() => {}}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
             </GlassCard>
           </View>
@@ -135,7 +137,7 @@ export const ProfileScreen: React.FC = () => {
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/profile/interests')}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
                 title="Search Radius"
@@ -145,7 +147,7 @@ export const ProfileScreen: React.FC = () => {
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/profile/radius')}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
                 title="Notifications"
@@ -187,7 +189,7 @@ export const ProfileScreen: React.FC = () => {
             <GlassCard variant="light" style={styles.settingsCard}>
               <GlassCardListItem
                 title="AI Model"
-                subtitle="mistral-large-latest"
+                subtitle="mistral-small-2"
                 leftIcon={<Text style={styles.settingIcon}>🤖</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
 
@@ -203,7 +205,7 @@ export const ProfileScreen: React.FC = () => {
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/ai/history')}
+                onPress={() => router.push('/ai')}
               />
               <GlassCardListItem
                 title="Data Usage"
@@ -213,7 +215,7 @@ export const ProfileScreen: React.FC = () => {
 
                 padding="md"
                 divider={false}
-                onPress={() => {}}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
             </GlassCard>
           </View>

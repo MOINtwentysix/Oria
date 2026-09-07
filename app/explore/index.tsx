@@ -83,7 +83,7 @@ export default function ExploreScreen() {
               </Text>
               <TouchableOpacity onPress={() => router.push('/explore/search')} hitSlop={12} style={styles.searchTrigger}>
                 <View style={styles.searchTriggerInner}>
-                  <Text style={styles.searchTriggerIcon}>\ud83d\udd0d</Text>
+                  <Text style={styles.searchTriggerIcon}>?</Text>
                   <Text style={[
                     styles.searchTriggerText,
                     { color: theme.colors.textSecondary },
@@ -123,10 +123,10 @@ export default function ExploreScreen() {
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>\ud83d\uddfa\ufe0f</Text>, selectedIcon: <Text style={styles.tabIcon}>\ud83d\uddfa\ufe0f</Text> },
-          { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>\u2728</Text>, selectedIcon: <Text style={styles.tabIcon}>\u2728</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>\u2764\ufe0f</Text>, selectedIcon: <Text style={styles.tabIcon}>\u2764\ufe0f</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>\ud83d\udc64</Text>, selectedIcon: <Text style={styles.tabIcon}>\ud83d\udc64</Text> },
+          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>M</Text>, selectedIcon: <Text style={styles.tabIcon}>M</Text> },
+          { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>AI</Text>, selectedIcon: <Text style={styles.tabIcon}>AI</Text> },
+          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>S</Text>, selectedIcon: <Text style={styles.tabIcon}>S</Text> },
+          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>P</Text>, selectedIcon: <Text style={styles.tabIcon}>P</Text> },
         ]}
         activeTab="explore"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}

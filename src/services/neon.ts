@@ -125,7 +125,7 @@ export const initializeDatabase = async () => {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
         title TEXT,
-        model TEXT DEFAULT 'mistral-large-latest',
+        model TEXT DEFAULT 'mistral-small-2',
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )

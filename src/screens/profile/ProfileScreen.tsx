@@ -1,6 +1,6 @@
 import React from 'react';
 import * as Linking from 'expo-linking';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassCardListItem } from '@/components/ui';
@@ -271,6 +271,7 @@ const styles = StyleSheet.create({
   section: { gap: 12 },
   sectionTitle: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
   settingsCard: { borderRadius: 20, overflow: 'hidden' },
+  accountButtonContainer: { padding: 16 },
   settingIcon: { fontSize: 20 },
   settingArrow: { fontSize: 18, fontWeight: '700' },
   themeOptions: { flexDirection: 'row', gap: 12, padding: 16 },

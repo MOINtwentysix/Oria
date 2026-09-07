@@ -7,8 +7,11 @@ export default function AuthCallbackRoute() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [error, setError] = React.useState<string | null>(null);
+  const handled = React.useRef(false);
 
   React.useEffect(() => {
+    if (handled.current) return;
+    handled.current = true;
     const callbackUrl = typeof window !== 'undefined'
       ? window.location.href
       : `oria://auth/callback?${new URLSearchParams(params as Record<string, string>).toString()}`;

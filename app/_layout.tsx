@@ -56,6 +56,7 @@ function RootLayoutContent() {
           <Stack.Screen name="index" />
           <Stack.Screen name="landing/index" />
           <Stack.Screen name="auth/index" />
+          <Stack.Screen name="auth/callback" />
           <Stack.Screen name="onboarding/index" />
           
           <Stack.Screen name="legal/privacy" />

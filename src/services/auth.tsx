@@ -163,33 +163,43 @@ export function useAuth() {
 }
 
 export function useSSO() {
+  const flowInProgress = React.useRef(false);
+
   const startSSOFlow = React.useCallback(async () => {
+    if (flowInProgress.current) return;
+    flowInProgress.current = true;
+
     if (!AUTHORIZATION_URL || !TOKEN_URL || !USERINFO_URL || !CLIENT_ID) {
+      flowInProgress.current = false;
       throw new Error('SSO configuration is incomplete');
     }
-    const redirectUri = getRedirectUri();
-    const { verifier, challenge } = await createPkcePair();
-    const state = randomString(32);
-    await AsyncStorage.setItem(PENDING_AUTH_KEY, JSON.stringify({ state, verifier, redirectUri }));
-    const url = `${AUTHORIZATION_URL}?${new URLSearchParams({
-      response_type: 'code',
-      client_id: CLIENT_ID,
-      redirect_uri: redirectUri,
-      scope: 'openid profile email',
-      state,
-      code_challenge: challenge,
-      code_challenge_method: 'S256',
-    }).toString()}`;
+    try {
+      const redirectUri = getRedirectUri();
+      const { verifier, challenge } = await createPkcePair();
+      const state = randomString(32);
+      await AsyncStorage.setItem(PENDING_AUTH_KEY, JSON.stringify({ state, verifier, redirectUri }));
+      const url = `${AUTHORIZATION_URL}?${new URLSearchParams({
+        response_type: 'code',
+        client_id: CLIENT_ID,
+        redirect_uri: redirectUri,
+        scope: 'openid profile email',
+        state,
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
+      }).toString()}`;
 
-    if (Platform.OS === 'web') {
-      window.location.assign(url);
-      return;
-    }
-    const result = await WebBrowser.openAuthSessionAsync(url, redirectUri);
-    if (result.type === 'success' && result.url) {
-      await completeSSO(result.url);
-    } else if (result.type === 'cancel') {
-      throw new Error('SSO login was cancelled');
+      if (Platform.OS === 'web') {
+        window.location.assign(url);
+        return;
+      }
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUri);
+      if (result.type === 'success' && result.url) {
+        await completeSSO(result.url);
+      } else if (result.type === 'cancel') {
+        throw new Error('SSO login was cancelled');
+      }
+    } finally {
+      flowInProgress.current = false;
     }
   }, []);
 

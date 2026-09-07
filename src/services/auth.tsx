@@ -97,10 +97,10 @@ async function exchangeCode(code: string, pending: PendingAuth) {
   });
   if (!userResponse.ok) throw new Error(`SSO user info failed (${userResponse.status})`);
   const user = mapUser(await userResponse.json());
-  await AsyncStorage.multiSet([
-    [TOKEN_STORAGE_KEY, token],
-    [USER_STORAGE_KEY, JSON.stringify(user)],
-  ]);
+  await AsyncStorage.setMany({
+    [TOKEN_STORAGE_KEY]: token,
+    [USER_STORAGE_KEY]: JSON.stringify(user),
+  });
   await apiClient.setToken(token);
   return { token, user };
 }
@@ -112,13 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadStoredSession = React.useCallback(async () => {
     try {
-      const entries = await AsyncStorage.multiGet([TOKEN_STORAGE_KEY, USER_STORAGE_KEY]);
-      const storedToken = entries[0][1];
-      const storedUser = entries[1][1];
+      const entries = await AsyncStorage.getMany([TOKEN_STORAGE_KEY, USER_STORAGE_KEY]);
+      const storedToken = entries[TOKEN_STORAGE_KEY];
+      const storedUser = entries[USER_STORAGE_KEY];
       setToken(storedToken);
       setUser(storedUser ? JSON.parse(storedUser) : null);
     } catch {
-      await AsyncStorage.multiRemove([TOKEN_STORAGE_KEY, USER_STORAGE_KEY]);
+      await AsyncStorage.removeMany([TOKEN_STORAGE_KEY, USER_STORAGE_KEY]);
       setToken(null);
       setUser(null);
     } finally {
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [loadStoredSession]);
 
   const signOut = React.useCallback(async () => {
-    await AsyncStorage.multiRemove([TOKEN_STORAGE_KEY, USER_STORAGE_KEY, PENDING_AUTH_KEY]);
+    await AsyncStorage.removeMany([TOKEN_STORAGE_KEY, USER_STORAGE_KEY, PENDING_AUTH_KEY]);
     await apiClient.clearToken();
     setToken(null);
     setUser(null);

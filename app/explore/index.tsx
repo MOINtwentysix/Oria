@@ -17,22 +17,19 @@ export default function ExploreScreen() {
   const theme = getTheme(colorScheme);
   const { user, isSignedIn } = useAuth();
   const { bottomSheetVisible, setBottomSheetVisible, tabBarVisible, setTabBarVisible } = useUIStore();
-  const { currentLocation, loading: locationLoading, getCurrentLocation } = useLocation();
+  const { currentLocation, loading: locationLoading, requestPermission, getCurrentLocation } = useLocation();
   const { places, selectedPlace, clusters, loading: placesLoading, searchNearby, loadPlaceDetails, selectPlace } = usePlaces();
 
   const router = useRouter();
 
   React.useEffect(() => {
     setTabBarVisible(true);
-    if (currentLocation) {
-      searchNearby(currentLocation.latitude, currentLocation.longitude);
-    } else {
-      getCurrentLocation().then(loc => {
-        if (loc) {
-          searchNearby(loc.latitude, loc.longitude);
-        }
-      });
-    }
+    const loadPlaces = async () => {
+      const location = currentLocation || await getCurrentLocation();
+      const center = location || { latitude: 52.52, longitude: 13.405 };
+      await searchNearby(center.latitude, center.longitude);
+    };
+    loadPlaces();
   }, []);
 
   const handlePlacePress = (place: any) => {
@@ -46,7 +43,9 @@ export default function ExploreScreen() {
     setBottomSheetVisible(false);
   };
 
-  const handleMyLocation = () => {
+  const handleMyLocation = async () => {
+    const permissionGranted = await requestPermission();
+    if (!permissionGranted) return;
     getCurrentLocation().then(loc => {
       if (loc) {
         // Animate map to user location

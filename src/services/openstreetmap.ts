@@ -1,6 +1,9 @@
 import { Place, PlaceCategory, SearchParams, SearchResult, Coordinates } from '@/types';
 
-const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_API_URLS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
 const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org';
 
 interface OverpassElement {
@@ -24,6 +27,8 @@ interface NominatimResult {
   lat: string;
   lon: string;
   display_name: string;
+  name?: string;
+  type?: string;
   address: Record<string, string>;
   boundingbox: string[];
 }
@@ -104,39 +109,59 @@ function buildOverpassQuery(
   const radiusMeters = radius;
   const center = `${latitude},${longitude}`;
 
-  let tagFilters = '';
+  let tags: string[] = [];
   if (categoryKeys && categoryKeys.length > 0) {
-    const allTags: string[] = [];
     for (const key of categoryKeys) {
-      const tags = OSM_TAG_MAP[key];
-      if (tags) {
-        allTags.push(...tags);
+      const categoryTags = OSM_TAG_MAP[key];
+      if (categoryTags) {
+        tags.push(...categoryTags);
       }
     }
-    if (allTags.length > 0) {
-      tagFilters = allTags.map(tag => {
-        const [k, v] = tag.split('=');
-        return `["${k}"="${v}"]`;
-      }).join('');
-    }
   }
+
+  const selectors = tags.length > 0
+    ? tags.map((tag) => {
+      const [key, value] = tag.split('=');
+      return `node["${key}"="${value}"](${center},${radiusMeters});way["${key}"="${value}"](${center},${radiusMeters});relation["${key}"="${value}"](${center},${radiusMeters});`;
+    }).join('')
+    : `node["name"](${center},${radiusMeters});way["name"](${center},${radiusMeters});relation["name"](${center},${radiusMeters});`;
 
   return `
     [out:json][timeout:25];
     (
-      node${tagFilters}(${center},${radiusMeters});
-      way${tagFilters}(${center},${radiusMeters});
-      relation${tagFilters}(${center},${radiusMeters});
+      ${selectors}
     );
     out center body ${limit};
   `;
 }
 
+function transformNominatimResult(result: NominatimResult): Place {
+  const type = result.type || 'place';
+  const name = result.name || result.display_name.split(',')[0];
+  return {
+    id: `nominatim_${result.osm_type}_${result.osm_id}`,
+    name,
+    categories: [{ id: type, name: type.replace(/_/g, ' '), icon: 'P' }],
+    location: {
+      address: result.display_name,
+      formatted_address: result.display_name,
+      latitude: Number(result.lat),
+      longitude: Number(result.lon),
+      geocodes: { main: { latitude: Number(result.lat), longitude: Number(result.lon) } },
+    },
+    photos: [],
+  };
+}
+
 function transformElementToPlace(element: OverpassElement): Place {
   const lat = element.lat ?? element.bounds?.minlat ?? 0;
   const lon = element.lon ?? element.bounds?.minlon ?? 0;
-  const centerLat = element.lat ?? element.bounds ? ((element.bounds!.minlat + element.bounds!.maxlat) / 2) : lat;
-  const centerLon = element.lon ?? element.bounds ? ((element.bounds!.minlon + element.bounds!.maxlon) / 2) : lon;
+  const centerLat = element.lat ?? (element.bounds
+    ? (element.bounds.minlat + element.bounds.maxlat) / 2
+    : lat);
+  const centerLon = element.lon ?? (element.bounds
+    ? (element.bounds.minlon + element.bounds.maxlon) / 2
+    : lon);
 
   const tags = element.tags;
   const name = tags.name || tags['name:en'] || tags['name:de'] || 'Unknown Place';
@@ -339,20 +364,37 @@ class OpenStreetMapService {
 
     const query = buildOverpassQuery(lat, lng, radius, params.categories, limit);
 
-    const response = await fetch(OVERPASS_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `data=${encodeURIComponent(query)}`,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Overpass API error: ${response.status}`);
+    let places: Place[] = [];
+    for (const endpoint of OVERPASS_API_URLS) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `data=${encodeURIComponent(query)}`,
+        });
+        if (!response.ok) continue;
+        const data = await response.json() as OverpassResponse;
+        places = data.elements
+          .filter(element => Boolean(element.tags?.name || element.tags?.['name:en'] || element.tags?.['name:de']))
+          .map(transformElementToPlace);
+        if (places.length > 0) break;
+      } catch {
+        // Try the next public Overpass endpoint.
+      }
     }
 
-    const data: OverpassResponse = await response.json();
-    const places = data.elements.map(transformElementToPlace);
+    if (places.length === 0) {
+      const halfDelta = radius / 111000;
+      const viewbox = `${lng - halfDelta},${lat + halfDelta},${lng + halfDelta},${lat - halfDelta}`;
+      const fallbackQuery = params.query || (params.categories?.length ? params.categories[0] : 'restaurant');
+      const fallbackResponse = await fetch(
+        `${NOMINATIM_API_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}&bounded=1&viewbox=${viewbox}&q=${encodeURIComponent(fallbackQuery)}`,
+        { headers: { Accept: 'application/json', 'User-Agent': 'Oria/1.0 (oria-app)' } }
+      );
+      if (!fallbackResponse.ok) throw new Error(`Map data unavailable (${fallbackResponse.status})`);
+      const fallbackData = await fallbackResponse.json() as NominatimResult[];
+      places = fallbackData.map(transformNominatimResult);
+    }
 
     if (params.query) {
       const lowerQuery = params.query.toLowerCase();
@@ -380,19 +422,19 @@ class OpenStreetMapService {
       out body;
     `;
 
-    const response = await fetch(OVERPASS_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `data=${encodeURIComponent(query)}`,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Overpass API error: ${response.status}`);
+    let data: OverpassResponse | null = null;
+    for (const endpoint of OVERPASS_API_URLS) {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+      if (response.ok) {
+        data = await response.json() as OverpassResponse;
+        break;
+      }
     }
-
-    const data: OverpassResponse = await response.json();
+    if (!data) throw new Error('Overpass API unavailable');
     if (data.elements.length === 0) {
       throw new Error(`Place not found: ${placeId}`);
     }

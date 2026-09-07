@@ -28,17 +28,6 @@ export const ProfileScreen: React.FC = () => {
     router.replace('/auth');
   };
 
-  const handleDeleteAccount = async () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: async () => { await handleSignOut(); } },
-      ]
-    );
-  };
-
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme);
     updatePreferences({ theme: newTheme });
@@ -93,36 +82,11 @@ export const ProfileScreen: React.FC = () => {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Account</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
-              <GlassCardListItem
-                title="Account Settings"
-                subtitle="Name, photo, password, and security"
-                leftIcon={<Text style={styles.settingIcon}>✏️</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => Linking.openURL(accountSettingsUrl)}
-              />
-              <GlassCardListItem
-                title="Email & Security"
-                subtitle="Password, 2FA, sessions"
-                leftIcon={<Text style={styles.settingIcon}>🔐</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => Linking.openURL(accountSettingsUrl)}
-              />
-              <GlassCardListItem
-                title="Connected Accounts"
-                subtitle="Manage social logins"
-                leftIcon={<Text style={styles.settingIcon}>🔗</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={false}
-                onPress={() => Linking.openURL(accountSettingsUrl)}
-              />
+              <View style={styles.accountButtonContainer}>
+                <GlassButton size="lg" fullWidth onPress={() => Linking.openURL(accountSettingsUrl)}>
+                  Account verwalten
+                </GlassButton>
+              </View>
             </GlassCard>
           </View>
 
@@ -270,10 +234,8 @@ export const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.dangerZone}>
-            <Text style={[styles.dangerTitle, { color: theme.colors.error }]}>Danger Zone</Text>
             <GlassCard variant="light" style={styles.dangerCard}>
-              <GlassCardListItem title="Sign Out" padding="md" divider={true} onPress={handleSignOut} />
-              <GlassCardListItem title="Delete Account" padding="md" divider={false} onPress={handleDeleteAccount} />
+              <GlassCardListItem title="Sign Out" padding="md" divider={false} onPress={handleSignOut} />
             </GlassCard>
           </View>
 

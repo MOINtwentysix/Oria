@@ -28,12 +28,30 @@ export const useLocation = () => {
 
   const requestPermission = useCallback(async () => {
     if (Platform.OS === 'web') {
-      if ('geolocation' in navigator) {
-        setLocationPermission('granted');
-        return true;
+      if (!('geolocation' in navigator)) {
+        setLocationPermission('denied');
+        return false;
       }
-      setLocationPermission('denied');
-      return false;
+
+      return await new Promise<boolean>((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position: any) => {
+            const coords: Coordinates = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+            setCurrentLocation(coords);
+            setLastKnownLocation(coords);
+            setLocationPermission('granted');
+            resolve(true);
+          },
+          () => {
+            setLocationPermission('denied');
+            resolve(false);
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+      });
     }
     const { status } = await Location.requestForegroundPermissionsAsync();
     const permission = status === 'granted' ? 'granted' : 'denied';
@@ -157,7 +175,6 @@ export const useLocation = () => {
     const initLocation = async () => {
       if (Platform.OS === 'web') {
         if ('geolocation' in navigator) {
-          setLocationPermission('granted');
           await getCurrentLocation();
         } else {
           setLocationPermission('denied');

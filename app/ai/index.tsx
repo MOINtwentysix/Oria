@@ -70,7 +70,6 @@ export const AIScreen: React.FC = () => {
 
   const handlePlaceCardPress = (card: PlaceCard) => {
     router.push('/explore');
-    // Navigate to explore and highlight place
   };
 
   const handlePlanTripPress = async () => {
@@ -90,7 +89,8 @@ export const AIScreen: React.FC = () => {
   };
 
   const handlePlanFromList = async () => {
-    // Would need selected list
+    setMode('list');
+    setShowModeSelector(false);
   };
 
   if (!isSignedIn) {

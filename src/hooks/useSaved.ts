@@ -39,6 +39,7 @@ export const useSaved = () => {
     setLoading(true);
     try {
       const response = await api.saved.lists.list();
+      setLists((response.data as { results?: SavedList[] }).results || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

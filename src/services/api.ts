@@ -96,24 +96,29 @@ class ApiClient {
     return this.client;
   }
 
-  async get<T>(url: string, params?: any) {
-    return this.client.get<T>(url, { params });
+  async get<T>(url: string, params?: any): Promise<{ data: T } & Record<string, any>> {
+    const response = await this.client.get<T>(url, { params });
+    return response as { data: T } & Record<string, any>;
   }
 
-  async post<T>(url: string, data?: any) {
-    return this.client.post<T>(url, data);
+  async post<T>(url: string, data?: any): Promise<{ data: T } & Record<string, any>> {
+    const response = await this.client.post<T>(url, data);
+    return response as { data: T } & Record<string, any>;
   }
 
-  async put<T>(url: string, data?: any) {
-    return this.client.put<T>(url, data);
+  async put<T>(url: string, data?: any): Promise<{ data: T } & Record<string, any>> {
+    const response = await this.client.put<T>(url, data);
+    return response as { data: T } & Record<string, any>;
   }
 
-  async patch<T>(url: string, data?: any) {
-    return this.client.patch<T>(url, data);
+  async patch<T>(url: string, data?: any): Promise<{ data: T } & Record<string, any>> {
+    const response = await this.client.patch<T>(url, data);
+    return response as { data: T } & Record<string, any>;
   }
 
-  async delete<T>(url: string) {
-    return this.client.delete<T>(url);
+  async delete<T>(url: string): Promise<{ data: T } & Record<string, any>> {
+    const response = await this.client.delete<T>(url);
+    return response as { data: T } & Record<string, any>;
   }
 }
 

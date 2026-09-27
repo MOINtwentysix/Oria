@@ -36,17 +36,12 @@ export const AuthScreen: React.FC = () => {
     );
   }
 
-  const handleSSO = async (strategy: 'oauth_google' | 'oauth_apple') => {
+  const handleSSO = async () => {
     setError('');
     setLoading(true);
     try {
-      const { createdSessionId, setActive } = await startSSOFlow({ strategy });
-      if (createdSessionId) {
-        await setActive({ session: createdSessionId });
-        router.replace('/explore');
-      } else {
-        setError('The social sign-in flow needs to be completed.');
-      }
+      await startSSOFlow();
+      router.replace('/explore');
     } catch (err: any) {
       setError(err.message || 'Social sign-in failed');
     } finally {
@@ -93,7 +88,7 @@ export const AuthScreen: React.FC = () => {
               <GlassButton
                 size="lg"
                 fullWidth
-                onPress={() => handleSSO('oauth_google')}
+                onPress={handleSSO}
                 loading={loading}
                 style={styles.submitButton}
               >
@@ -102,7 +97,7 @@ export const AuthScreen: React.FC = () => {
               <GlassButton
                 size="lg"
                 fullWidth
-                onPress={() => handleSSO('oauth_apple')}
+                onPress={handleSSO}
                 loading={loading}
                 style={styles.submitButton}
               >

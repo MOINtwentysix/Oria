@@ -23,7 +23,7 @@ export const SavedScreen: React.FC = () => {
   React.useEffect(() => {
     setTabBarVisible(true);
     if (isSignedIn && user) {
-      loadLists();
+      loadLists(user.id);
       loadSavedPlaces(user.id);
     }
   }, [isSignedIn, loadLists, loadSavedPlaces, user?.id]);
@@ -90,7 +90,7 @@ export const SavedScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={() => { if (user) { loadLists(); loadSavedPlaces(user.id); } }} />
+        <RefreshControl refreshing={loading} onRefresh={() => { if (user) { loadLists(user.id); loadSavedPlaces(user.id); } }} />
       }>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>

@@ -42,7 +42,7 @@ export const SavedListScreen: React.FC = () => {
   };
 
   const handleShare = () => {
-    // Generate share link
+    setShowShareModal(true);
   };
 
   const handlePlanTrip = () => {
@@ -67,7 +67,7 @@ export const SavedListScreen: React.FC = () => {
     );
   }
 
-  const isOwner = true; // Check from list members
+  const isOwner = true;
 
   return (
     <SafeAreaView style={styles.container}>

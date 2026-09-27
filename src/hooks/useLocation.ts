@@ -27,39 +27,52 @@ export const useLocation = () => {
   const [loading, setLoading] = useState(false);
 
   const requestPermission = useCallback(async () => {
+    setLoading(true);
+
     if (Platform.OS === 'web') {
       if (!('geolocation' in navigator)) {
         setLocationPermission('denied');
+        setLoading(false);
         return false;
       }
 
-      return await new Promise<boolean>((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          (position: any) => {
-            const coords: Coordinates = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            };
-            setCurrentLocation(coords);
-            setLastKnownLocation(coords);
-            setLocationPermission('granted');
-            resolve(true);
-          },
-          () => {
-            setLocationPermission('denied');
-            resolve(false);
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-      });
+      try {
+        return await new Promise<boolean>((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            (position: any) => {
+              const coords: Coordinates = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              };
+              setCurrentLocation(coords);
+              setLastKnownLocation(coords);
+              setLocationPermission('granted');
+              resolve(true);
+            },
+            () => {
+              setLocationPermission('denied');
+              resolve(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+          );
+        });
+      } finally {
+        setLoading(false);
+      }
     }
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    const permission = status === 'granted' ? 'granted' : 'denied';
-    setLocationPermission(permission);
-    return permission === 'granted';
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      const permission = status === 'granted' ? 'granted' : 'denied';
+      setLocationPermission(permission);
+      return permission === 'granted';
+    } finally {
+      setLoading(false);
+    }
   }, [setLocationPermission]);
 
   const getCurrentLocation = useCallback(async (): Promise<Coordinates | null> => {
+    setLoading(true);
+
     try {
       if (Platform.OS === 'web') {
         return await new Promise<Coordinates | null>((resolve, reject) => {
@@ -100,6 +113,8 @@ export const useLocation = () => {
     } catch (error) {
       console.error('Failed to get current location:', error);
       return null;
+    } finally {
+      setLoading(false);
     }
   }, [setCurrentLocation, setLastKnownLocation]);
 

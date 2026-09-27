@@ -71,7 +71,7 @@ class MistralService {
 
     return `You are Oria, an intelligent location discovery assistant. You help users find and plan visits to real places.
 
-AVAILABLE PLACES (real places from Foursquare):
+AVAILABLE PLACES (verified places from OpenStreetMap):
 ${placesContext}
 
 RULES:
@@ -254,7 +254,7 @@ BUDGET: ${budget}
 PEOPLE: ${peopleCount}
 TRANSPORT: ${transportMode}
 
-AVAILABLE PLACES (real places from Foursquare):
+AVAILABLE PLACES (verified places from OpenStreetMap):
 ${nearbyPlaces.slice(0, 20).map((p, i) => 
   `${i + 1}. ${p.name} (${p.categories[0]?.name || 'Place'})${p.rating ? ` - ⭐ ${p.rating}` : ''} - ${Math.round(p.distance || 0)}m away${p.location.formatted_address ? ` - ${p.location.formatted_address}` : ''}`
 ).join('\n')}

@@ -5,8 +5,8 @@ import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 
 interface GlassAvatarProps {
   source?: any;
-  uri?: string;
-  name?: string;
+  uri?: string | null;
+  name?: string | null;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   style?: any;
   borderColor?: string;
@@ -180,8 +180,8 @@ const s0 = StyleSheet.create({
 
 export interface GlassAvatarGroupProps {
   avatars: Array<{
-    uri?: string;
-    name?: string;
+    uri?: string | null;
+    name?: string | null;
     source?: any;
   }>;
   size?: 'sm' | 'md' | 'lg';

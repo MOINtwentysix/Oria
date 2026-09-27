@@ -1,9 +1,5 @@
 import { Place, PlaceCategory, SearchParams, SearchResult, Coordinates } from '@/types';
 
-const OVERPASS_API_URLS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-];
 const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org';
 
 interface OverpassElement {
@@ -91,49 +87,6 @@ const CATEGORY_ICONS: Record<string, string> = {
   photo_studio: '📸',
   photo: '📸',
 };
-
-function osmTagsToOverpassQuery(tags: string[]): string {
-  return tags.map(tag => {
-    const [key, value] = tag.split('=');
-    return `["${key}"="${value}"]`;
-  }).join('');
-}
-
-function buildOverpassQuery(
-  latitude: number,
-  longitude: number,
-  radius: number,
-  categoryKeys?: string[],
-  limit: number = 50
-): string {
-  const radiusMeters = radius;
-  const center = `${latitude},${longitude}`;
-
-  let tags: string[] = [];
-  if (categoryKeys && categoryKeys.length > 0) {
-    for (const key of categoryKeys) {
-      const categoryTags = OSM_TAG_MAP[key];
-      if (categoryTags) {
-        tags.push(...categoryTags);
-      }
-    }
-  }
-
-  const selectors = tags.length > 0
-    ? tags.map((tag) => {
-      const [key, value] = tag.split('=');
-      return `node["${key}"="${value}"](${center},${radiusMeters});way["${key}"="${value}"](${center},${radiusMeters});relation["${key}"="${value}"](${center},${radiusMeters});`;
-    }).join('')
-    : `node["name"](${center},${radiusMeters});way["name"](${center},${radiusMeters});relation["name"](${center},${radiusMeters});`;
-
-  return `
-    [out:json][timeout:25];
-    (
-      ${selectors}
-    );
-    out body center ${limit};
-  `;
-}
 
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000;
@@ -372,7 +325,7 @@ function parseOpeningHours(hoursString: string): boolean {
 
 class OpenStreetMapService {
   private async searchNominatimFallback(
-    query: string,
+    queries: string[],
     latitude: number,
     longitude: number,
     radius: number,
@@ -380,23 +333,34 @@ class OpenStreetMapService {
   ): Promise<Place[]> {
     const halfDelta = Math.max(radius / 111000, 0.01);
     const viewbox = `${longitude - halfDelta},${latitude + halfDelta},${longitude + halfDelta},${latitude - halfDelta}`;
-    const url = `${NOMINATIM_API_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}&bounded=1&viewbox=${encodeURIComponent(viewbox)}&q=${encodeURIComponent(query)}`;
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'Oria/1.0 (oria-app)',
-      },
-    });
-    if (!response.ok) throw new Error(`Map data unavailable (${response.status})`);
+    for (const query of queries) {
+      const url = `${NOMINATIM_API_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}&bounded=1&viewbox=${encodeURIComponent(viewbox)}&q=${encodeURIComponent(query)}`;
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'Oria/1.0 (oria-app)',
+          },
+        });
+        if (!response.ok) continue;
 
-    const data = await response.json() as NominatimResult[];
-    return data
-      .map(transformNominatimResult)
-      .map((place) => ({
-        ...place,
-        distance: haversineDistance(latitude, longitude, place.location.latitude, place.location.longitude),
-      }))
-      .filter((place) => Number.isFinite(place.location.latitude) && Number.isFinite(place.location.longitude));
+        const data = await response.json() as NominatimResult[];
+        const places = data
+          .map(transformNominatimResult)
+          .map((place) => ({
+            ...place,
+            distance: haversineDistance(latitude, longitude, place.location.latitude, place.location.longitude),
+          }))
+          .filter((place) => Number.isFinite(place.location.latitude) && Number.isFinite(place.location.longitude))
+          .filter((place) => (place.distance ?? Infinity) <= radius)
+          .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+        if (places.length > 0) return places;
+      } catch {
+        // Try the next Nominatim query when a request is temporarily unavailable.
+      }
+    }
+
+    return [];
   }
 
   async searchPlaces(params: SearchParams): Promise<SearchResult> {
@@ -405,39 +369,14 @@ class OpenStreetMapService {
     const radius = params.radius || 5000;
     const limit = params.limit || 20;
 
-    const query = buildOverpassQuery(lat, lng, radius, params.categories, limit);
-
-    let places: Place[] = [];
-    for (const endpoint of OVERPASS_API_URLS) {
-      try {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `data=${encodeURIComponent(query)}`,
-        });
-        if (!response.ok) continue;
-        const data = await response.json() as OverpassResponse;
-        places = data.elements
-          .filter(element => Boolean(element.tags?.name || element.tags?.['name:en'] || element.tags?.['name:de']))
-          .map(transformElementToPlace);
-        if (places.length > 0) break;
-      } catch {
-        // Try the next public Overpass endpoint.
-      }
-    }
-
-    if (places.length === 0) {
-      const categoryQuery = params.categories?.length
-        ? params.categories[0].replace(/s$/, '')
-        : 'restaurant';
-      const fallbackQuery = params.query?.trim() || categoryQuery;
-      places = await this.searchNominatimFallback(fallbackQuery, lat, lng, radius, limit);
-    } else if (places.length > 0) {
-      places = places.map((place) => ({
-        ...place,
-        distance: haversineDistance(lat, lng, place.location.latitude, place.location.longitude),
-      }));
-    }
+    const categoryQueries = (params.categories || []).flatMap((category) => {
+      const tags = OSM_TAG_MAP[category] || [];
+      return tags.slice(0, 2).map((tag) => tag.split('=')[1].replace(/_/g, ' '));
+    });
+    const fallbackQueries = params.query?.trim()
+      ? [params.query.trim()]
+      : [...new Set([...categoryQueries, 'restaurant', 'cafe', 'park'])];
+    const places = await this.searchNominatimFallback(fallbackQueries, lat, lng, radius, limit);
 
     if (params.query) {
       const lowerQuery = params.query.toLowerCase();
@@ -456,36 +395,17 @@ class OpenStreetMapService {
   }
 
   async getPlaceDetails(placeId: string): Promise<Place> {
-    const match = placeId.match(/^osm_(node|way|relation)_(\d+)$/);
-    if (!match) {
-      throw new Error(`Invalid OSM place ID: ${placeId}`);
+    if (!placeId.startsWith('nominatim_')) {
+      throw new Error('Place details are only available for current map results');
     }
-
-    const [, type, id] = match;
-    const query = `
-      [out:json][timeout:25];
-      ${type}(${id});
-      out body;
-    `;
-
-    let data: OverpassResponse | null = null;
-    for (const endpoint of OVERPASS_API_URLS) {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `data=${encodeURIComponent(query)}`,
-      });
-      if (response.ok) {
-        data = await response.json() as OverpassResponse;
-        break;
-      }
-    }
-    if (!data) throw new Error('Overpass API unavailable');
-    if (data.elements.length === 0) {
-      throw new Error(`Place not found: ${placeId}`);
-    }
-
-    return transformElementToPlace(data.elements[0]);
+    const [, osmType, osmId] = placeId.split('_');
+    const result = await fetch(`${NOMINATIM_API_URL}/lookup?format=jsonv2&addressdetails=1&osm_ids=${osmType[0].toUpperCase()}${osmId}`, {
+      headers: { Accept: 'application/json', 'User-Agent': 'Oria/1.0 (oria-app)' },
+    });
+    if (!result.ok) throw new Error(`Place details unavailable (${result.status})`);
+    const data = await result.json() as NominatimResult[];
+    if (!data[0]) throw new Error(`Place not found: ${placeId}`);
+    return transformNominatimResult(data[0]);
   }
 
   async getNearbyPlaces(
@@ -534,6 +454,20 @@ class OpenStreetMapService {
 
     const data: NominatimResult = await response.json();
     return data.display_name || null;
+  }
+
+  async getCountryCode(latitude: number, longitude: number): Promise<string | null> {
+    const url = `${NOMINATIM_API_URL}/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2&addressdetails=1&zoom=3`;
+    try {
+      const response = await fetch(url, {
+        headers: { Accept: 'application/json', 'User-Agent': 'Oria/1.0 (oria-app)' },
+      });
+      if (!response.ok) return null;
+      const data = await response.json() as NominatimResult;
+      return data.address?.country_code?.toLowerCase() || null;
+    } catch {
+      return null;
+    }
   }
 
   async searchNominatim(query: string, limit: number = 5): Promise<Array<{ name: string; lat: number; lon: number; display_name: string }>> {

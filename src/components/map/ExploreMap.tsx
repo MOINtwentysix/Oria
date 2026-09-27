@@ -249,8 +249,26 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
         {React.createElement('iframe', {
           title: 'OpenStreetMap',
           src: mapUrl,
-          style: { border: 0, width: '100%', height: '100%' },
+          // The embedded OSM map cannot report its pan/zoom back to React.
+          // Keep it passive so the fixed blue dot never drifts away from the
+          // actual location represented by the map center.
+          style: { border: 0, width: '100%', height: '100%', pointerEvents: 'none' },
           loading: 'lazy',
+        })}
+
+        {visiblePlaces.map((place) => {
+          const left = `${Math.max(3, Math.min(97, ((place.location.longitude - west) / (east - west)) * 100))}%`;
+          const top = `${Math.max(5, Math.min(82, ((north - place.location.latitude) / (north - south)) * 100))}%`;
+          return (
+            <TouchableOpacity
+              key={`map-marker-${place.id}`}
+              onPress={() => onPlacePress(place)}
+              style={[styles.webPlaceMarker, { left, top }]}
+              accessibilityLabel={place.name}
+            >
+              <Text style={styles.webPlaceMarkerText}>{place.categories[0]?.icon || '📍'}</Text>
+            </TouchableOpacity>
+          );
         })}
 
         {showUserLocation && userLocation && <View style={styles.webUserLocation} />}
@@ -393,6 +411,27 @@ const s0 = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
     zIndex: 5,
+  },
+  webPlaceMarker: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    marginLeft: -16,
+    marginTop: -16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#0066CC',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+    zIndex: 4,
+  },
+  webPlaceMarkerText: {
+    fontSize: 16,
   },
   webMapAttribution: {
     position: 'absolute',

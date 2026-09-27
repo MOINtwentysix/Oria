@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/services/queryClient';
 import { AuthProvider, useAuth } from '@/services/auth';
 import { useUIStore } from '@/store';
+import { GermanyBetaGate } from '@/components/GermanyBetaGate';
 
 export default function RootLayout() {
   return (
@@ -52,7 +53,8 @@ function RootLayoutContent() {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <Stack screenOptions={{ headerShown: false }}>
+        <GermanyBetaGate>
+          <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="landing/index" />
           <Stack.Screen name="auth/index" />
@@ -73,7 +75,8 @@ function RootLayoutContent() {
           <Stack.Screen name="saved/list" />
           <Stack.Screen name="ai/index" />
           <Stack.Screen name="profile/index" />
-        </Stack>
+          </Stack>
+        </GermanyBetaGate>
       </QueryClientProvider>
     </ThemeProvider>
   );

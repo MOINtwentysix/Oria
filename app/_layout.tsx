@@ -53,7 +53,7 @@ function RootLayoutContent() {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <GermanyBetaGate>
+        <>
           <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="landing/index" />
@@ -76,7 +76,8 @@ function RootLayoutContent() {
           <Stack.Screen name="ai/index" />
           <Stack.Screen name="profile/index" />
           </Stack>
-        </GermanyBetaGate>
+          <GermanyBetaGate />
+        </>
       </QueryClientProvider>
     </ThemeProvider>
   );

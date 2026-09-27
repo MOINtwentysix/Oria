@@ -9,7 +9,7 @@ const PROTECTED_PATHS = ['/explore', '/saved', '/ai', '/profile'];
 const isProtectedPath = (pathname: string) =>
   PROTECTED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
-export const GermanyBetaGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GermanyBetaGate: React.FC = () => {
   const pathname = usePathname();
   const { getCurrentLocation } = useLocation();
   const [status, setStatus] = React.useState<'idle' | 'checking' | 'allowed' | 'blocked'>('idle');
@@ -47,7 +47,7 @@ export const GermanyBetaGate: React.FC<{ children: React.ReactNode }> = ({ child
   }, [pathname, checkAvailability]);
 
   if (!isProtectedPath(pathname) || status === 'idle' || status === 'allowed') {
-    return <>{children}</>;
+    return null;
   }
 
   return (
@@ -74,7 +74,7 @@ export const GermanyBetaGate: React.FC<{ children: React.ReactNode }> = ({ child
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  container: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: '#F7F9FC', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 100 },
   card: { width: '100%', maxWidth: 460, alignItems: 'center', padding: 28, borderRadius: 24, backgroundColor: '#FFFFFF' },
   icon: { fontSize: 44, marginBottom: 12 },
   title: { fontSize: 26, fontWeight: '800', color: '#101828', marginBottom: 10 },

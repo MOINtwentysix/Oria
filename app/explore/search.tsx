@@ -5,7 +5,7 @@ import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassChip, GlassInput } from '@/components/ui';
 import { LiquidSearchBar, LiquidCategoryPill } from '@/components/common';
 import { LiquidTabBar } from '@/components/common';
-import { useSearchStore } from '@/store';
+import { useSearchStore, useSavedStore } from '@/store';
 import { useAuth } from '@/services/auth';
 import { useUIStore } from '@/store';
 import { CATEGORIES, ERROR_MESSAGES } from '@/constants';
@@ -22,6 +22,7 @@ export default function SearchScreen() {
   const router = useRouter();
 
   const { places, selectedPlace, clusters, searchByQuery, loadPlaceDetails, selectPlace } = usePlaces();
+  const { savedPlaces, lists, addSavedPlace, createList, updateList } = useSavedStore();
 
   React.useEffect(() => {
     setTabBarVisible(false);
@@ -49,6 +50,29 @@ export default function SearchScreen() {
   const handleVoicePress = () => {};
   const handleClear = () => setQuery('');
   const handleSuggestionPress = (suggestion: string) => setQuery(suggestion);
+
+  const handleSavePlace = async (place: any) => {
+    if (!isSignedIn || !user) {
+      router.push('/auth');
+      return;
+    }
+    if (savedPlaces.some((savedPlace: any) => savedPlace.place_id === place.id)) return;
+
+    const targetList = lists.find((list) => list.is_default) || lists[0] || await createList(user.id, 'Favorites');
+    addSavedPlace({
+      id: `saved-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      user_id: user.id,
+      place_id: place.id,
+      place_data: place,
+      list_id: targetList?.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+    if (targetList) {
+      updateList({ ...targetList, place_count: (targetList.place_count || 0) + 1, updated_at: new Date().toISOString() });
+    }
+    setBottomSheetVisible(false);
+  };
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -266,10 +290,10 @@ export default function SearchScreen() {
         place={selectedPlace}
         visible={bottomSheetVisible}
         onClose={() => { selectPlace(null); setBottomSheetVisible(false); }}
-        onSave={(place) => {}}
+        onSave={handleSavePlace}
         onDirections={(place) => {}}
         onShare={(place) => {}}
-        saved={false}
+        saved={Boolean(selectedPlace && savedPlaces.some((savedPlace: any) => savedPlace.place_id === selectedPlace.id))}
       />
 
       <LiquidTabBar

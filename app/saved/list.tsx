@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, FlatList, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, TextInput } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput } from '@/components/ui';
@@ -8,7 +8,7 @@ import { useAuth } from '@/services/auth';
 import { useUIStore, useSavedStore } from '@/store';
 import { SavedList, SavedListItem } from '@/types';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
-import { RefreshControl } from 'react-native';
+import { ShareListModal, SavedPlaceItem } from '@/components/lists/SavedListComponents';
 
 export const SavedListScreen: React.FC = () => {
   const { colorScheme } = useTheme();
@@ -24,6 +24,10 @@ export const SavedListScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const list = activeList || lists[0];
+  const visibleItems = items.filter((item) => {
+    const query = searchQuery.trim().toLowerCase();
+    return !query || item.place_data?.name?.toLowerCase().includes(query);
+  });
 
   React.useEffect(() => {
     setTabBarVisible(false);
@@ -209,21 +213,17 @@ export const SavedListScreen: React.FC = () => {
               </GlassCard>
             </View>
           ) : (
-            <FlatList
-              data={items}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item, index }) => (
+            <View style={styles.listContainer}>
+              {visibleItems.map((item) => (
                 <SavedPlaceItem
+                  key={item.id}
                   item={item}
-                  onPress={() => {}}
+                  onPress={() => router.push('/explore')}
                   onRemove={() => handleRemoveItem(item.id)}
                   style={styles.placeItem}
                 />
-              )}
-              contentContainerStyle={styles.listContainer}
-              showsVerticalScrollIndicator={false}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-            />
+              ))}
+            </View>
           )}
         </View>
       </ScrollView>
@@ -263,8 +263,6 @@ export const SavedListScreen: React.FC = () => {
 };
 
 export default SavedListScreen;
-
-import { SavedListCard, CreateListModal, ShareListModal, SavedPlaceItem } from '@/components/lists/SavedListComponents';
 
 const styles = StyleSheet.create({
   container: {

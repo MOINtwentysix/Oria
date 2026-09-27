@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios';
 // @ts-ignore - expo-secure-store types
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
@@ -101,8 +101,8 @@ class ApiClient {
     return response as { data: T } & Record<string, any>;
   }
 
-  async post<T>(url: string, data?: any): Promise<{ data: T } & Record<string, any>> {
-    const response = await this.client.post<T>(url, data);
+  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<{ data: T } & Record<string, any>> {
+    const response = await this.client.post<T>(url, data, config);
     return response as { data: T } & Record<string, any>;
   }
 

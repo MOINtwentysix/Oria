@@ -4,12 +4,13 @@ import { api } from '@/services/api';
 import { SavedPlace, SavedList, SavedListItem } from '@/types';
 
 export const useSaved = () => {
-  const { savedPlaces, lists, activeList, loading, error, setLists, addList, updateList, removeList, setActiveList, setLoading, setError } = useSavedStore();
+  const { savedPlaces, lists, activeList, loading, error, setSavedPlaces, setLists, addList, updateList, removeList, setActiveList, setLoading, setError } = useSavedStore();
 
   const loadSavedPlaces = useCallback(async (userId: string, listId?: string) => {
     setLoading(true);
     try {
       const response = await api.saved.places.list();
+      setSavedPlaces((response.data as { results?: any[] }).results || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

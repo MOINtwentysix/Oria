@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch } from 'react-native';
+import * as Linking from 'expo-linking';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassCardListItem } from '@/components/ui';
@@ -9,10 +10,11 @@ import { useUIStore, useUserStore } from '@/store';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 export const ProfileScreen: React.FC = () => {
+  const accountSettingsUrl = 'https://accounts.moin26.dev/user';
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const { user, isSignedIn, signOut } = useAuth();
-  const { user: appUser, preferences, updatePreferences, logout } = useUserStore();
+  const { preferences, updatePreferences, logout } = useUserStore();
   const { tabBarVisible, setTabBarVisible, theme: uiTheme, setTheme } = useUIStore();
   const router = useAppNavigation();
 
@@ -24,17 +26,6 @@ export const ProfileScreen: React.FC = () => {
     await signOut();
     logout();
     router.replace('/auth');
-  };
-
-  const handleDeleteAccount = async () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: async () => { await handleSignOut(); } },
-      ]
-    );
   };
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
@@ -82,74 +73,49 @@ export const ProfileScreen: React.FC = () => {
                 {user?.emailAddresses?.[0]?.emailAddress}
               </Text>
               <View style={styles.profileBadges}>
-                <GlassChip variant="outline" size="sm">Explorer</GlassChip>
-                <GlassChip variant="outline" size="sm">Planner</GlassChip>
+                <GlassChip variant="outline" size="sm">Entdecker</GlassChip>
+                <GlassChip variant="outline" size="sm">Planer</GlassChip>
               </View>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Account</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Konto</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
-              <GlassCardListItem
-                title="Edit Profile"
-                subtitle="Name, photo, username"
-                leftIcon={<Text style={styles.settingIcon}>✏️</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => router.push('/profile/edit')}
-              />
-              <GlassCardListItem
-                title="Email & Security"
-                subtitle="Password, 2FA, sessions"
-                leftIcon={<Text style={styles.settingIcon}>🔐</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => router.push('/profile/security')}
-              />
-              <GlassCardListItem
-                title="Connected Accounts"
-                subtitle="Manage social logins"
-                leftIcon={<Text style={styles.settingIcon}>🔗</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={false}
-                onPress={() => {}}
-              />
+              <View style={styles.accountButtonContainer}>
+                <GlassButton size="lg" fullWidth onPress={() => Linking.openURL(accountSettingsUrl)}>
+                  Account verwalten
+                </GlassButton>
+              </View>
             </GlassCard>
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Preferences</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Einstellungen</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <GlassCardListItem
-                title="Interests"
-                subtitle="Customize your discovery"
+                title="Interessen"
+                subtitle="Entdeckungen anpassen"
                 leftIcon={<Text style={styles.settingIcon}>❤️</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/profile/interests')}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
-                title="Search Radius"
+                title="Suchradius"
                 subtitle={`${preferences?.preferred_radius || 5000}m default`}
                 leftIcon={<Text style={styles.settingIcon}>📍</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
 
                 padding="md"
                 divider={true}
-                onPress={() => router.push('/profile/radius')}
+                onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
-                title="Notifications"
-                subtitle="Push and email preferences"
+                title="Benachrichtigungen"
+                subtitle="Push- und E-Mail-Einstellungen"
                 leftIcon={<Text style={styles.settingIcon}>🔔</Text>}
                 rightIcon={
                   <Switch
@@ -164,8 +130,8 @@ export const ProfileScreen: React.FC = () => {
                 divider={true}
               />
               <GlassCardListItem
-                title="Location Sharing"
-                subtitle="Share location with friends"
+                title="Standortfreigabe"
+                subtitle="Standort mit Freunden teilen"
                 leftIcon={<Text style={styles.settingIcon}>📍</Text>}
                 rightIcon={
                   <Switch
@@ -183,43 +149,7 @@ export const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>AI Settings</Text>
-            <GlassCard variant="light" style={styles.settingsCard}>
-              <GlassCardListItem
-                title="AI Model"
-                subtitle="mistral-small-2"
-                leftIcon={<Text style={styles.settingIcon}>🤖</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => {}}
-              />
-              <GlassCardListItem
-                title="Conversation History"
-                subtitle="Manage saved chats"
-                leftIcon={<Text style={styles.settingIcon}>💬</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => router.push('/ai/history')}
-              />
-              <GlassCardListItem
-                title="Data Usage"
-                subtitle="Control AI data processing"
-                leftIcon={<Text style={styles.settingIcon}>📊</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={false}
-                onPress={() => {}}
-              />
-            </GlassCard>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Appearance</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Darstellung</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <View style={styles.themeOptions}>
                 {(['light', 'dark', 'system'] as const).map((t) => (
@@ -257,21 +187,20 @@ export const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>About</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Über</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
-              <GlassCardListItem title="Privacy Policy" padding="md" divider={true} onPress={() => router.push('/legal/privacy')} />
-              <GlassCardListItem title="Terms of Service" padding="md" divider={true} onPress={() => router.push('/legal/terms')} />
-              <GlassCardListItem title="Open Source Licenses" padding="md" divider={true} onPress={() => router.push('/legal/licenses')} />
-              <GlassCardListItem title="Third Party Services" padding="md" divider={true} onPress={() => router.push('/legal/third-party')} />
-              <GlassCardListItem title="About Oria" padding="md" divider={false} onPress={() => router.push('/legal/about')} />
+              <GlassCardListItem title="Datenschutz" padding="md" divider={true} onPress={() => router.push('/legal/privacy')} />
+              <GlassCardListItem title="Nutzungsbedingungen" padding="md" divider={true} onPress={() => router.push('/legal/terms')} />
+              <GlassCardListItem title="Open-Source-Lizenzen" padding="md" divider={true} onPress={() => router.push('/legal/licenses')} />
+              <GlassCardListItem title="Drittanbieter" padding="md" divider={true} onPress={() => router.push('/legal/third-party')} />
+              <GlassCardListItem title="Über Oria" padding="md" divider={false} onPress={() => router.push('/legal/about')} />
             </GlassCard>
           </View>
 
           <View style={styles.dangerZone}>
-            <Text style={[styles.dangerTitle, { color: theme.colors.error }]}>Danger Zone</Text>
+            <Text style={[styles.dangerTitle, { color: theme.colors.error }]}>Gefahrenzone</Text>
             <GlassCard variant="light" style={styles.dangerCard}>
-              <GlassCardListItem title="Sign Out" padding="md" divider={true} onPress={handleSignOut} />
-              <GlassCardListItem title="Delete Account" padding="md" divider={false} onPress={handleDeleteAccount} />
+              <GlassCardListItem title="Abmelden" padding="md" divider={false} onPress={handleSignOut} />
             </GlassCard>
           </View>
 
@@ -309,6 +238,7 @@ const styles = StyleSheet.create({
   section: { gap: 12 },
   sectionTitle: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
   settingsCard: { borderRadius: 20, overflow: 'hidden' },
+  accountButtonContainer: { padding: 16 },
   settingIcon: { fontSize: 20 },
   settingArrow: { fontSize: 18, fontWeight: '700' },
   themeOptions: { flexDirection: 'row', gap: 12, padding: 16 },

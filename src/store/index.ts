@@ -194,9 +194,9 @@ interface SavedState {
   activeList: SavedList | null;
   loading: boolean;
   error: string | null;
-  setanys: (places: any[]) => void;
-  addany: (place: any) => void;
-  removeany: (placeId: string) => void;
+  setSavedPlaces: (places: any[]) => void;
+  addSavedPlace: (place: any) => void;
+  removeSavedPlace: (placeId: string) => void;
   setLists: (lists: SavedList[]) => void;
   addList: (list: SavedList) => void;
   updateList: (list: SavedList) => void;
@@ -218,16 +218,16 @@ interface SavedState {
 
 export const useSavedStore = create<SavedState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       savedPlaces: [],
       lists: [],
       activeList: null,
       loading: false,
       error: null,
-      setanys: (places) => set({ savedPlaces: places, loading: false }),
-      addany: (place) =>
+      setSavedPlaces: (places: any[]) => set({ savedPlaces: places, loading: false }),
+      addSavedPlace: (place: any) =>
         set((state) => ({ savedPlaces: [place, ...state.savedPlaces] })),
-      removeany: (placeId) =>
+      removeSavedPlace: (placeId: string) =>
         set((state) => ({
           savedPlaces: state.savedPlaces.filter((p) => p.id !== placeId),
         })),
@@ -247,18 +247,60 @@ export const useSavedStore = create<SavedState>()(
       setActiveList: (list) => set({ activeList: list }),
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error, loading: false }),
-      loadLists: async (userId?: string) => {},
-      loadSavedPlaces: async (userId: string) => {},
-      createList: async (userId: string, name: string, description?: string, isShared?: boolean) => {
-        return { id: '', user_id: userId, name, description, is_shared: isShared || false, is_default: false, member_count: 1, place_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as SavedList;
+      loadLists: async (_userId?: string) => {
+        set({ loading: false });
       },
-      loadListItems: async (listId: string) => [],
-      addListItem: async (listId: string, item: Omit<SavedListItem, 'id' | 'created_at' | 'updated_at'>) => ({ ...item, id: '', list_id: listId, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as SavedListItem),
-      removeListItem: async (itemId: string) => {},
-      reorderListItems: async (listId: string, newOrder: string[]) => {},
-      inviteToList: async (listId: string, email: string, role: 'editor' | 'viewer') => {},
-      removeListMember: async (listId: string, userId: string) => {},
-      updateMemberRole: async (listId: string, userId: string, role: 'editor' | 'viewer' | 'owner') => {},
+      loadSavedPlaces: async (_userId: string) => {
+        set({ loading: false });
+      },
+      createList: async (userId: string, name: string, description?: string, isShared?: boolean) => {
+        const list: SavedList = {
+          id: `list-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          user_id: userId,
+          name,
+          description,
+          is_shared: isShared || false,
+          is_default: false,
+          member_count: 1,
+          place_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        get().addList(list);
+        return list;
+      },
+      loadListItems: async (listId: string) =>
+        get().savedPlaces
+          .filter((place: any) => place.list_id === listId)
+          .map((place: any, index: number) => ({
+            id: place.id,
+            list_id: listId,
+            place_id: place.place_id,
+            place_data: place.place_data,
+            added_by: place.user_id,
+            notes: place.notes,
+            position: index,
+            created_at: place.created_at,
+            updated_at: place.updated_at,
+          })),
+      addListItem: async (listId: string, item: Omit<SavedListItem, 'id' | 'created_at' | 'updated_at'>) => {
+        const savedItem = {
+          ...item,
+          id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          list_id: listId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        set((state) => ({ savedPlaces: [savedItem, ...state.savedPlaces] }));
+        return savedItem;
+      },
+      removeListItem: async (itemId: string) => {
+        set((state) => ({ savedPlaces: state.savedPlaces.filter((p: any) => p.id !== itemId) }));
+      },
+      reorderListItems: async (_listId: string, _newOrder: string[]) => {},
+      inviteToList: async (_listId: string, _email: string, _role: 'editor' | 'viewer') => {},
+      removeListMember: async (_listId: string, _userId: string) => {},
+      updateMemberRole: async (_listId: string, _userId: string, _role: 'editor' | 'viewer' | 'owner') => {},
     }),
     {
       name: STORAGE_KEYS.savedLists,

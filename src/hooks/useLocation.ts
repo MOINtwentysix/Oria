@@ -22,9 +22,17 @@ export const useLocation = () => {
     setWatching,
   } = useLocationStore();
 
-  const watchIdRef = useRef<number | null>(null);
+  // Web returns a numeric watch id, while Expo returns a subscription object.
+  const watchIdRef = useRef<number | { remove: () => void } | null>(null);
   const lastUpdateRef = useRef<number>(0);
   const [loading, setLoading] = useState(false);
+
+  // Restore the last valid position immediately while a fresh GPS fix is requested.
+  useEffect(() => {
+    if (!currentLocation && lastKnownLocation) {
+      setCurrentLocation(lastKnownLocation);
+    }
+  }, [currentLocation, lastKnownLocation, setCurrentLocation]);
 
   const requestPermission = useCallback(async () => {
     setLoading(true);
@@ -177,9 +185,9 @@ export const useLocation = () => {
   const stopWatching = useCallback(async () => {
     if (watchIdRef.current !== null) {
       if (Platform.OS === 'web') {
-        navigator.geolocation.clearWatch(watchIdRef.current);
+        navigator.geolocation.clearWatch(watchIdRef.current as number);
       } else {
-        Location.removeWatch(watchIdRef.current);
+        (watchIdRef.current as { remove: () => void }).remove();
       }
       watchIdRef.current = null;
       setWatching(false);

@@ -74,7 +74,7 @@ On mobile, we use AsyncStorage (React Native) instead of traditional cookies for
 YOUR CHOICES
 - Essential cookies cannot be disabled
 - Analytics cookies can be disabled in Settings
-- Clear all data: Settings \u2192 Delete Account
+- Account deletion and profile management: Account page
 
 CONTACT
 privacy@oria.app

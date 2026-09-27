@@ -46,6 +46,66 @@ interface PlaceContext {
 }
 
 class MistralService {
+  private offlineResponse(messages: MistralMessage[], places: Place[]): string {
+    const userMessages = messages.filter((message) => message.role === 'user');
+    const query = userMessages[userMessages.length - 1]?.content?.trim() || '';
+    const normalizedQuery = query.toLowerCase();
+    const matches = places.filter((place) => {
+      const searchable = [
+        place.name,
+        ...place.categories.map((category) => category.name),
+        place.location.formatted_address || '',
+      ].join(' ').toLowerCase();
+      return normalizedQuery.split(/\s+/).some((term) => term.length > 2 && searchable.includes(term));
+    });
+    const suggestions = (matches.length ? matches : places).slice(0, 3);
+
+    if (suggestions.length === 0) {
+      return 'Ich kann dir gerade antworten, aber in deiner Umgebung wurden noch keine Orte geladen. Öffne kurz Explore und versuche es danach erneut.';
+    }
+
+    const placeText = suggestions
+      .map((place) => `${place.name}${place.distance != null ? ` (${Math.round(place.distance)} m entfernt)` : ''}`)
+      .join(', ');
+    return `Ich habe diese passenden Orte in deiner Nähe gefunden: ${placeText}. Wenn du möchtest, kann ich dir daraus auch einen konkreten Vorschlag für Essen, Kultur oder einen Spaziergang machen.`;
+  }
+
+  private buildFallbackTrip(
+    location: Coordinates,
+    durationHours: number,
+    interests: string[],
+    budget: 'low' | 'medium' | 'high',
+    peopleCount: number,
+    transportMode: 'walking' | 'cycling' | 'driving' | 'transit',
+    places: Place[]
+  ): TripPlan {
+    const stops = places.slice(0, 6).map((place, index) => ({
+      id: `stop-${index}`,
+      trip_id: '',
+      place_id: place.id,
+      place_data: place,
+      order: index + 1,
+      duration_minutes: this.estimateDuration(place),
+      notes: 'Passender Ort in deiner Nähe',
+    }));
+
+    return {
+      id: `trip-${Date.now()}`,
+      user_id: '',
+      name: 'Dein Oria-Ausflug',
+      description: stops.length ? 'Eine einfache Route aus Orten in deiner Nähe.' : 'Sobald Orte geladen sind, kann Oria hier eine Route zusammenstellen.',
+      start_location: location,
+      duration_hours: durationHours,
+      interests,
+      budget,
+      people_count: peopleCount,
+      transport_mode: transportMode,
+      stops,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  }
+
   private async request<T>(endpoint: string, body: any): Promise<T> {
     const response = await fetch(`${MISTRAL_BASE_URL}${endpoint}`, {
       method: 'POST',
@@ -57,8 +117,10 @@ class MistralService {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Mistral API error: ${response.status} - ${error.message || 'Unknown error'}`);
+      const message = MISTRAL_API_KEY
+        ? `Mistral API error: ${response.status}`
+        : 'Oria AI ist nicht konfiguriert. Explore bleibt weiterhin nutzbar.';
+      throw new Error(message);
     }
 
     return response.json();
@@ -115,8 +177,16 @@ RULES:
       stream: options.stream ?? false,
     };
 
-    const response = await this.request<MistralChatResponse>('/chat/completions', request);
-    return response.choices[0]?.message?.content || '';
+    if (!MISTRAL_API_KEY) {
+      return this.offlineResponse(messages, places);
+    }
+
+    try {
+      const response = await this.request<MistralChatResponse>('/chat/completions', request);
+      return response.choices[0]?.message?.content || this.offlineResponse(messages, places);
+    } catch {
+      return this.offlineResponse(messages, places);
+    }
   }
 
   async streamChat(
@@ -151,18 +221,32 @@ RULES:
       stream: true,
     };
 
-    const response = await fetch(`${MISTRAL_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MISTRAL_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
+    if (!MISTRAL_API_KEY) {
+      const fallback = this.offlineResponse(messages, places);
+      onChunk(fallback);
+      return fallback;
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${MISTRAL_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${MISTRAL_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+    } catch {
+      const fallback = this.offlineResponse(messages, places);
+      onChunk(fallback);
+      return fallback;
+    }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Mistral API error: ${response.status} - ${error.message || 'Unknown error'}`);
+      const fallback = this.offlineResponse(messages, places);
+      onChunk(fallback);
+      return fallback;
     }
 
     const reader = response.body?.getReader();
@@ -170,7 +254,9 @@ RULES:
     let fullContent = '';
 
     if (!reader) {
-      throw new Error('No response stream');
+      const fallback = this.offlineResponse(messages, places);
+      onChunk(fallback);
+      return fallback;
     }
 
     try {
@@ -203,7 +289,7 @@ RULES:
       reader.releaseLock();
     }
 
-    return fullContent;
+    return fullContent || this.offlineResponse(messages, places);
   }
 
   async askOria(
@@ -323,7 +409,7 @@ Rules:
         updated_at: new Date().toISOString(),
       };
     } catch (error) {
-      throw new Error('Failed to parse trip plan from AI response');
+      return this.buildFallbackTrip(location, durationHours, interests, budget, peopleCount, transportMode, nearbyPlaces);
     }
   }
 
@@ -383,7 +469,32 @@ Return format: [0, 2, 1, 3, ...]`;
         updated_at: new Date().toISOString(),
       };
     } catch (error) {
-      throw new Error('Failed to parse list plan from AI response');
+      const stops: TripStop[] = listPlaces.map((place, index) => ({
+        id: `stop-${index}`,
+        trip_id: '',
+        place_id: place.id,
+        place_data: place,
+        order: index + 1,
+        duration_minutes: this.estimateDuration(place),
+      }));
+      return {
+        id: `trip-${Date.now()}`,
+        user_id: '',
+        name: 'Planned from List',
+        description: 'Optimized route from your saved list',
+        start_location: {
+          latitude: listPlaces[0]?.location.latitude || 0,
+          longitude: listPlaces[0]?.location.longitude || 0,
+        },
+        duration_hours: stops.reduce((sum, stop) => sum + stop.duration_minutes, 0) / 60,
+        interests: [...new Set(listPlaces.flatMap((place) => place.categories.map((category) => category.name)))],
+        budget: 'medium',
+        people_count: 1,
+        transport_mode: transportMode,
+        stops,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
     }
   }
 

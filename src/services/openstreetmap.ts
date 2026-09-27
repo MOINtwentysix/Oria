@@ -131,8 +131,19 @@ function buildOverpassQuery(
     (
       ${selectors}
     );
-    out center body ${limit};
+    out body center ${limit};
   `;
+}
+
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000;
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+  const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(deltaPhi / 2) ** 2 +
+    Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function transformNominatimResult(result: NominatimResult): Place {
@@ -141,7 +152,11 @@ function transformNominatimResult(result: NominatimResult): Place {
   return {
     id: `nominatim_${result.osm_type}_${result.osm_id}`,
     name,
-    categories: [{ id: type, name: type.replace(/_/g, ' '), icon: 'P' }],
+    categories: [{
+      id: type,
+      name: type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      icon: CATEGORY_ICONS[type] || '📍',
+    }],
     location: {
       address: result.display_name,
       formatted_address: result.display_name,
@@ -356,6 +371,34 @@ function parseOpeningHours(hoursString: string): boolean {
 }
 
 class OpenStreetMapService {
+  private async searchNominatimFallback(
+    query: string,
+    latitude: number,
+    longitude: number,
+    radius: number,
+    limit: number
+  ): Promise<Place[]> {
+    const halfDelta = Math.max(radius / 111000, 0.01);
+    const viewbox = `${longitude - halfDelta},${latitude + halfDelta},${longitude + halfDelta},${latitude - halfDelta}`;
+    const url = `${NOMINATIM_API_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}&bounded=1&viewbox=${encodeURIComponent(viewbox)}&q=${encodeURIComponent(query)}`;
+    const response = await fetch(url, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'Oria/1.0 (oria-app)',
+      },
+    });
+    if (!response.ok) throw new Error(`Map data unavailable (${response.status})`);
+
+    const data = await response.json() as NominatimResult[];
+    return data
+      .map(transformNominatimResult)
+      .map((place) => ({
+        ...place,
+        distance: haversineDistance(latitude, longitude, place.location.latitude, place.location.longitude),
+      }))
+      .filter((place) => Number.isFinite(place.location.latitude) && Number.isFinite(place.location.longitude));
+  }
+
   async searchPlaces(params: SearchParams): Promise<SearchResult> {
     const lat = params.ll ? parseFloat(params.ll.split(',')[0]) : 52.52;
     const lng = params.ll ? parseFloat(params.ll.split(',')[1]) : 13.405;
@@ -384,24 +427,27 @@ class OpenStreetMapService {
     }
 
     if (places.length === 0) {
-      const halfDelta = radius / 111000;
-      const viewbox = `${lng - halfDelta},${lat + halfDelta},${lng + halfDelta},${lat - halfDelta}`;
-      const fallbackQuery = params.query || (params.categories?.length ? params.categories[0] : 'restaurant');
-      const fallbackResponse = await fetch(
-        `${NOMINATIM_API_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}&bounded=1&viewbox=${viewbox}&q=${encodeURIComponent(fallbackQuery)}`,
-        { headers: { Accept: 'application/json', 'User-Agent': 'Oria/1.0 (oria-app)' } }
-      );
-      if (!fallbackResponse.ok) throw new Error(`Map data unavailable (${fallbackResponse.status})`);
-      const fallbackData = await fallbackResponse.json() as NominatimResult[];
-      places = fallbackData.map(transformNominatimResult);
+      const categoryQuery = params.categories?.length
+        ? params.categories[0].replace(/s$/, '')
+        : 'restaurant';
+      const fallbackQuery = params.query?.trim() || categoryQuery;
+      places = await this.searchNominatimFallback(fallbackQuery, lat, lng, radius, limit);
+    } else if (places.length > 0) {
+      places = places.map((place) => ({
+        ...place,
+        distance: haversineDistance(lat, lng, place.location.latitude, place.location.longitude),
+      }));
     }
 
     if (params.query) {
       const lowerQuery = params.query.toLowerCase();
+      const queryTerms = lowerQuery.split(/\s+/).filter((term) => term.length > 2);
       const filtered = places.filter(p =>
-        p.name.toLowerCase().includes(lowerQuery) ||
-        p.categories.some(c => c.name.toLowerCase().includes(lowerQuery)) ||
-        (p.location.formatted_address && p.location.formatted_address.toLowerCase().includes(lowerQuery))
+        queryTerms.length === 0 || queryTerms.some((term) =>
+          p.name.toLowerCase().includes(term) ||
+          p.categories.some(c => c.name.toLowerCase().includes(term)) ||
+          Boolean(p.location.formatted_address?.toLowerCase().includes(term))
+        )
       );
       return { results: filtered };
     }

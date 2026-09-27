@@ -18,9 +18,9 @@ export const initializeDatabase = async () => {
         account_id TEXT UNIQUE NOT NULL,
         email TEXT NOT NULL,
         username TEXT UNIQUE,
-        firstName TEXT,
-        lastName TEXT,
-        imageUrl TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        image_url TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
@@ -250,14 +250,14 @@ export const db = {
   users: {
     create: async (data: { account_id: string; email: string; username?: string; firstName?: string; lastName?: string; imageUrl?: string }) => {
       const result = await sql`
-        INSERT INTO users (account_id, email, username, firstName, lastName, imageUrl)
+        INSERT INTO users (account_id, email, username, first_name, last_name, image_url)
         VALUES (${data.account_id}, ${data.email}, ${data.username}, ${data.firstName}, ${data.lastName}, ${data.imageUrl})
         ON CONFLICT (account_id) DO UPDATE SET
           email = EXCLUDED.email,
           username = EXCLUDED.username,
-          firstName = EXCLUDED.firstName,
-          lastName = EXCLUDED.lastName,
-          imageUrl = EXCLUDED.imageUrl,
+          first_name = EXCLUDED.first_name,
+          last_name = EXCLUDED.last_name,
+          image_url = EXCLUDED.image_url,
           updated_at = NOW()
         RETURNING *
       `;
@@ -276,9 +276,9 @@ export const db = {
         UPDATE users SET
           email = COALESCE(${data.email}, email),
           username = COALESCE(${data.username}, username),
-          firstName = COALESCE(${data.firstName}, firstName),
-          lastName = COALESCE(${data.lastName}, lastName),
-          imageUrl = COALESCE(${data.imageUrl}, imageUrl),
+          first_name = COALESCE(${data.firstName}, first_name),
+          last_name = COALESCE(${data.lastName}, last_name),
+          image_url = COALESCE(${data.imageUrl}, image_url),
           updated_at = NOW()
         WHERE id = ${id}
         RETURNING *
@@ -475,7 +475,7 @@ export const db = {
     },
     getMembers: async (listId: string) => {
       const result = await sql`
-        SELECT slm.*, u.email, u.firstName, u.lastName, u.imageUrl, u.username
+        SELECT slm.*, u.email, u.first_name AS "firstName", u.last_name AS "lastName", u.image_url AS "imageUrl", u.username
         FROM saved_list_members slm
         JOIN users u ON u.id = slm.user_id
         WHERE slm.list_id = ${listId}

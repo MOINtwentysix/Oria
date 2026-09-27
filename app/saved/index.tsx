@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, FlatList } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, RefreshControl } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 import { GlassButton, GlassCard, GlassAvatar, GlassChip } from '@/components/ui';
@@ -8,6 +8,7 @@ import { useAuth } from '@/services/auth';
 import { useUIStore, useSavedStore } from '@/store';
 import { SavedList, SavedPlace } from '@/types';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
+import { SavedListCard, CreateListModal } from '@/components/lists/SavedListComponents';
 
 export const SavedScreen: React.FC = () => {
   const { colorScheme } = useTheme();
@@ -28,9 +29,11 @@ export const SavedScreen: React.FC = () => {
     }
   }, [isSignedIn, loadLists, loadSavedPlaces, user?.id]);
 
-  const handleCreateList = (name: string, description?: string, isShared = false) => {
+  const handleCreateList = async (name: string, description?: string, isShared = false) => {
     if (user) {
-      createList(user.id, name, description, isShared);
+      await createList(user.id, name, description, isShared);
+      setShowCreateModal(false);
+    } else {
       setShowCreateModal(false);
     }
   };
@@ -141,44 +144,17 @@ export const SavedScreen: React.FC = () => {
               </GlassCard>
             </View>
           ) : (
-            <FlatList
-              data={lists}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
+            <View style={styles.listContainer}>
+              {lists.map((item) => (
                 <SavedListCard
+                  key={item.id}
                   list={item}
                   onPress={() => handleListPress(item)}
                   onShare={() => {}}
                   style={styles.listCard}
                 />
-              )}
-              ListEmptyComponent={
-                <View style={styles.emptyLists}>
-                  <GlassCard variant="light" style={styles.emptyListsCard}>
-                    <View style={styles.emptyListsContent}>
-                      <Text style={styles.emptyListsIcon}>❤️</Text>
-                      <Text style={[
-                        styles.emptyListsTitle,
-                        { color: theme.colors.text },
-                      ]}>
-                        No lists yet
-                      </Text>
-                      <Text style={[
-                        styles.emptyListsSubtitle,
-                        { color: theme.colors.textSecondary },
-                      ]}>
-                        Create your first list to start saving places
-                      </Text>
-                      <GlassButton variant="primary" size="md" onPress={() => setShowCreateModal(true)} style={styles.emptyListsButton}>
-                        Create List
-                      </GlassButton>
-                    </View>
-                  </GlassCard>
-                </View>
-              }
-              contentContainerStyle={styles.listContainer}
-              showsVerticalScrollIndicator={false}
-            />
+              ))}
+            </View>
           )}
 
           {savedPlaces.length > 0 && !activeList && (
@@ -223,12 +199,6 @@ export const SavedScreen: React.FC = () => {
 };
 
 export default SavedScreen;
-
-import { RefreshControl } from 'react-native';
-import { SavedListCard } from '@/components/lists/SavedListComponents';
-import { CreateListModal } from '@/components/lists/SavedListComponents';
-import { usePlaces } from '@/hooks/usePlaces';
-import { PlaceBottomSheet } from '@/components/sheets';
 
 const styles = StyleSheet.create({
   container: {

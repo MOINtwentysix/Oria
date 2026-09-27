@@ -222,8 +222,27 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
 
   if (Platform.OS === 'web') {
     const center = userLocation || { latitude: 52.52, longitude: 13.405 };
-    const marker = places[0]?.location || center;
-    const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${marker.longitude - 0.04}%2C${marker.latitude - 0.025}%2C${marker.longitude + 0.04}%2C${marker.latitude + 0.025}&layer=mapnik&marker=${marker.latitude}%2C${marker.longitude}`;
+    const visiblePlaces = places.filter(
+      (place) =>
+        Number.isFinite(place.location.latitude) &&
+        Number.isFinite(place.location.longitude)
+    );
+    // Keep the embedded map centered on the user so the overlay dot represents
+    // the real position. The OSM embed marker is intentionally omitted because
+    // it is a pin icon, not the native blue location dot.
+    const latitudeExtent = Math.max(
+      0.03,
+      ...visiblePlaces.map((p) => Math.abs(p.location.latitude - center.latitude))
+    ) * 1.25;
+    const longitudeExtent = Math.max(
+      0.045,
+      ...visiblePlaces.map((p) => Math.abs(p.location.longitude - center.longitude))
+    ) * 1.25;
+    const south = center.latitude - latitudeExtent;
+    const north = center.latitude + latitudeExtent;
+    const west = center.longitude - longitudeExtent;
+    const east = center.longitude + longitudeExtent;
+    const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(`${west},${south},${east},${north}`)}&layer=mapnik`;
 
     return (
       <View style={[styles.webMap, style]}>
@@ -233,12 +252,14 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
           style: { border: 0, width: '100%', height: '100%' },
           loading: 'lazy',
         })}
+
+        {showUserLocation && userLocation && <View style={styles.webUserLocation} />}
         <View style={styles.webMapAttribution}>
           <Text style={styles.webMapAttributionText}>© OpenStreetMap contributors</Text>
         </View>
-        {places.length > 0 && (
+        {visiblePlaces.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.webPlaceList} contentContainerStyle={styles.webPlaceListContent}>
-            {places.slice(0, 8).map((place) => (
+            {visiblePlaces.slice(0, 8).map((place) => (
               <TouchableOpacity key={place.id} onPress={() => onPlacePress(place)} style={[styles.webPlaceCard, place.id === selectedPlaceId && styles.webPlaceCardSelected]}>
                 <Text numberOfLines={1} style={styles.webPlaceName}>{place.name}</Text>
                 <Text numberOfLines={1} style={styles.webPlaceCategory}>{place.categories[0]?.name || 'Place'}</Text>
@@ -323,7 +344,7 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
       onRegionChange={handleRegionChange}
       onRegionChangeComplete={handleRegionChange}
       onPress={handleMapPress}
-      showsUserLocation={showUserLocation}
+      showsUserLocation={showUserLocation && Boolean(userLocation)}
       showsMyLocationButton={showsMyLocationButton}
       showsCompass={showsCompass}
       showsScale={showsScale}
@@ -354,6 +375,24 @@ const s0 = StyleSheet.create({
     minHeight: 360,
     overflow: 'hidden',
     backgroundColor: '#DDE7E5',
+  },
+  webUserLocation: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    width: 18,
+    height: 18,
+    marginLeft: -9,
+    marginTop: -9,
+    borderRadius: 9,
+    backgroundColor: '#0066CC',
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.95)',
+    shadowColor: '#0066CC',
+    shadowOpacity: 0.45,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 5,
   },
   webMapAttribution: {
     position: 'absolute',

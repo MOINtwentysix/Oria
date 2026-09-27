@@ -57,7 +57,15 @@ export const AIScreen: React.FC = () => {
       messages.map(m => ({ role: m.role, content: m.content })),
       () => undefined
     );
-    if (response) {
+    if (!response) {
+      addMessage({
+        id: `msg-${Date.now()}-assistant`,
+        conversation_id: currentConversation?.id || '',
+        role: 'assistant',
+        content: error || 'Ich konnte darauf gerade keine Antwort erstellen. Bitte versuche es noch einmal.',
+        created_at: new Date().toISOString(),
+      });
+    } else if (response) {
       addMessage({
         id: `msg-${Date.now()}-assistant`,
         conversation_id: currentConversation?.id || '',
@@ -209,6 +217,11 @@ export const AIScreen: React.FC = () => {
                     />
                   ))
                 )}
+                {error && (
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                  </View>
+                )}
                 {streaming && (
                   <View style={styles.typingIndicator}>
                     <Text style={[
@@ -249,7 +262,7 @@ export const AIScreen: React.FC = () => {
           onChangeText={setInputValue}
           onSend={handleSend}
           onVoicePress={() => {}}
-          disabled={!currentLocation}
+          disabled={false}
           loading={streaming}
         />
       </View>
@@ -324,6 +337,16 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     paddingBottom: 20,
+  },
+  errorContainer: {
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(239,68,68,0.1)',
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    lineHeight: 20,
   },
   welcomeMessage: {
     flex: 1,

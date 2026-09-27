@@ -149,42 +149,6 @@ export const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>AI Settings</Text>
-            <GlassCard variant="light" style={styles.settingsCard}>
-              <GlassCardListItem
-                title="AI Model"
-                subtitle="mistral-small-2"
-                leftIcon={<Text style={styles.settingIcon}>🤖</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => {}}
-              />
-              <GlassCardListItem
-                title="Conversation History"
-                subtitle="Manage saved chats"
-                leftIcon={<Text style={styles.settingIcon}>💬</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={true}
-                onPress={() => router.push('/ai')}
-              />
-              <GlassCardListItem
-                title="Data Usage"
-                subtitle="Control AI data processing"
-                leftIcon={<Text style={styles.settingIcon}>📊</Text>}
-                rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
-                padding="md"
-                divider={false}
-                onPress={() => Linking.openURL(accountSettingsUrl)}
-              />
-            </GlassCard>
-          </View>
-
-          <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Appearance</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <View style={styles.themeOptions}>

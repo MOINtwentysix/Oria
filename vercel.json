@@ -2,9 +2,14 @@
   "buildCommand": "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK=1 npx expo export -p web --clear",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
+  "functions": {
+    "api/[...path].ts": {
+      "maxDuration": 15
+    }
+  },
   "rewrites": [
     {
-      "source": "/((?!_expo|assets|favicon.ico|metadata.json|.*\\.).*)",
+      "source": "/((?!_expo|assets|api|favicon.ico|metadata.json|.*\\.).*)",
       "destination": "/"
     }
   ]

@@ -92,7 +92,7 @@ export const SavedScreen: React.FC = () => {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} refreshControl={
+      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView} showsVerticalScrollIndicator={false} refreshControl={
         <RefreshControl refreshing={loading} onRefresh={() => { if (user) { loadLists(user.id); loadSavedPlaces(user.id); } }} />
       }>
         <View style={styles.content}>
@@ -240,6 +240,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 140,
   },
   content: {
     paddingHorizontal: 20,

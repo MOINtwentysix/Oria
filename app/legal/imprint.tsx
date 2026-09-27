@@ -13,7 +13,7 @@ export default function ImprintScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <View style={styles.backIcon} />
+          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
         </TouchableOpacity>
         <Text style={[
           styles.headerTitle,
@@ -115,15 +115,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
-    opacity: 0.6,
-  },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',

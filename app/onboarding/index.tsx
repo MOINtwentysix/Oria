@@ -359,7 +359,7 @@ export default function OnboardingScreen() {
         <View style={styles.content}>
           {onboardingStep > 0 && (
             <TouchableOpacity onPress={handleBack} hitSlop={16} style={styles.backButton}>
-              <View style={styles.backIcon} />
+              <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
             </TouchableOpacity>
           )}
 
@@ -443,15 +443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
-    opacity: 0.6,
-  },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
   stepHeader: {
     marginBottom: 32,
     gap: 8,

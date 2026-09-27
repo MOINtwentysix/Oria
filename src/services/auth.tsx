@@ -117,6 +117,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedUser = entries[USER_STORAGE_KEY];
       setToken(storedToken);
       setUser(storedUser ? JSON.parse(storedUser) : null);
+      if (storedToken) {
+        await apiClient.setToken(storedToken);
+      } else {
+        await apiClient.clearToken();
+      }
     } catch {
       await AsyncStorage.removeMany([TOKEN_STORAGE_KEY, USER_STORAGE_KEY]);
       setToken(null);

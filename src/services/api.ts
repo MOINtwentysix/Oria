@@ -3,7 +3,9 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosRequ
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ||
+  (typeof window !== 'undefined' ? `${window.location.origin}/api` : '');
+export const hasApiConfiguration = Boolean(API_BASE_URL);
 const AUTH_TOKEN_KEY = 'auth_token';
 
 function getStoredToken() {
@@ -141,7 +143,7 @@ export const api = {
   saved: {
     places: {
       list: () => apiClient.get('/saved/places'),
-      add: (data: { place_id: string; list_id?: string; notes?: string }) => apiClient.post('/saved/places', data),
+    add: (data: { place_id: string; place_data?: any; list_id?: string; notes?: string }) => apiClient.post('/saved/places', data),
       remove: (placeId: string) => apiClient.delete(`/saved/places/${placeId}`),
       update: (placeId: string, data: { notes?: string; list_id?: string }) => apiClient.patch(`/saved/places/${placeId}`, data),
     },
@@ -152,7 +154,7 @@ export const api = {
       update: (listId: string, data: { name?: string; description?: string; is_shared?: boolean; cover_image?: string }) => apiClient.patch(`/saved/lists/${listId}`, data),
       delete: (listId: string) => apiClient.delete(`/saved/lists/${listId}`),
       items: (listId: string) => apiClient.get(`/saved/lists/${listId}/items`),
-      addItem: (listId: string, data: { place_id: string; notes?: string; position?: number }) => apiClient.post(`/saved/lists/${listId}/items`, data),
+      addItem: (listId: string, data: { place_id: string; place_data?: any; notes?: string; position?: number }) => apiClient.post(`/saved/lists/${listId}/items`, data),
       removeItem: (listId: string, itemId: string) => apiClient.delete(`/saved/lists/${listId}/items/${itemId}`),
       reorderItems: (listId: string, items: { id: string; position: number }[]) => apiClient.patch(`/saved/lists/${listId}/items/reorder`, { items }),
       members: (listId: string) => apiClient.get(`/saved/lists/${listId}/members`),

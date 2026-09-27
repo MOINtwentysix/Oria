@@ -2,7 +2,7 @@ import { Place, Coordinates, TripPlan, TripStop, Route, RouteWaypoint } from '@/
 
 const MISTRAL_API_KEY = process.env.EXPO_PUBLIC_MISTRAL_API_KEY || process.env.MISTRAL_API_KEY || '';
 const MISTRAL_BASE_URL = 'https://api.mistral.ai/v1';
-const MISTRAL_MODEL = process.env.EXPO_PUBLIC_MISTRAL_MODEL || 'mistral-small-2';
+const MISTRAL_MODEL = process.env.EXPO_PUBLIC_MISTRAL_MODEL || 'mistral-small-latest';
 
 interface MistralMessage {
   role: 'system' | 'user' | 'assistant';

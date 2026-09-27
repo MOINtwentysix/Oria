@@ -37,7 +37,7 @@ export const SavedListScreen: React.FC = () => {
   }, [list, loadListItems]);
 
   const handleRemoveItem = (itemId: string) => {
-    removeListItem(itemId);
+    removeListItem(itemId, list?.id);
     setItems(prev => prev.filter(i => i.id !== itemId));
   };
 
@@ -58,7 +58,7 @@ export const SavedListScreen: React.FC = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyState}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-            <View style={styles.backIcon} />
+            <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
           </TouchableOpacity>
           <Text style={[
             styles.emptyTitle,
@@ -77,7 +77,7 @@ export const SavedListScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <View style={styles.backIcon} />
+          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
         </TouchableOpacity>
 
         <View style={styles.headerContent}>
@@ -289,15 +289,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  backIcon: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
-    opacity: 0.6,
-  },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
   headerContent: {
     flexDirection: 'row',
     gap: 16,
@@ -419,7 +411,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 150,
   },
   emptyList: {
     paddingVertical: 60,

@@ -50,27 +50,27 @@ export const AIScreen: React.FC = () => {
     };
 
     addMessage(userMessage);
-    const response = await streamAskOria(
-      query,
-      currentLocation || { latitude: 52.52, longitude: 13.405 },
-      nearbyPlaces,
-      messages.map(m => ({ role: m.role, content: m.content })),
-      () => undefined
-    );
-    if (!response) {
+    try {
+      const response = await streamAskOria(
+        query,
+        currentLocation || { latitude: 52.52, longitude: 13.405 },
+        nearbyPlaces,
+        messages.map(m => ({ role: m.role, content: m.content })),
+        () => undefined
+      );
       addMessage({
         id: `msg-${Date.now()}-assistant`,
         conversation_id: currentConversation?.id || '',
         role: 'assistant',
-        content: error || 'Ich konnte darauf gerade keine Antwort erstellen. Bitte versuche es noch einmal.',
+        content: response?.trim() || 'Ich konnte darauf gerade keine Antwort erstellen. Bitte versuche es noch einmal.',
         created_at: new Date().toISOString(),
       });
-    } else if (response) {
+    } catch {
       addMessage({
         id: `msg-${Date.now()}-assistant`,
         conversation_id: currentConversation?.id || '',
         role: 'assistant',
-        content: response,
+        content: 'Ich konnte darauf gerade keine Antwort erstellen. Bitte versuche es noch einmal.',
         created_at: new Date().toISOString(),
       });
     }
@@ -147,7 +147,7 @@ export const AIScreen: React.FC = () => {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {showModeSelector && (
             <View style={styles.modeSelector}>
@@ -312,6 +312,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 150,
   },
   content: {
     paddingHorizontal: 20,

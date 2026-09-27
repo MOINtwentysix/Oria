@@ -333,7 +333,7 @@ class OpenStreetMapService {
   ): Promise<Place[]> {
     const halfDelta = Math.max(radius / 111000, 0.01);
     const viewbox = `${longitude - halfDelta},${latitude + halfDelta},${longitude + halfDelta},${latitude - halfDelta}`;
-    for (const query of queries) {
+    const queryResults = await Promise.all(queries.slice(0, 8).map(async (query) => {
       const url = `${NOMINATIM_API_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}&bounded=1&viewbox=${encodeURIComponent(viewbox)}&q=${encodeURIComponent(query)}`;
       try {
         const response = await fetch(url, {
@@ -342,25 +342,25 @@ class OpenStreetMapService {
             'User-Agent': 'Oria/1.0 (oria-app)',
           },
         });
-        if (!response.ok) continue;
-
-        const data = await response.json() as NominatimResult[];
-        const places = data
-          .map(transformNominatimResult)
-          .map((place) => ({
-            ...place,
-            distance: haversineDistance(latitude, longitude, place.location.latitude, place.location.longitude),
-          }))
-          .filter((place) => Number.isFinite(place.location.latitude) && Number.isFinite(place.location.longitude))
-          .filter((place) => (place.distance ?? Infinity) <= radius)
-          .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-        if (places.length > 0) return places;
+        if (!response.ok) return [];
+        return await response.json() as NominatimResult[];
       } catch {
-        // Try the next Nominatim query when a request is temporarily unavailable.
+        return [];
       }
-    }
+    }));
 
-    return [];
+    const placesById = new Map<string, Place>();
+    queryResults.flat().forEach((result) => {
+      const place = transformNominatimResult(result);
+      const distance = haversineDistance(latitude, longitude, place.location.latitude, place.location.longitude);
+      if (Number.isFinite(place.location.latitude) && Number.isFinite(place.location.longitude) && distance <= radius) {
+        placesById.set(place.id, { ...place, distance });
+      }
+    });
+
+    return Array.from(placesById.values())
+      .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      .slice(0, limit);
   }
 
   async searchPlaces(params: SearchParams): Promise<SearchResult> {
@@ -375,7 +375,7 @@ class OpenStreetMapService {
     });
     const fallbackQueries = params.query?.trim()
       ? [params.query.trim()]
-      : [...new Set([...categoryQueries, 'restaurant', 'cafe', 'park'])];
+      : [...new Set([...categoryQueries, 'restaurant', 'cafe', 'park', 'museum', 'attraction', 'supermarket', 'cinema'])];
     const places = await this.searchNominatimFallback(fallbackQueries, lat, lng, radius, limit);
 
     if (params.query) {

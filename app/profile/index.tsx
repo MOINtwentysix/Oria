@@ -55,7 +55,7 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
 
           <View style={styles.profileHeader}>
@@ -228,7 +228,8 @@ export default ProfileScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F9FC' },
   scrollView: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingVertical: 20, gap: 24 },
+  scrollContent: { paddingBottom: 140 },
+  content: { paddingHorizontal: 20, paddingVertical: 20, paddingBottom: 150, gap: 24 },
   profileHeader: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingTop: 10 },
   avatar: {},
   profileInfo: { flex: 1, gap: 4 },

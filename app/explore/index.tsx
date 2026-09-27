@@ -106,7 +106,7 @@ export default function ExploreScreen() {
               </Text>
               <TouchableOpacity onPress={() => router.push('/explore/search')} hitSlop={12} style={styles.searchTrigger}>
                 <View style={styles.searchTriggerInner}>
-                  <Text style={styles.searchTriggerIcon}>?</Text>
+                  <Text style={styles.searchTriggerIcon}>⌕</Text>
                   <Text style={[
                     styles.searchTriggerText,
                     { color: theme.colors.textSecondary },

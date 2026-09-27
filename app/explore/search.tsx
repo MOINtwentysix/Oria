@@ -12,6 +12,7 @@ import { CATEGORIES, ERROR_MESSAGES } from '@/constants';
 import { useRouter } from 'expo-router';
 import { usePlaces } from '@/hooks/usePlaces';
 import { PlaceBottomSheet } from '@/components/sheets';
+import { useLocation } from '@/hooks/useLocation';
 
 export default function SearchScreen() {
   const { colorScheme } = useTheme();
@@ -21,12 +22,33 @@ export default function SearchScreen() {
   const { bottomSheetVisible, setBottomSheetVisible, tabBarVisible, setTabBarVisible } = useUIStore();
   const router = useRouter();
 
-  const { places, selectedPlace, clusters, searchByQuery, loadPlaceDetails, selectPlace } = usePlaces();
+  const { places, selectedPlace, clusters, searchPlaces, loadPlaceDetails, selectPlace, clear } = usePlaces();
   const { savedPlaces, lists, addSavedPlace, createList, updateList } = useSavedStore();
+  const { currentLocation, getCurrentLocation } = useLocation();
 
   React.useEffect(() => {
     setTabBarVisible(false);
   }, [setTabBarVisible]);
+
+  React.useEffect(() => {
+    if (!query.trim() && selectedCategories.length === 0) {
+      clear();
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const location = currentLocation || await getCurrentLocation();
+      const center = location || { latitude: 52.52, longitude: 13.405 };
+      await searchPlaces({
+        query: query.trim() || undefined,
+        ll: `${center.latitude},${center.longitude}`,
+        radius: filters.radius,
+        categories: selectedCategories,
+        limit: 50,
+        sort: filters.sortBy,
+      });
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [query, selectedCategories, filters.radius, filters.sortBy, currentLocation, getCurrentLocation, searchPlaces, clear]);
 
   const handleSearch = (text: string) => {
     setQuery(text);
@@ -92,7 +114,7 @@ export default function SearchScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <View style={styles.backIcon} />
+          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
         </TouchableOpacity>
         <LiquidSearchBar
           value={query}
@@ -197,7 +219,7 @@ export default function SearchScreen() {
             </View>
           )}
 
-          {query && (
+          {(query || selectedCategories.length > 0) && (
             <View style={styles.resultsSection}>
               <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>
                 Results
@@ -316,9 +338,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F9FC' },
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
   backButton: { position: 'absolute', left: 0, top: 8, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { width: 24, height: 24, borderWidth: 2, borderColor: 'currentColor', borderRadius: 2, transform: [{ rotate: '45deg' }], opacity: 0.6 },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
   scrollView: { flex: 1 },
-  content: { paddingHorizontal: 16, paddingVertical: 16, gap: 24 },
+  content: { paddingHorizontal: 16, paddingVertical: 16, paddingBottom: 150, gap: 24 },
   chipsContainer: { marginTop: -8 },
   chipsContent: { gap: 8, paddingBottom: 8 },
   chipIcon: { fontSize: 12 },

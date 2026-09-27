@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Coordinates, Place, User, UserPreferences, SavedList, SavedListItem, TripPlan } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
+import { api, hasApiConfiguration } from '@/services/api';
 
 interface LocationState {
   currentLocation: Coordinates | null;
@@ -195,7 +196,7 @@ interface SavedState {
   loading: boolean;
   error: string | null;
   setSavedPlaces: (places: any[]) => void;
-  addSavedPlace: (place: any) => void;
+  addSavedPlace: (place: any) => Promise<void>;
   removeSavedPlace: (placeId: string) => void;
   setLists: (lists: SavedList[]) => void;
   addList: (list: SavedList) => void;
@@ -209,7 +210,7 @@ interface SavedState {
   createList: (userId: string, name: string, description?: string, isShared?: boolean) => Promise<SavedList>;
   loadListItems: (listId: string) => Promise<SavedListItem[]>;
   addListItem: (listId: string, item: Omit<SavedListItem, 'id' | 'created_at' | 'updated_at'>) => Promise<SavedListItem>;
-  removeListItem: (itemId: string) => Promise<void>;
+  removeListItem: (itemId: string, listId?: string) => Promise<void>;
   reorderListItems: (listId: string, newOrder: string[]) => Promise<void>;
   inviteToList: (listId: string, email: string, role: 'editor' | 'viewer') => Promise<void>;
   removeListMember: (listId: string, userId: string) => Promise<void>;
@@ -225,8 +226,26 @@ export const useSavedStore = create<SavedState>()(
       loading: false,
       error: null,
       setSavedPlaces: (places: any[]) => set({ savedPlaces: places, loading: false }),
-      addSavedPlace: (place: any) =>
-        set((state) => ({ savedPlaces: [place, ...state.savedPlaces] })),
+      addSavedPlace: async (place: any) => {
+        set((state) => ({ savedPlaces: [place, ...state.savedPlaces], error: null }));
+        if (!hasApiConfiguration) return;
+        try {
+          const response = await api.saved.places.add({
+            place_id: place.place_id,
+            place_data: place.place_data,
+            list_id: place.list_id,
+            notes: place.notes,
+          });
+          const saved = response.data;
+          if (saved?.id) {
+            set((state) => ({
+              savedPlaces: state.savedPlaces.map((entry) => entry.id === place.id ? saved : entry),
+            }));
+          }
+        } catch (error: any) {
+          set({ error: error?.message || 'Ort konnte nicht gespeichert werden.' });
+        }
+      },
       removeSavedPlace: (placeId: string) =>
         set((state) => ({
           savedPlaces: state.savedPlaces.filter((p) => p.id !== placeId),
@@ -248,12 +267,38 @@ export const useSavedStore = create<SavedState>()(
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error, loading: false }),
       loadLists: async (_userId?: string) => {
-        set({ loading: false });
+        if (!hasApiConfiguration) return;
+        set({ loading: true, error: null });
+        try {
+          const response = await api.saved.lists.list();
+          const data = response.data as { results?: SavedList[] } | SavedList[];
+          set({ lists: Array.isArray(data) ? data : data.results || [], loading: false });
+        } catch (error: any) {
+          set({ loading: false, error: error?.message || 'Listen konnten nicht geladen werden.' });
+        }
       },
       loadSavedPlaces: async (_userId: string) => {
-        set({ loading: false });
+        if (!hasApiConfiguration) return;
+        set({ loading: true, error: null });
+        try {
+          const response = await api.saved.places.list();
+          const data = response.data as { results?: any[] } | any[];
+          set({ savedPlaces: Array.isArray(data) ? data : data.results || [], loading: false });
+        } catch (error: any) {
+          set({ loading: false, error: error?.message || 'Gespeicherte Orte konnten nicht geladen werden.' });
+        }
       },
       createList: async (userId: string, name: string, description?: string, isShared?: boolean) => {
+        if (hasApiConfiguration) {
+          try {
+            const response = await api.saved.lists.create({ name, description, is_shared: isShared });
+            const data = response.data as SavedList;
+            get().addList(data);
+            return data;
+          } catch (error: any) {
+            set({ error: error?.message || 'Liste konnte nicht gespeichert werden.' });
+          }
+        }
         const list: SavedList = {
           id: `list-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           user_id: userId,
@@ -269,8 +314,17 @@ export const useSavedStore = create<SavedState>()(
         get().addList(list);
         return list;
       },
-      loadListItems: async (listId: string) =>
-        get().savedPlaces
+      loadListItems: async (listId: string) => {
+        if (hasApiConfiguration) {
+          try {
+            const response = await api.saved.lists.items(listId);
+            const data = response.data as { results?: SavedListItem[] } | SavedListItem[];
+            return Array.isArray(data) ? data : data.results || [];
+          } catch (error: any) {
+            set({ error: error?.message || 'Listeneinträge konnten nicht geladen werden.' });
+          }
+        }
+        return get().savedPlaces
           .filter((place: any) => place.list_id === listId)
           .map((place: any, index: number) => ({
             id: place.id,
@@ -282,8 +336,24 @@ export const useSavedStore = create<SavedState>()(
             position: index,
             created_at: place.created_at,
             updated_at: place.updated_at,
-          })),
+          }));
+      },
       addListItem: async (listId: string, item: Omit<SavedListItem, 'id' | 'created_at' | 'updated_at'>) => {
+        if (hasApiConfiguration) {
+          try {
+            const response = await api.saved.lists.addItem(listId, {
+              place_id: item.place_id,
+              place_data: item.place_data,
+              notes: item.notes,
+              position: item.position,
+            });
+            const data = response.data as SavedListItem;
+            set((state) => ({ savedPlaces: [data, ...state.savedPlaces] }));
+            return data;
+          } catch (error: any) {
+            set({ error: error?.message || 'Ort konnte nicht in der Liste gespeichert werden.' });
+          }
+        }
         const savedItem = {
           ...item,
           id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -294,8 +364,15 @@ export const useSavedStore = create<SavedState>()(
         set((state) => ({ savedPlaces: [savedItem, ...state.savedPlaces] }));
         return savedItem;
       },
-      removeListItem: async (itemId: string) => {
+      removeListItem: async (itemId: string, listId?: string) => {
         set((state) => ({ savedPlaces: state.savedPlaces.filter((p: any) => p.id !== itemId) }));
+        if (hasApiConfiguration && listId) {
+          try {
+            await api.saved.lists.removeItem(listId, itemId);
+          } catch (error: any) {
+            set({ error: error?.message || 'Ort konnte nicht aus der Liste entfernt werden.' });
+          }
+        }
       },
       reorderListItems: async (_listId: string, _newOrder: string[]) => {},
       inviteToList: async (_listId: string, _email: string, _role: 'editor' | 'viewer') => {},

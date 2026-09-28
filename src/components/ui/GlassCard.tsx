@@ -156,7 +156,7 @@ export const GlassTabBar: React.FC<GlassTabBarProps> = ({
       {children}
     </BlurView>
   );
-});
+};
 
 const tabStyles = StyleSheet.create({
   tabBar: {

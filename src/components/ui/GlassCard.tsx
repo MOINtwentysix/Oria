@@ -6,7 +6,7 @@ import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 interface GlassCardProps {
   children: React.ReactNode;
   style?: any;
-  variant?: 'light' | 'dark' | 'heavy' | 'heavyDark';
+  variant?: 'light' | 'heavy';
   blurIntensity?: number;
   onPress?: () => void;
   pressable?: boolean;
@@ -27,14 +27,8 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
   const glassStyle = variant === 'heavy'
     ? theme.glassStyles.heavy
-    : variant === 'heavyDark'
-    ? theme.glassStyles.heavyDark
-    : variant === 'dark'
-    ? theme.glassStyles.dark
-    : variant === 'light'
-    ? theme.glassStyles.light
     : colorScheme === 'dark'
-    ? theme.glassStyles.dark
+    ? theme.glassStyles.heavyDark
     : theme.glassStyles.light;
 
   const Content = pressable ? Pressable : View;
@@ -46,7 +40,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         styles.container,
         glassStyle,
         {
-          borderRadius: theme.borderRadius.xxl,
+          borderRadius: theme.borderRadius.card,
         },
         style,
       ]}
@@ -64,7 +58,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   );
 };
 
-const s0 = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
   },
@@ -76,7 +70,7 @@ const s0 = StyleSheet.create({
 export interface GlassSurfaceProps {
   children: React.ReactNode;
   style?: any;
-  variant?: 'light' | 'dark' | 'heavy' | 'heavyDark';
+  variant?: 'light' | 'heavy';
   blurIntensity?: number;
   borderRadius?: number;
 }
@@ -93,14 +87,8 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
 
   const glassStyle = variant === 'heavy'
     ? theme.glassStyles.heavy
-    : variant === 'heavyDark'
-    ? theme.glassStyles.heavyDark
-    : variant === 'dark'
-    ? theme.glassStyles.dark
-    : variant === 'light'
-    ? theme.glassStyles.light
     : colorScheme === 'dark'
-    ? theme.glassStyles.dark
+    ? theme.glassStyles.heavyDark
     : theme.glassStyles.light;
 
   return (
@@ -110,7 +98,7 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
         styles.surface,
         glassStyle,
         {
-          borderRadius: borderRadius ?? theme.borderRadius.xl,
+          borderRadius: borderRadius ?? theme.borderRadius.sheet,
         },
         style,
       ]}
@@ -120,7 +108,7 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
   );
 };
 
-const s1 = StyleSheet.create({
+const surfaceStyles = StyleSheet.create({
   surface: {
     overflow: 'hidden',
   },
@@ -129,7 +117,7 @@ const s1 = StyleSheet.create({
 export interface GlassTabBarProps {
   children: React.ReactNode;
   style?: any;
-  variant?: 'light' | 'dark' | 'heavy' | 'heavyDark';
+  variant?: 'light' | 'heavy';
   blurIntensity?: number;
   height?: number;
 }
@@ -146,14 +134,8 @@ export const GlassTabBar: React.FC<GlassTabBarProps> = ({
 
   const glassStyle = variant === 'heavy'
     ? theme.glassStyles.heavy
-    : variant === 'heavyDark'
-    ? theme.glassStyles.heavyDark
-    : variant === 'dark'
-    ? theme.glassStyles.dark
-    : variant === 'light'
-    ? theme.glassStyles.light
     : colorScheme === 'dark'
-    ? theme.glassStyles.dark
+    ? theme.glassStyles.heavyDark
     : theme.glassStyles.light;
 
   return (
@@ -164,8 +146,8 @@ export const GlassTabBar: React.FC<GlassTabBarProps> = ({
         glassStyle,
         {
           height,
-          borderTopLeftRadius: theme.borderRadius.xxxl,
-          borderTopRightRadius: theme.borderRadius.xxxl,
+          borderTopLeftRadius: theme.borderRadius.sheet,
+          borderTopRightRadius: theme.borderRadius.sheet,
           borderWidth: 0,
         },
         style,
@@ -174,9 +156,9 @@ export const GlassTabBar: React.FC<GlassTabBarProps> = ({
       {children}
     </BlurView>
   );
-};
+});
 
-const s2 = StyleSheet.create({
+const tabStyles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -187,4 +169,6 @@ const s2 = StyleSheet.create({
     overflow: 'hidden',
   },
 });
-const styles = { ...s0, ...s1, ...s2 };
+
+const allStyles = { ...styles, ...surfaceStyles, ...tabStyles };
+export default allStyles;

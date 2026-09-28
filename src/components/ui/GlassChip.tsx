@@ -58,27 +58,27 @@ export const GlassChip: React.FC<GlassChipProps> = ({
   const getVariantStyles = () => {
     const base = {
       default: {
-        backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.05)',
-        borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)',
-        textColor: theme.colors.text,
+        backgroundColor: colorScheme === 'dark' ? 'rgba(245,240,232,0.08)' : 'rgba(13,27,30,0.04)',
+        borderColor: theme.colors.glassBorder,
+        textColor: theme.colors.ink,
         glass: false,
       },
       selected: {
-        backgroundColor: theme.colors.primary,
-        borderColor: theme.colors.primary,
+        backgroundColor: theme.colors.accent,
+        borderColor: theme.colors.accent,
         textColor: theme.colors.textOnPrimary,
         glass: false,
       },
       outline: {
         backgroundColor: 'transparent',
         borderColor: theme.colors.border,
-        textColor: theme.colors.textSecondary,
+        textColor: theme.colors.inkMuted,
         glass: false,
       },
       filter: {
-        backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.7)',
-        borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.3)',
-        textColor: theme.colors.text,
+        backgroundColor: colorScheme === 'dark' ? 'rgba(13,27,30,0.82)' : 'rgba(254,251,246,0.9)',
+        borderColor: theme.colors.glassBorder,
+        textColor: theme.colors.ink,
         glass: true,
       },
     };
@@ -142,6 +142,7 @@ export const GlassChip: React.FC<GlassChipProps> = ({
     {
       fontSize: s.fontSize,
       fontWeight: '600' as const,
+      fontFamily: theme.typography.fontFamily.body,
       color: variantStyle.textColor,
     },
   ];
@@ -184,9 +185,13 @@ export const GlassChip: React.FC<GlassChipProps> = ({
                 styles.removeButton,
                 { width: s.removeSize, height: s.removeSize },
               ]}
-              accessibilityLabel="Remove"
             >
-              <View style={styles.removeIcon} />
+              <Text style={[
+                styles.removeIcon,
+                { fontSize: s.iconSize, color: variantStyle.textColor },
+              ]}>
+                ✕
+              </Text>
             </TouchableOpacity>
           )}
         </ChipComponent>
@@ -195,100 +200,19 @@ export const GlassChip: React.FC<GlassChipProps> = ({
   );
 };
 
-const s0 = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
   },
   text: {
-    textAlign: 'center',
+    includeFontPadding: false,
   },
   removeButton: {
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   removeIcon: {
-    width: 12,
-    height: 12,
-    borderWidth: 1.5,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
+    includeFontPadding: false,
   },
 });
-
-export interface GlassCategoryChipProps extends Omit<GlassChipProps, 'variant'> {
-  category: {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-  };
-  selected?: boolean;
-  onSelect?: (category: GlassCategoryChipProps['category']) => void;
-}
-
-export const GlassCategoryChip: React.FC<GlassCategoryChipProps> = ({
-  category,
-  selected = false,
-  onSelect,
-  style,
-  size = 'md',
-  disabled = false,
-  hitSlop = 8,
-}) => {
-  const { colorScheme } = useTheme();
-  const theme = getTheme(colorScheme);
-
-  const variant = selected ? 'selected' : 'filter';
-
-  return (
-    <GlassChip
-      variant={variant}
-      size={size}
-      disabled={disabled}
-      onPress={() => onSelect?.(category)}
-      hitSlop={hitSlop}
-      style={[
-        style,
-        selected && {
-          shadowColor: theme.colors[category.color as keyof typeof theme.colors] || theme.colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 4,
-        },
-      ]}
-      icon={
-        <View
-          style={[
-            styles.categoryIcon,
-            { backgroundColor: theme.colors[category.color as keyof typeof theme.colors] || theme.colors.primary },
-          ]}
-        >
-          <Text style={styles.categoryIconText}>{category.icon}</Text>
-        </View>
-      }
-      iconPosition="left"
-    >
-      {category.name}
-    </GlassChip>
-  );
-};
-
-const categoryIconStyles = StyleSheet.create({
-  categoryIcon: {
-    borderRadius: 9999,
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  categoryIconText: {
-    fontSize: 10,
-    color: 'white',
-  },
-});
-
-const styles = { ...s0, ...categoryIconStyles };

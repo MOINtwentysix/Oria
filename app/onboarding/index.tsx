@@ -52,38 +52,26 @@ export default function OnboardingScreen() {
       case 0: // Welcome
         return (
           <View style={styles.welcomeContent}>
-            <Text style={[
-              styles.welcomeIcon,
-              { color: theme.colors.text },
-            ]}>
+            <Text style={[styles.welcomeIcon, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
               Oria
             </Text>
-            <Text style={[
-              styles.welcomeSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Discover what's around you ✨🗺️
+            <Text style={[styles.welcomeSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+              Entdecke, was um dich herum ist ✨🗺️
             </Text>
             <View style={styles.welcomeFeatures}>
               {[
-                { icon: '🗺️', title: 'Explore', desc: 'Interactive map with places' },
-                { icon: '✨', title: 'Oria AI', desc: 'Smart recommendations' },
-                { icon: '❤️', title: 'Save & Share', desc: 'Lists with friends' },
-                { icon: '🗺️', title: 'Plan Trips', desc: 'AI-powered itineraries' },
+                { icon: '🗺️', title: 'Entdecken', desc: 'Interaktive Karte mit Live-Plätzen' },
+                { icon: '✨', title: 'Oria AI', desc: 'Natürliche Sprachsuche & Empfehlungen' },
+                { icon: '❤️', title: 'Speichern & Teilen', desc: 'Listen mit Freunden erstellen' },
+                { icon: '🗺️', title: 'Reisen planen', desc: 'KI-Routen & Google Maps Export' },
               ].map((feature, index) => (
-                <View key={index} style={styles.welcomeFeature}>
+                <View key={index} style={[styles.welcomeFeature, { backgroundColor: theme.colors.paperElevated, borderColor: theme.colors.border }]}>
                   <Text style={styles.welcomeFeatureIcon}>{feature.icon}</Text>
                   <View style={styles.welcomeFeatureText}>
-                    <Text style={[
-                      styles.welcomeFeatureTitle,
-                      { color: theme.colors.text },
-                    ]}>
+                    <Text style={[styles.welcomeFeatureTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body }]}>
                       {feature.title}
                     </Text>
-                    <Text style={[
-                      styles.welcomeFeatureDesc,
-                      { color: theme.colors.textSecondary },
-                    ]}>
+                    <Text style={[styles.welcomeFeatureDesc, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
                       {feature.desc}
                     </Text>
                   </View>
@@ -96,17 +84,11 @@ export default function OnboardingScreen() {
       case 1: // Interests
         return (
           <View style={styles.interestsContent}>
-            <Text style={[
-              styles.stepTitle,
-              { color: theme.colors.text },
-            ]}>
-              What do you love?
+            <Text style={[styles.stepTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+              Was interessiert dich?
             </Text>
-            <Text style={[
-              styles.stepSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Select your interests to personalize discoveries
+            <Text style={[styles.stepSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+              Wähle Kategorien für persönliche Entdeckungen
             </Text>
             <ScrollView style={styles.interestsGrid} contentContainerStyle={styles.interestsGridContent}>
               {CATEGORIES.map((category) => (
@@ -117,11 +99,11 @@ export default function OnboardingScreen() {
                     styles.interestCard,
                     {
                       backgroundColor: interests.includes(category.id)
-                        ? theme.colors[category.color as keyof typeof theme.colors] || theme.colors.primary
-                        : (colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.05)'),
+                        ? theme.colors[category.color as keyof typeof theme.colors] || theme.colors.accent
+                        : 'transparent',
                       borderColor: interests.includes(category.id)
-                        ? theme.colors[category.color as keyof typeof theme.colors] || theme.colors.primary
-                        : (colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)'),
+                        ? theme.colors[category.color as keyof typeof theme.colors] || theme.colors.accent
+                        : theme.colors.border,
                       borderWidth: interests.includes(category.id) ? 0 : 1,
                     },
                   ]}
@@ -129,13 +111,13 @@ export default function OnboardingScreen() {
                 >
                   <View style={[
                     styles.interestIcon,
-                    { backgroundColor: interests.includes(category.id) ? 'rgba(255,255,255,0.2)' : theme.colors[category.color as keyof typeof theme.colors] || theme.colors.primary },
+                    { backgroundColor: interests.includes(category.id) ? 'rgba(255,255,255,0.2)' : theme.colors.accentSoft },
                   ]}>
                     <Text style={styles.interestIconText}>{category.icon}</Text>
                   </View>
                   <Text style={[
                     styles.interestName,
-                    { color: interests.includes(category.id) ? 'white' : theme.colors.text },
+                    { color: interests.includes(category.id) ? 'white' : theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                   ]}>
                     {category.name}
                   </Text>
@@ -148,17 +130,11 @@ export default function OnboardingScreen() {
       case 2: // Radius
         return (
           <View style={styles.radiusContent}>
-            <Text style={[
-              styles.stepTitle,
-              { color: theme.colors.text },
-            ]}>
-              How far to explore?
+            <Text style={[styles.stepTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+              Wie weit soll Oria suchen?
             </Text>
-            <Text style={[
-              styles.stepSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Choose your default search radius
+            <Text style={[styles.stepSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+              Bestimme deinen Suchradius für Entdeckungen
             </Text>
             <View style={styles.radiusOptions}>
               {RADIUS_OPTIONS.map((option) => (
@@ -168,24 +144,24 @@ export default function OnboardingScreen() {
                   style={[
                     styles.radiusOption,
                     {
-                      backgroundColor: radius === option.value ? theme.colors.primary : (colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.05)'),
-                      borderColor: radius === option.value ? theme.colors.primary : (colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)'),
-                      borderWidth: radius === option.value ? 0 : 1,
+                      backgroundColor: radius === option.value ? theme.colors.accentSoft : theme.colors.paperElevated,
+                      borderColor: radius === option.value ? theme.colors.accent : theme.colors.border,
+                      borderWidth: radius === option.value ? 2 : 1,
                     },
                   ]}
                   hitSlop={8}
                 >
                   <Text style={[
                     styles.radiusOptionLabel,
-                    { color: radius === option.value ? 'white' : theme.colors.text },
+                    { color: radius === option.value ? theme.colors.accent : theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                   ]}>
                     {option.label}
                   </Text>
                   <Text style={[
                     styles.radiusOptionDesc,
-                    { color: radius === option.value ? 'rgba(255,255,255,0.8)' : theme.colors.textSecondary },
+                    { color: radius === option.value ? theme.colors.inkMuted : theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    {option.value < 1000 ? `${option.value}m` : `${option.value / 1000}km`} radius
+                    Bis zu {option.value / 1000} km Entfernung
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -196,91 +172,66 @@ export default function OnboardingScreen() {
       case 3: // Location
         return (
           <View style={styles.locationContent}>
-            <Text style={[
-              styles.stepTitle,
-              { color: theme.colors.text },
-            ]}>
-              Location Access
+            <Text style={[styles.stepTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+              Standortzugriff
             </Text>
-            <Text style={[
-              styles.stepSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Oria needs your location to show nearby places and calculate routes
+            <Text style={[styles.stepSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+              Oria braucht deinen Standort, um Orte in deiner Nähe zu zeigen
             </Text>
             <View style={styles.locationIllustration}>
               <Text style={styles.locationIllustrationIcon}>📍</Text>
             </View>
-            <GlassCard variant="light" style={styles.locationCard}>
-              <View style={styles.locationCardContent}>
-                <Text style={[
-                  styles.locationCardTitle,
-                  { color: theme.colors.text },
-                ]}>
-                  Why we need location
+            <View style={styles.locationCard}>
+              <GlassCard variant="light" style={styles.locationCardContent}>
+                <Text style={[styles.locationCardTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body }]}>
+                  Deine Privatsphäre ist uns wichtig
                 </Text>
-                <Text style={[
-                  styles.locationCardText,
-                  { color: theme.colors.textSecondary },
-                ]}>
-                  • Show places near you
-                  • Calculate walking/driving routes
-                  • Plan trips from your location
-                  • Enable "Nearby" searches
+                <Text style={[styles.locationCardText, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+                  Dein Standort wird nur lokal auf dem Gerät verwendet, um nahegelegene Orte zu finden. Er wird nicht gespeichert, nicht geteilt und nicht für Werbung genutzt. Du kannst die Berechtigung jederzeit in den Einstellungen widerrufen.
                 </Text>
-              </View>
-            </GlassCard>
-            <GlassButton
-              variant={locationGranted ? 'secondary' : 'primary'}
-              size="lg"
-              fullWidth
-              onPress={async () => {
-                setLocationGranted(true);
-              }}
-            >
-              {locationGranted ? 'Location Enabled ✓' : 'Enable Location'}
-            </GlassButton>
+              </GlassCard>
+            </View>
           </View>
         );
 
-      case 4: // Preferences confirmation
+      case 4: // Confirm
         return (
           <View style={styles.confirmContent}>
-            <Text style={[
-              styles.stepTitle,
-              { color: theme.colors.text },
-            ]}>
-              Almost ready!
+            <Text style={[styles.stepTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+              Fast fertig!
             </Text>
-            <Text style={[
-              styles.stepSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Review your preferences
+            <Text style={[styles.stepSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+              Prüfe deine Einstellungen und starte deine Entdeckungsreise
             </Text>
             <GlassCard variant="light" style={styles.confirmCard}>
               <View style={styles.confirmSection}>
                 <Text style={[
                   styles.confirmSectionTitle,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  Interests ({interests.length})
+                  Interessen
                 </Text>
                 <View style={styles.confirmChips}>
-                  {interests.map((interestId) => {
-                    const cat = CATEGORIES.find(c => c.id === interestId);
-                    return cat ? (
-                      <GlassChip key={interestId} variant="outline" size="sm">
-                        {cat.icon} {cat.name}
-                      </GlassChip>
-                    ) : null;
-                  })}
-                  {interests.length === 0 && (
+                  {interests.length > 0 ? (
+                    interests.map((interestId) => {
+                      const category = CATEGORIES.find(c => c.id === interestId);
+                      return (
+                        <GlassChip
+                          key={interestId}
+                          variant="selected"
+                          size="sm"
+                          style={{ backgroundColor: category ? (theme.colors[category.color as keyof typeof theme.colors] || theme.colors.accent) : theme.colors.accent }}
+                        >
+                          {category?.icon} {category?.name}
+                        </GlassChip>
+                      );
+                    })
+                  ) : (
                     <Text style={[
                       styles.confirmEmpty,
-                      { color: theme.colors.textTertiary },
+                      { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
                     ]}>
-                      No interests selected
+                      Keine ausgewählt
                     </Text>
                   )}
                 </View>
@@ -288,29 +239,15 @@ export default function OnboardingScreen() {
               <View style={styles.confirmSection}>
                 <Text style={[
                   styles.confirmSectionTitle,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  Search Radius
+                  Suchradius
                 </Text>
                 <Text style={[
                   styles.confirmValue,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                 ]}>
-                  {RADIUS_OPTIONS.find(o => o.value === radius)?.label || `${radius}m`}
-                </Text>
-              </View>
-              <View style={styles.confirmSection}>
-                <Text style={[
-                  styles.confirmSectionTitle,
-                  { color: theme.colors.textSecondary },
-                ]}>
-                  Location Access
-                </Text>
-                <Text style={[
-                  styles.confirmValue,
-                  { color: locationGranted ? theme.colors.success : theme.colors.error },
-                ]}>
-                  {locationGranted ? 'Enabled' : 'Not granted'}
+                  {RADIUS_OPTIONS.find(o => o.value === radius)?.label || '5 km'}
                 </Text>
               </View>
             </GlassCard>
@@ -320,22 +257,13 @@ export default function OnboardingScreen() {
       case 5: // Complete
         return (
           <View style={styles.completeContent}>
-            <Text style={styles.completeIcon}>🎉</Text>
-            <Text style={[
-              styles.completeTitle,
-              { color: theme.colors.text },
-            ]}>
-              You're all set!
+            <Text style={styles.completeIcon}>✨</Text>
+            <Text style={[styles.completeTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+              Bereit zum Entdecken!
             </Text>
-            <Text style={[
-              styles.completeSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Start exploring amazing places around you
+            <Text style={[styles.completeSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+              Dein Oria ist konfiguriert. Finde Orte, die du lieben wirst.
             </Text>
-            <GlassButton size="xl" fullWidth onPress={handleNext}>
-              Start Exploring
-            </GlassButton>
           </View>
         );
 
@@ -345,36 +273,36 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
       <View style={styles.progressBar}>
         <Animated.View
           style={[
             styles.progressFill,
-            { backgroundColor: theme.colors.primary },
+            { backgroundColor: theme.colors.accent, width: `${((onboardingStep + 1) / ONBOARDING_STEPS.length) * 100}%` },
           ]}
         />
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           {onboardingStep > 0 && (
             <TouchableOpacity onPress={handleBack} hitSlop={16} style={styles.backButton}>
-              <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
+              <Text style={[styles.backIcon, { color: theme.colors.ink }]}>‹</Text>
             </TouchableOpacity>
           )}
 
           <View style={styles.stepHeader}>
             <Text style={[
               styles.stepNumber,
-              { color: theme.colors.textTertiary },
+              { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
             ]}>
-              Step {onboardingStep + 1} of {ONBOARDING_STEPS.length}
+              Schritt {onboardingStep + 1} von {ONBOARDING_STEPS.length}
             </Text>
             <Text style={[
               styles.stepTitleLarge,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
             ]}>
-              {currentStep?.title}
+              {currentStep.title}
             </Text>
           </View>
 
@@ -382,26 +310,26 @@ export default function OnboardingScreen() {
         </View>
       </ScrollView>
 
-      {onboardingStep < ONBOARDING_STEPS.length - 1 && (
-        <View style={styles.bottomActions}>
+      <View style={[styles.bottomActions, { borderTopColor: theme.colors.border }]}>
+        {onboardingStep > 0 && (
           <GlassButton
-            variant={onboardingStep === 0 ? 'ghost' : 'secondary'}
+            variant="secondary"
             size="lg"
+            style={[styles.bottomActionButton, { flex: 1 }]}
             onPress={handleBack}
-            disabled={onboardingStep === 0}
           >
-            Back
+            Zurück
           </GlassButton>
-          <GlassButton
-
-            size="lg"
-            onPress={handleNext}
-            disabled={onboardingStep === 1 && interests.length === 0}
-          >
-            Next
-          </GlassButton>
-        </View>
-      )}
+        )}
+        <GlassButton
+          variant={onboardingStep === ONBOARDING_STEPS.length - 1 ? 'primary' : 'primary'}
+          size="lg"
+          style={[styles.bottomActionButton, { flex: onboardingStep > 0 ? 1 : undefined, flexGrow: onboardingStep === 0 ? 1 : 0 }]}
+          onPress={handleNext}
+        >
+          {onboardingStep === ONBOARDING_STEPS.length - 1 ? 'Los geht\'s' : 'Weiter'}
+        </GlassButton>
+      </View>
     </SafeAreaView>
   );
 }
@@ -409,7 +337,6 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   progressBar: {
     position: 'absolute',
@@ -417,7 +344,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.1)',
     zIndex: 10,
   },
   progressFill: {
@@ -427,6 +353,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingBottom: 100,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     paddingHorizontal: 24,
@@ -443,21 +372,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300', includeFontPadding: false },
   stepHeader: {
     marginBottom: 32,
     gap: 8,
   },
   stepNumber: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
+    fontSize: 11,
+    fontWeight: '700',
     letterSpacing: 1,
+    textTransform: 'uppercase',
+    includeFontPadding: false,
   },
   stepTitleLarge: {
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.5,
+    includeFontPadding: false,
   },
   welcomeContent: {
     gap: 24,
@@ -467,17 +398,12 @@ const styles = StyleSheet.create({
     fontSize: 64,
     marginTop: 20,
   },
-  welcomeTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    textAlign: 'center',
-    letterSpacing: -0.5,
-  },
   welcomeSubtitle: {
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,
+    includeFontPadding: false,
   },
   welcomeFeatures: {
     width: '100%',
@@ -490,9 +416,7 @@ const styles = StyleSheet.create({
     gap: 16,
     padding: 16,
     borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.6)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
   },
   welcomeFeatureIcon: {
     fontSize: 28,
@@ -504,9 +428,11 @@ const styles = StyleSheet.create({
   welcomeFeatureTitle: {
     fontSize: 16,
     fontWeight: '600',
+    includeFontPadding: false,
   },
   welcomeFeatureDesc: {
     fontSize: 13,
+    includeFontPadding: false,
   },
   interestsContent: {
     gap: 20,
@@ -516,22 +442,26 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textAlign: 'center',
     letterSpacing: -0.5,
+    includeFontPadding: false,
   },
   stepSubtitle: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
   },
   interestsGrid: {
     marginTop: 8,
   },
   interestsGridContent: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
     paddingBottom: 20,
+    justifyContent: 'space-between',
   },
   interestCard: {
-    flex: 1,
-    minWidth: '45%',
+    width: '48%',
     aspectRatio: 1,
     borderRadius: 20,
     alignItems: 'center',
@@ -553,6 +483,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     textAlign: 'center',
+    includeFontPadding: false,
   },
   radiusContent: {
     gap: 20,
@@ -561,6 +492,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   radiusOption: {
+    width: '100%',
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -569,9 +501,11 @@ const styles = StyleSheet.create({
   radiusOptionLabel: {
     fontSize: 18,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   radiusOptionDesc: {
     fontSize: 13,
+    includeFontPadding: false,
   },
   locationContent: {
     gap: 24,
@@ -594,10 +528,12 @@ const styles = StyleSheet.create({
   locationCardTitle: {
     fontSize: 16,
     fontWeight: '600',
+    includeFontPadding: false,
   },
   locationCardText: {
     fontSize: 14,
     lineHeight: 22,
+    includeFontPadding: false,
   },
   confirmContent: {
     gap: 20,
@@ -610,10 +546,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   confirmSectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    includeFontPadding: false,
   },
   confirmChips: {
     flexDirection: 'row',
@@ -622,10 +559,12 @@ const styles = StyleSheet.create({
   },
   confirmEmpty: {
     fontSize: 14,
+    includeFontPadding: false,
   },
   confirmValue: {
     fontSize: 16,
     fontWeight: '600',
+    includeFontPadding: false,
   },
   completeContent: {
     gap: 20,
@@ -639,11 +578,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     textAlign: 'center',
+    includeFontPadding: false,
   },
   completeSubtitle: {
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+    includeFontPadding: false,
   },
   bottomActions: {
     position: 'absolute',
@@ -655,8 +596,11 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     flexDirection: 'row',
     gap: 12,
-    backgroundColor: '#F7F9FC',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  bottomActionButton: {
+    minWidth: 140,
   },
 });
+
+export default OnboardingScreen;

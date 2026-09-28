@@ -61,7 +61,7 @@ export default function ExploreScreen() {
     }
     if (savedPlaces.some((savedPlace: any) => savedPlace.place_id === place.id)) return;
 
-    const targetList = lists.find((list) => list.is_default) || lists[0] || await createList(user.id, 'Favorites');
+    const targetList = lists.find((list) => list.is_default) || lists[0] || await createList(user.id, 'Favoriten');
     addSavedPlace({
       id: `saved-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       user_id: user.id,
@@ -78,7 +78,7 @@ export default function ExploreScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
       <View style={styles.mapContainer}>
         <ExploreMap
           places={places}
@@ -96,22 +96,28 @@ export default function ExploreScreen() {
         />
 
         <View style={styles.topBar}>
-          <BlurView intensity={80} style={styles.topBarInner}>
+          <BlurView intensity={80} style={[
+            styles.topBarInner,
+            { backgroundColor: colorScheme === 'dark' ? 'rgba(13,27,30,0.9)' : 'rgba(254,251,246,0.94)' },
+          ]}>
             <View style={styles.topBarContent}>
               <Text style={[
                 styles.title,
-                { color: theme.colors.text },
+                { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
               ]}>
                 Oria
               </Text>
               <TouchableOpacity onPress={() => router.push('/explore/search')} hitSlop={12} style={styles.searchTrigger}>
-                <View style={styles.searchTriggerInner}>
+                <View style={[
+                  styles.searchTriggerInner,
+                  { backgroundColor: theme.colors.glass, borderColor: theme.colors.glassBorder },
+                ]}>
                   <Text style={styles.searchTriggerIcon}>⌕</Text>
                   <Text style={[
                     styles.searchTriggerText,
-                    { color: theme.colors.textSecondary },
+                    { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    Search places...
+                    Orte suchen...
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -135,21 +141,21 @@ export default function ExploreScreen() {
       </View>
 
       <PlaceBottomSheet
-        place={selectedPlace}
         visible={bottomSheetVisible}
-        onClose={() => { selectPlace(null); setBottomSheetVisible(false); }}
+        onClose={() => setBottomSheetVisible(false)}
+        place={selectedPlace}
         onSave={handleSavePlace}
-        onDirections={(place) => {}}
-        onShare={(place) => {}}
-        saved={Boolean(selectedPlace && savedPlaces.some((savedPlace: any) => savedPlace.place_id === selectedPlace.id))}
+        isSaved={savedPlaces.some((p: any) => p.place_id === selectedPlace?.id)}
+        onNavigate={() => {}}
+        onShare={() => {}}
       />
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>M</Text>, selectedIcon: <Text style={styles.tabIcon}>M</Text> },
-          { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>AI</Text>, selectedIcon: <Text style={styles.tabIcon}>AI</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>S</Text>, selectedIcon: <Text style={styles.tabIcon}>S</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>P</Text>, selectedIcon: <Text style={styles.tabIcon}>P</Text> },
+          { id: 'explore', label: 'Entdecken', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
+          { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>✨</Text>, selectedIcon: <Text style={styles.tabIcon}>✨</Text> },
+          { id: 'saved', label: 'Gespeichert', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
+          { id: 'profile', label: 'Profil', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
         ]}
         activeTab="explore"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}
@@ -163,7 +169,6 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   mapContainer: {
     flex: 1,
@@ -173,53 +178,56 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 20,
-    paddingTop: 0,
+    zIndex: 10,
+    paddingTop: 8,
+    paddingHorizontal: 16,
   },
   topBarInner: {
-    borderRadius: 0,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(13,27,30,0.05)',
   },
   topBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    paddingTop: 60,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '800',
     letterSpacing: -0.5,
+    includeFontPadding: false,
   },
   searchTrigger: {
     flex: 1,
-    maxWidth: 280,
     marginHorizontal: 16,
   },
   searchTriggerInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
+    gap: 8,
     paddingVertical: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 1,
   },
   searchTriggerIcon: {
-    fontSize: 18,
+    fontSize: 20,
   },
   searchTriggerText: {
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '400',
+    includeFontPadding: false,
   },
   avatarButton: {
     padding: 4,
   },
   mapControls: {
-    top: 140,
+    position: 'absolute',
+    right: 16,
+    bottom: 120,
   },
   tabBar: {
     position: 'absolute',
@@ -232,3 +240,5 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
 });
+
+export default ExploreScreen;

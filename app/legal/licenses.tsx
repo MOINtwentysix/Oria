@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Linking } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { GlassCard } from '@/components/ui';
+import { GlassButton, GlassCard } from '@/components/ui';
 import { useRouter } from 'expo-router';
 
-export default function OpenSourceLicensesScreen() {
+export default function LegalScreen() {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const router = useRouter();
@@ -13,89 +14,46 @@ export default function OpenSourceLicensesScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
+          <Text style={[styles.backIcon, { color: theme.colors.ink }]}>‹</Text>
         </TouchableOpacity>
         <Text style={[
           styles.headerTitle,
-          { color: theme.colors.text },
+          { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
         ]}>
-          Open Source Licenses
+          Rechtliches
         </Text>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          <View style={styles.lastUpdated}>
-            <Text style={[
-              styles.lastUpdatedText,
-              { color: theme.colors.textTertiary },
-            ]}>
-              Last updated: August 2026
-            </Text>
-          </View>
-
           <GlassCard variant="light" style={styles.contentCard}>
             <Text style={[
               styles.legalContent,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
             ]}>
-OPEN SOURCE LICENSES
+RECHTLICHER HINWEIS
 
-Oria is built with the following open source software:
+Diese Seite ist ein Platzhalter für rechtliche Inhalte, die vor Veröffentlichung von Rechtsanwälten geprüft und freigegeben werden müssen. Die finale Version muss rechtlich bindende Bedingungen enthalten, die spezifisch für Orias Betrieb, Zuständigkeit und Dienste sind.
 
-EXPO & REACT NATIVE ECOSYSTEM
-- expo (MIT) - https://github.com/expo/expo
-- react-native (MIT) - https://github.com/facebook/react-native
-- expo-router (MIT) - https://github.com/expo/router
-- expo-location (MIT) - https://github.com/expo/expo
-- expo-blur (MIT) - https://github.com/expo/expo
-- expo-image-picker (MIT) - https://github.com/expo/expo
-- expo-secure-store (MIT) - https://github.com/expo/expo
-- expo-constants (MIT) - https://github.com/expo/expo
-- expo-linking (MIT) - https://github.com/expo/expo
-- expo-web-browser (MIT) - https://github.com/expo/expo
-- expo-auth-session (MIT) - https://github.com/expo/expo
-- expo-device (MIT) - https://github.com/expo/expo
-- expo-status-bar (MIT) - https://github.com/expo/expo
-- expo-build-properties (MIT) - https://github.com/expo/expo
-
-REACT NATIVE LIBRARIES
-- react-native-maps (MIT) - https://github.com/react-native-maps/react-native-maps
-- react-native-gesture-handler (MIT) - https://github.com/software-mansion/react-native-gesture-handler
-- react-native-reanimated (MIT) - https://github.com/software-mansion/react-native-reanimated
-- react-native-screens (MIT) - https://github.com/software-mansion/react-native-screens
-- react-native-safe-area-context (MIT) - https://github.com/th3rdwave/react-native-safe-area-context
-- @react-native-async-storage/async-storage (MIT) - https://github.com/react-native-async-storage/async-storage
-
-STATE MANAGEMENT & DATA
-- zustand (MIT) - https://github.com/pmndrs/zustand
-- @tanstack/react-query (MIT) - https://github.com/TanStack/query
-
-AUTHENTICATION
-
-UTILITIES
-- axios (MIT) - https://github.com/axios/axios
-
-Full license texts available at respective GitHub repositories.
+Kontakt: legal@oria.app
             </Text>
           </GlassCard>
 
           <GlassCard variant="light" style={styles.noticeCard}>
             <View style={styles.noticeHeader}>
-              <Text style={styles.noticeIcon}>\u26a0\ufe0f</Text>
+              <Text style={styles.noticeIcon}>⚠️</Text>
               <Text style={[
                 styles.noticeTitle,
-                { color: theme.colors.warning },
+                { color: theme.colors.warning, fontFamily: theme.typography.fontFamily.display },
               ]}>
-                Placeholder Content
+                Platzhalter-Inhalt
               </Text>
             </View>
             <Text style={[
               styles.noticeText,
-              { color: theme.colors.textSecondary },
+              { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              This is a placeholder for legal content that must be reviewed and approved by legal counsel before publication. 
-              The final version should include legally binding terms specific to Oria's operations, jurisdiction, and services.
+              Dies ist ein Platzhalter für rechtliche Inhalte, die vor Veröffentlichung von Rechtsanwälten geprüft und freigegeben werden müssen.
             </Text>
           </GlassCard>
         </View>
@@ -107,17 +65,17 @@ Full license texts available at respective GitHub repositories.
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: theme.colors.paper,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: theme.colors.border,
   },
   backButton: {
     width: 44,
@@ -125,52 +83,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300', includeFontPadding: false },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
     gap: 16,
-  },
-  lastUpdated: {
-    paddingHorizontal: 4,
-  },
-  lastUpdatedText: {
-    fontSize: 13,
-    fontWeight: '500',
   },
   contentCard: {
     padding: 20,
   },
   legalContent: {
-    fontSize: 14,
-    lineHeight: 22,
-    
+    fontSize: 15,
+    lineHeight: 24,
+    whiteSpace: 'pre',
+    includeFontPadding: false,
   },
   noticeCard: {
-    padding: 16,
+    padding: 20,
   },
   noticeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 12,
   },
   noticeIcon: {
     fontSize: 20,
   },
   noticeTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   noticeText: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
+    includeFontPadding: false,
   },
 });

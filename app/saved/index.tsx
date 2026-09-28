@@ -46,28 +46,17 @@ export const SavedScreen: React.FC = () => {
 
   if (!isSignedIn) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
         <View style={styles.emptyState}>
-          <Text style={[
-            styles.emptyIcon,
-            { color: theme.colors.textTertiary },
-          ]}>
-            🔐
+          <Text style={[styles.emptyIcon, { color: theme.colors.inkSubtle }]}>🔐</Text>
+          <Text style={[styles.emptyTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+            Anmelden, um Orte zu speichern
           </Text>
-          <Text style={[
-            styles.emptyTitle,
-            { color: theme.colors.text },
-          ]}>
-            Sign in to save places
-          </Text>
-          <Text style={[
-            styles.emptySubtitle,
-            { color: theme.colors.textSecondary },
-          ]}>
-            Create lists, save favorites, and share with friends
+          <Text style={[styles.emptySubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+            Listen erstellen, Favoriten speichern, mit Freunden teilen
           </Text>
           <GlassButton variant="primary" size="lg" onPress={() => router.push('/auth')}>
-            Sign In
+            Anmelden
           </GlassButton>
         </View>
       </SafeAreaView>
@@ -75,17 +64,14 @@ export const SavedScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
+      <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
         <View style={styles.headerContent}>
-          <Text style={[
-            styles.title,
-            { color: theme.colors.text },
-          ]}>
-            Saved
+          <Text style={[styles.title, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+            Gespeichert
           </Text>
           <TouchableOpacity onPress={() => setShowCreateModal(true)} hitSlop={12} style={styles.createButton}>
-            <View style={styles.createButtonInner}>
+            <View style={[styles.createButtonInner, { backgroundColor: theme.colors.accent }]}>
               <Text style={styles.createButtonIcon}>+</Text>
             </View>
           </TouchableOpacity>
@@ -97,27 +83,18 @@ export const SavedScreen: React.FC = () => {
       }>
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
-            <Text style={[
-              styles.sectionTitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Your Lists
+            <Text style={[styles.sectionTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>
+              Deine Listen
             </Text>
-            <Text style={[
-              styles.sectionCount,
-              { color: theme.colors.textTertiary },
-            ]}>
-              {lists.length} lists
+            <Text style={[styles.sectionCount, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body }]}>
+              {lists.length} Listen
             </Text>
           </View>
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <Text style={[
-                styles.loadingText,
-                { color: theme.colors.textSecondary },
-              ]}>
-                Loading...
+              <Text style={[styles.loadingText, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+                Lädt...
               </Text>
             </View>
           ) : lists.length === 0 ? (
@@ -127,18 +104,18 @@ export const SavedScreen: React.FC = () => {
                   <Text style={styles.emptyListsIcon}>❤️</Text>
                   <Text style={[
                     styles.emptyListsTitle,
-                    { color: theme.colors.text },
+                    { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    No lists yet
+                    Noch keine Listen
                   </Text>
                   <Text style={[
                     styles.emptyListsSubtitle,
-                    { color: theme.colors.textSecondary },
+                    { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    Create your first list to start saving places
+                    Erstelle deine erste Liste für Favoriten
                   </Text>
-                  <GlassButton variant="primary" size="md" onPress={() => setShowCreateModal(true)} style={styles.emptyListsButton}>
-                    Create List
+                  <GlassButton variant="primary" size="md" style={styles.emptyListsButton} onPress={() => setShowCreateModal(true)}>
+                    Liste erstellen
                   </GlassButton>
                 </View>
               </GlassCard>
@@ -159,17 +136,11 @@ export const SavedScreen: React.FC = () => {
 
           {savedPlaces.length > 0 && !activeList && (
             <View style={styles.sectionHeader}>
-              <Text style={[
-                styles.sectionTitle,
-                { color: theme.colors.textSecondary },
-              ]}>
-                Saved Places
+              <Text style={[styles.sectionTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>
+                Gespeicherte Orte
               </Text>
-              <Text style={[
-                styles.sectionCount,
-                { color: theme.colors.textTertiary },
-              ]}>
-                {savedPlaces.length} places
+              <Text style={[styles.sectionCount, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body }]}>
+                {savedPlaces.length} Orte
               </Text>
             </View>
           )}
@@ -184,10 +155,10 @@ export const SavedScreen: React.FC = () => {
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
+          { id: 'explore', label: 'Entdecken', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
           { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>✨</Text>, selectedIcon: <Text style={styles.tabIcon}>✨</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
+          { id: 'saved', label: 'Gespeichert', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
+          { id: 'profile', label: 'Profil', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
         ]}
         activeTab="saved"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}
@@ -203,14 +174,12 @@ export default SavedScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   headerContent: {
     flexDirection: 'row',
@@ -221,6 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.5,
+    includeFontPadding: false,
   },
   createButton: {
     padding: 8,
@@ -229,7 +199,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#0066CC',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -237,6 +206,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: 'white',
+    includeFontPadding: false,
   },
   scrollView: {
     flex: 1,
@@ -245,9 +215,9 @@ const styles = StyleSheet.create({
     paddingBottom: 140,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    gap: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    gap: 32,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -255,14 +225,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    includeFontPadding: false,
   },
   sectionCount: {
     fontSize: 13,
     fontWeight: '500',
+    includeFontPadding: false,
   },
   loadingContainer: {
     paddingVertical: 40,
@@ -271,6 +243,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     fontWeight: '500',
+    includeFontPadding: false,
   },
   emptyLists: {
     paddingVertical: 40,
@@ -290,11 +263,13 @@ const styles = StyleSheet.create({
   emptyListsTitle: {
     fontSize: 20,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   emptyListsSubtitle: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
   },
   emptyListsButton: {
     marginTop: 8,
@@ -330,10 +305,14 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     textAlign: 'center',
+    includeFontPadding: false,
   },
   emptySubtitle: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
   },
 });
+
+export default SavedScreen;

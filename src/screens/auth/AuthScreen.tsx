@@ -18,9 +18,9 @@ export const AuthScreen: React.FC = () => {
 
   if (!isLoaded) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={[styles.loadingText, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -28,9 +28,9 @@ export const AuthScreen: React.FC = () => {
 
   if (isSignedIn) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Redirecting...</Text>
+          <Text style={[styles.loadingText, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>Redirecting...</Text>
         </View>
       </SafeAreaView>
     );
@@ -50,22 +50,22 @@ export const AuthScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
 
           <View style={styles.header}>
             <Text style={[
               styles.logo,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
             ]}>
-              oria
+              Oria
             </Text>
             <Text style={[
               styles.tagline,
-              { color: theme.colors.textSecondary },
+              { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              Discover what's around you
+              Entdecke, was um dich herum ist
             </Text>
           </View>
 
@@ -75,7 +75,7 @@ export const AuthScreen: React.FC = () => {
                 <Text style={styles.errorIcon}>⚠️</Text>
                 <Text style={[
                   styles.errorText,
-                  { color: theme.colors.error },
+                  { color: theme.colors.error, fontFamily: theme.typography.fontFamily.body },
                 ]}>
                   {error}
                 </Text>
@@ -91,17 +91,22 @@ export const AuthScreen: React.FC = () => {
                 onPress={handleSSO}
                 loading={loading}
                 style={styles.submitButton}
+                icon={<Text style={{fontSize: 20}}>🔍</Text>}
+                iconPosition="left"
               >
-                Continue with Google
+                Mit Google fortfahren
               </GlassButton>
               <GlassButton
                 size="lg"
                 fullWidth
+                variant="secondary"
                 onPress={handleSSO}
                 loading={loading}
                 style={styles.submitButton}
+                icon={<Text style={{fontSize: 20}}>🍎</Text>}
+                iconPosition="left"
               >
-                Continue with Apple
+                Mit Apple fortfahren
               </GlassButton>
             </View>
           </GlassCard>
@@ -109,31 +114,31 @@ export const AuthScreen: React.FC = () => {
           <View style={styles.footer}>
             <Text style={[
               styles.footerText,
-              { color: theme.colors.textTertiary },
+              { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              By continuing, you agree to our
+              Mit der Anmeldung akzeptierst du unsere
             </Text>
             <View style={styles.footerLinks}>
               <TouchableOpacity onPress={() => router.push('/legal/terms')} hitSlop={8}>
                 <Text style={[
                   styles.footerLink,
-                  { color: theme.colors.primary },
+                  { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
                 ]}>
-                  Terms of Service
+                  AGB
                 </Text>
               </TouchableOpacity>
               <Text style={[
                 styles.footerText,
-                { color: theme.colors.textTertiary },
+                { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
               ]}>
-                and
+                und
               </Text>
               <TouchableOpacity onPress={() => router.push('/legal/privacy')} hitSlop={8}>
                 <Text style={[
                   styles.footerLink,
-                  { color: theme.colors.primary },
+                  { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
                 ]}>
-                  Privacy Policy
+                  Datenschutzrichtlinie
                 </Text>
               </TouchableOpacity>
             </View>
@@ -148,7 +153,6 @@ export const AuthScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   scrollView: {
     flex: 1,
@@ -166,33 +170,16 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    fontSize: 42,
+    fontSize: 52,
     fontWeight: '800',
-    letterSpacing: -2,
+    letterSpacing: -1.2,
+    includeFontPadding: false,
   },
   tagline: {
-    fontSize: 16,
+    fontSize: 17,
     textAlign: 'center',
-  },
-  modeToggle: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 24,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-    borderRadius: 16,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  modeButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  modeButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
+    lineHeight: 25,
+    includeFontPadding: false,
   },
   errorCard: {
     marginBottom: 16,
@@ -210,6 +197,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontWeight: '500',
+    includeFontPadding: false,
   },
   formCard: {
     padding: 20,
@@ -217,27 +205,8 @@ const styles = StyleSheet.create({
   form: {
     gap: 16,
   },
-  formInput: {
-    marginTop: 0,
-  },
   submitButton: {
     marginTop: 8,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-  },
-  dividerText: {
-    fontSize: 13,
-    fontWeight: '500',
-    
   },
   footer: {
     alignItems: 'center',
@@ -246,6 +215,7 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 13,
     textAlign: 'center',
+    includeFontPadding: false,
   },
   footerLinks: {
     flexDirection: 'row',
@@ -255,6 +225,7 @@ const styles = StyleSheet.create({
   footerLink: {
     fontSize: 13,
     fontWeight: '600',
+    includeFontPadding: false,
   },
   loadingContainer: {
     flex: 1,
@@ -264,5 +235,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     fontWeight: '500',
+    includeFontPadding: false,
   },
 });

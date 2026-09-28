@@ -38,8 +38,8 @@ export const GlassProgress: React.FC<GlassProgressProps> = ({
   const theme = getTheme(colorScheme);
 
   const progress = Math.min(Math.max(value / max, 0), 1);
-  const progressColor = color || theme.colors.primary;
-  const trackBgColor = trackColor || (colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)');
+  const progressColor = color || theme.colors.accent;
+  const trackBgColor = trackColor || (colorScheme === 'dark' ? 'rgba(245,240,232,0.1)' : 'rgba(13,27,30,0.08)');
 
   const [anim] = React.useState(new Animated.Value(0));
 
@@ -63,11 +63,7 @@ export const GlassProgress: React.FC<GlassProgressProps> = ({
     const strokeDashoffset = circumference * (1 - progressValue._value);
 
     return (
-      <View style={[
-        styles.circularContainer,
-        { width: size, height: size },
-        style,
-      ]}>
+      <View style={[styles.circularContainer, { width: size, height: size }, style]}>
         <Animated.View
           style={[
             styles.circularTrack,
@@ -106,20 +102,13 @@ export const GlassProgress: React.FC<GlassProgressProps> = ({
                 borderTopColor: 'transparent',
                 borderRightColor: 'transparent',
                 borderBottomColor: 'transparent',
-                transform: [
-                  { rotate: '-90deg' },
-                ],
+                transform: [{ rotate: '-90deg' }],
               },
             ]}
           />
         </Animated.View>
         {showValue && (
-          <Animated.Text
-            style={[
-              styles.circularValue,
-              { color: theme.colors.text },
-            ]}
-          >
+          <Animated.Text style={[styles.circularValue, { color: theme.colors.ink }]}>
             {Math.round(progress * 100)}%
           </Animated.Text>
         )}
@@ -133,10 +122,7 @@ export const GlassProgress: React.FC<GlassProgressProps> = ({
   });
 
   return (
-    <View style={[
-      styles.linearContainer,
-      style,
-    ]}>
+    <View style={[styles.linearContainer, style]}>
       <BlurView intensity={40} style={[
         styles.linearTrack,
         {
@@ -161,10 +147,7 @@ export const GlassProgress: React.FC<GlassProgressProps> = ({
         />
       </BlurView>
       {showValue && (
-        <Text style={[
-          styles.linearValue,
-          { color: theme.colors.textSecondary },
-        ]}>
+        <Text style={[styles.linearValue, { color: theme.colors.inkMuted }]}>
           {Math.round(progress * 100)}%
         </Text>
       )}
@@ -214,51 +197,47 @@ const styles = StyleSheet.create({
     position: 'absolute',
     fontSize: 14,
     fontWeight: '700',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
 });
 
 export interface GlassSkeletonProps {
-  style?: any;
   variant?: 'text' | 'circular' | 'rectangular' | 'card' | 'list-item';
+  lines?: number;
   width?: number | string;
   height?: number;
-  lines?: number;
   lineHeight?: number;
-  spacing?: number;
   borderRadius?: number;
-  animated?: boolean;
+  style?: any;
 }
 
 export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
-  style,
   variant = 'text',
+  lines = 3,
   width = '100%',
   height = 16,
-  lines = 1,
   lineHeight = 16,
-  spacing = 8,
   borderRadius = 8,
-  animated = true,
+  style,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
-  const baseColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)';
-  const highlightColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(15,23,42,0.12)';
+  const baseColor = colorScheme === 'dark' ? 'rgba(245,240,232,0.12)' : 'rgba(13,27,30,0.06)';
+  const highlightColor = colorScheme === 'dark' ? 'rgba(245,240,232,0.2)' : 'rgba(13,27,30,0.1)';
 
   const [anim] = React.useState(new Animated.Value(0));
 
   React.useEffect(() => {
-    if (animated) {
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 1500,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }).start(() => {
-        anim.setValue(0);
-      });
-    }
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 1500,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start(() => {
+      anim.setValue(0);
+    });
   }, []);
 
   const shimmerStyle = {
@@ -304,10 +283,7 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
         );
       case 'card':
         return (
-          <View style={[
-            skeletonStyles.skeletonCard,
-            style,
-          ]}>
+          <View style={[skeletonStyles.skeletonCard, style]}>
             <View style={[
               skeletonStyles.skeleton,
               { width: '100%', height: 200, borderRadius: 16, backgroundColor: baseColor },
@@ -338,10 +314,7 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
         );
       case 'list-item':
         return (
-          <View style={[
-            skeletonStyles.skeletonListItem,
-            style,
-          ]}>
+          <View style={[skeletonStyles.skeletonListItem, style]}>
             <View style={[
               skeletonStyles.skeleton,
               { width: 56, height: 56, borderRadius: 12, backgroundColor: baseColor },
@@ -366,10 +339,7 @@ export const GlassSkeleton: React.FC<GlassSkeletonProps> = ({
         );
       default:
         return (
-          <View style={[
-            skeletonStyles.skeletonContainer,
-            style,
-          ]}>
+          <View style={[skeletonStyles.skeletonContainer, style]}>
             {Array.from({ length: lines }).map((_, i) => (
               <View key={i} style={[
                 skeletonStyles.skeleton,

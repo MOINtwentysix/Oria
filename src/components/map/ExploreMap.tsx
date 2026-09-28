@@ -53,15 +53,12 @@ const MapPin: React.FC<MapPinProps> = ({ place, selected, onPress, clusterCount 
   if (clusterCount && clusterCount > 1) {
     return (
       <Animated.View
-        style={[
-          styles.clusterPin,
-          {
-            width: MAP_CONFIG.clusterMinSize + Math.min(clusterCount, 20) * 1.5,
-            height: MAP_CONFIG.clusterMinSize + Math.min(clusterCount, 20) * 1.5,
-            backgroundColor: theme.colors.pinCluster,
-            transform: [{ scale: pressAnim }],
-          },
-        ]}
+        style={[styles.clusterPin, {
+          width: MAP_CONFIG.clusterMinSize + Math.min(clusterCount, 20) * 1.5,
+          height: MAP_CONFIG.clusterMinSize + Math.min(clusterCount, 20) * 1.5,
+          backgroundColor: theme.colors.pinCluster,
+          transform: [{ scale: pressAnim }],
+        }]}
       >
         <TouchableOpacity
           onPress={onPress}
@@ -80,12 +77,7 @@ const MapPin: React.FC<MapPinProps> = ({ place, selected, onPress, clusterCount 
   const pinSize = selected ? MAP_CONFIG.selectedPinSize : MAP_CONFIG.pinSize;
 
   return (
-    <Animated.View
-      style={[
-        styles.pinWrapper,
-        { transform: [{ scale: pressAnim }] },
-      ]}
-    >
+    <Animated.View style={[styles.pinWrapper, { transform: [{ scale: pressAnim }] }]}>
       <TouchableOpacity
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -99,7 +91,7 @@ const MapPin: React.FC<MapPinProps> = ({ place, selected, onPress, clusterCount 
             width: pinSize,
             height: pinSize,
             backgroundColor: pinColor,
-            borderColor: colorScheme === 'dark' ? theme.colors.background : theme.colors.background,
+            borderColor: theme.colors.paper,
             borderWidth: 3,
             shadowColor: pinColor,
             shadowOffset: { width: 0, height: 4 },
@@ -116,10 +108,7 @@ const MapPin: React.FC<MapPinProps> = ({ place, selected, onPress, clusterCount 
         </View>
         {selected && (
           <View style={styles.pinShadow}>
-            <View style={[
-              styles.pinShadowInner,
-              { backgroundColor: pinColor },
-            ]} />
+            <View style={[styles.pinShadowInner, { backgroundColor: pinColor }]} />
           </View>
         )}
       </TouchableOpacity>
@@ -186,15 +175,11 @@ interface ExploreMapProps {
   onRegionChange: (region: any) => void;
   userLocation: Coordinates | null;
   followUser: boolean;
-  style?: any;
-  showUserLocation?: boolean;
-  showsMyLocationButton?: boolean;
-  showsCompass?: boolean;
-  showsScale?: boolean;
-  showsTraffic?: boolean;
-  showsBuildings?: boolean;
-  showsIndoors?: boolean;
-  mapType?: 'standard' | 'satellite' | 'hybrid' | 'terrain' | 'mutedStandard';
+  onFollowUserChange: (follow: boolean) => void;
+  mapStyle: 'standard' | 'satellite';
+  onMapStyleChange: (style: string) => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
 }
 
 export const ExploreMap: React.FC<ExploreMapProps> = ({
@@ -206,179 +191,181 @@ export const ExploreMap: React.FC<ExploreMapProps> = ({
   onRegionChange,
   userLocation,
   followUser,
-  style,
-  showUserLocation = true,
-  showsMyLocationButton = false,
-  showsCompass = true,
-  showsScale = false,
-  showsTraffic = false,
-  showsBuildings = true,
-  showsIndoors = true,
-  mapType = 'standard',
-  ...mapProps
+  onFollowUserChange,
+  mapStyle,
+  onMapStyleChange,
+  onZoomIn,
+  onZoomOut,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
-  if (Platform.OS === 'web') {
-    const center = userLocation || { latitude: 52.52, longitude: 13.405 };
-    const visiblePlaces = places.filter(
-      (place) =>
-        Number.isFinite(place.location.latitude) &&
-        Number.isFinite(place.location.longitude)
-    );
-    // Keep the embedded map centered on the user so the overlay dot represents
-    // the real position. The OSM embed marker is intentionally omitted because
-    // it is a pin icon, not the native blue location dot.
-    const latitudeExtent = Math.max(
-      0.03,
-      ...visiblePlaces.map((p) => Math.abs(p.location.latitude - center.latitude))
-    ) * 1.25;
-    const longitudeExtent = Math.max(
-      0.045,
-      ...visiblePlaces.map((p) => Math.abs(p.location.longitude - center.longitude))
-    ) * 1.25;
-    const south = center.latitude - latitudeExtent;
-    const north = center.latitude + latitudeExtent;
-    const west = center.longitude - longitudeExtent;
-    const east = center.longitude + longitudeExtent;
-    const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(`${west},${south},${east},${north}`)}&layer=mapnik`;
+  const mapRef = React.useRef<MapView>(null);
+
+  const handleMapPress = (event: any) => {
+    if (event.nativeEvent.coordinate) {
+      onMapPress(event.nativeEvent.coordinate);
+    }
+  };
+
+  const renderPins = () => {
+    if (Platform.OS === 'web') {
+      return renderWebPins();
+    }
 
     return (
-      <View style={[styles.webMap, style]}>
-        {React.createElement('iframe', {
-          title: 'OpenStreetMap',
-          src: mapUrl,
-          // The embedded OSM map cannot report its pan/zoom back to React.
-          // Keep it passive so the fixed blue dot never drifts away from the
-          // actual location represented by the map center.
-          style: { border: 0, width: '100%', height: '100%', pointerEvents: 'none' },
-          loading: 'lazy',
-        })}
-
-        {visiblePlaces.map((place) => {
-          const left = `${Math.max(3, Math.min(97, ((place.location.longitude - west) / (east - west)) * 100))}%`;
-          const top = `${Math.max(5, Math.min(82, ((north - place.location.latitude) / (north - south)) * 100))}%`;
+      <>
+        {Array.from(clusters.entries()).map(([clusterId, clusterPlaces]) => {
+          if (clusterPlaces.length === 1) {
+            const place = clusterPlaces[0];
+            return (
+              <Marker
+                key={place.id}
+                coordinate={place.coordinates}
+                onPress={() => onPlacePress(place)}
+              >
+                <MapPin place={place} selected={place.id === selectedPlaceId} onPress={() => onPlacePress(place)} />
+              </Marker>
+            );
+          }
+          const centerLat = clusterPlaces.reduce((sum, p) => sum + p.coordinates.latitude, 0) / clusterPlaces.length;
+          const centerLng = clusterPlaces.reduce((sum, p) => sum + p.coordinates.longitude, 0) / clusterPlaces.length;
           return (
-            <TouchableOpacity
-              key={`map-marker-${place.id}`}
-              onPress={() => onPlacePress(place)}
-              style={[styles.webPlaceMarker, { left, top }]}
-              accessibilityLabel={place.name}
+            <Marker
+              key={clusterId}
+              coordinate={{ latitude: centerLat, longitude: centerLng }}
+              onPress={() => onPlacePress(clusterPlaces[0])}
             >
-              <Text style={styles.webPlaceMarkerText}>{place.categories[0]?.icon || '📍'}</Text>
-            </TouchableOpacity>
+              <MapPin place={clusterPlaces[0]} clusterCount={clusterPlaces.length} onPress={() => onPlacePress(clusterPlaces[0])} />
+            </Marker>
           );
         })}
+      </>
+    );
+  };
 
-        {showUserLocation && userLocation && <View style={styles.webUserLocation} />}
-        <View style={styles.webMapAttribution}>
-          <Text style={styles.webMapAttributionText}>© OpenStreetMap contributors</Text>
+  const renderWebPins = () => {
+    const center = userLocation || { latitude: 52.52, longitude: 13.405 };
+    const scale = 100000;
+
+    return (
+      <>
+        <View style={[
+          styles.webUserLocation,
+          { 
+            left: '50%', 
+            top: '50%',
+            backgroundColor: theme.colors.accent,
+            borderColor: theme.colors.paper,
+            shadowColor: theme.colors.accent,
+          }
+        ]} />
+        {places.map((place) => {
+          const deltaLat = (place.coordinates.latitude - center.latitude) * scale;
+          const deltaLng = (place.coordinates.longitude - center.longitude) * scale;
+          const isSelected = place.id === selectedPlaceId;
+          return (
+            <View
+              key={place.id}
+              style={[
+                styles.webPlaceMarker,
+                {
+                  left: `calc(50% + ${deltaLng}px)`,
+                  top: `calc(50% - ${deltaLat}px)`,
+                  borderColor: isSelected ? theme.colors.accent : theme.colors.border,
+                  backgroundColor: isSelected ? theme.colors.accentSoft : theme.colors.paper,
+                },
+              ]}
+              onClick={() => onPlacePress(place)}
+            >
+              <Text style={[
+                styles.webPlaceMarkerText,
+                { color: isSelected ? theme.colors.paper : theme.colors.ink },
+              ]}>
+                {place.categories[0]?.icon || '📍'}
+              </Text>
+            </View>
+          );
+        })}
+      </>
+    );
+  };
+
+  const mapProps: any = {
+    ref: mapRef,
+    style: Platform.OS === 'web' ? styles.webMap : styles.map,
+    onPress: handleMapPress,
+    onRegionChange: onRegionChange,
+    onRegionChangeComplete: onRegionChange,
+    initialRegion: userLocation
+      ? { latitude: userLocation.latitude, longitude: userLocation.longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 }
+      : { latitude: 52.52, longitude: 13.405, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    showsUserLocation: true,
+    showsMyLocationButton: false,
+    showsCompass: false,
+    showsScale: false,
+    showsTraffic: false,
+    showsBuildings: true,
+    showsIndoors: false,
+    mapType: mapStyle,
+    followsUserLocation: followUser,
+    rotateEnabled: true,
+    scrollEnabled: true,
+    zoomEnabled: true,
+    pitchEnabled: true,
+    minZoomLevel: MAP_CONFIG.minZoom,
+    maxZoomLevel: MAP_CONFIG.maxZoom,
+    ...mapProps,
+  };
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.webMapContainer}>
+        <View style={[
+          styles.webMap,
+          { backgroundColor: theme.colors.paper },
+        ]} {...mapProps}>
+          {renderPins()}
         </View>
-        {visiblePlaces.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.webPlaceList} contentContainerStyle={styles.webPlaceListContent}>
-            {visiblePlaces.slice(0, 8).map((place) => (
-              <TouchableOpacity key={place.id} onPress={() => onPlacePress(place)} style={[styles.webPlaceCard, place.id === selectedPlaceId && styles.webPlaceCardSelected]}>
-                <Text numberOfLines={1} style={styles.webPlaceName}>{place.name}</Text>
-                <Text numberOfLines={1} style={styles.webPlaceCategory}>{place.categories[0]?.name || 'Place'}</Text>
+        <View style={styles.webMapAttribution}>
+          <Text style={[
+            styles.webMapAttributionText,
+            { color: theme.colors.inkSubtle },
+          ]}>© OpenStreetMap contributors</Text>
+        </View>
+        <View style={styles.webPlaceList}>
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.webPlaceListContent}>
+            {places.map((place) => (
+              <TouchableOpacity
+                key={place.id}
+                onPress={() => onPlacePress(place)}
+                style={[
+                  styles.webPlaceCard,
+                  place.id === selectedPlaceId && styles.webPlaceCardSelected,
+                ]}
+              >
+                <Text style={[
+                  styles.webPlaceName,
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
+                ]} numberOfLines={1}>
+                  {place.name}
+                </Text>
+                <Text style={[
+                  styles.webPlaceCategory,
+                  { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
+                ]} numberOfLines={1}>
+                  {place.categories[0]?.name || 'Place'}
+                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
-        )}
+        </View>
       </View>
     );
   }
 
-  const [mapRef, setMapRef] = React.useState<any>(null);
-
-  const handleRegionChange = (region: any) => {
-    onRegionChange(region);
-  };
-
-  const handleMapPress = (event: any) => {
-    onMapPress({
-      latitude: event.nativeEvent.coordinate.latitude,
-      longitude: event.nativeEvent.coordinate.longitude,
-    });
-  };
-
-  const renderPins = () => {
-    if (clusters.size > 0) {
-      return Array.from(clusters.entries()).map(([key, clusterPlaces]) => {
-        const [latStr, lngStr] = key.split(',');
-        const latitude = parseFloat(latStr);
-        const longitude = parseFloat(lngStr);
-        const representative = clusterPlaces[0];
-
-        return (
-          <Marker
-            key={key}
-            coordinate={{ latitude, longitude }}
-            onPress={() => onPlacePress(representative)}
-            anchor={{ x: 0.5, y: 0.5 }}
-          >
-            <MapPin place={representative} clusterCount={clusterPlaces.length} onPress={() => onPlacePress(representative)} />
-          </Marker>
-        );
-      });
-    }
-
-    return places.map((place) => (
-      <Marker
-        key={place.id}
-        coordinate={{
-          latitude: place.location.latitude,
-          longitude: place.location.longitude,
-        }}
-        onPress={() => onPlacePress(place)}
-        anchor={{ x: 0.5, y: 0.5 }}
-        tracksViewChanges={false}
-      >
-        <MapPin
-          place={place}
-          selected={place.id === selectedPlaceId}
-          onPress={() => onPlacePress(place)}
-        />
-      </Marker>
-    ));
-  };
-
-  const mapStyle = [
-    styles.map,
-    { backgroundColor: colorScheme === 'dark' ? '#1E293B' : '#E2E8F0' },
-    style,
-  ];
-
   return (
-    <MapView
-      ref={setMapRef}
-      style={mapStyle}
-      initialRegion={{
-        latitude: userLocation?.latitude || 52.5200,
-        longitude: userLocation?.longitude || 13.4050,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }}
-      onRegionChange={handleRegionChange}
-      onRegionChangeComplete={handleRegionChange}
-      onPress={handleMapPress}
-      showsUserLocation={showUserLocation && Boolean(userLocation)}
-      showsMyLocationButton={showsMyLocationButton}
-      showsCompass={showsCompass}
-      showsScale={showsScale}
-      showsTraffic={showsTraffic}
-      showsBuildings={showsBuildings}
-      showsIndoors={showsIndoors}
-      mapType={mapType}
-      followsUserLocation={followUser}
-      rotateEnabled={true}
-      scrollEnabled={true}
-      zoomEnabled={true}
-      pitchEnabled={true}
-      minZoomLevel={MAP_CONFIG.minZoom}
-      maxZoomLevel={MAP_CONFIG.maxZoom}
-      {...mapProps}
-    >
+    <MapView {...mapProps}>
       {renderPins()}
     </MapView>
   );
@@ -388,11 +375,15 @@ const s0 = StyleSheet.create({
   map: {
     flex: 1,
   },
+  webMapContainer: {
+    flex: 1,
+    minHeight: 360,
+    overflow: 'hidden',
+  },
   webMap: {
     flex: 1,
     minHeight: 360,
     overflow: 'hidden',
-    backgroundColor: '#DDE7E5',
   },
   webUserLocation: {
     position: 'absolute',
@@ -403,10 +394,7 @@ const s0 = StyleSheet.create({
     marginLeft: -9,
     marginTop: -9,
     borderRadius: 9,
-    backgroundColor: '#0066CC',
     borderWidth: 3,
-    borderColor: 'rgba(255,255,255,0.95)',
-    shadowColor: '#0066CC',
     shadowOpacity: 0.45,
     shadowRadius: 8,
     elevation: 6,
@@ -421,9 +409,7 @@ const s0 = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 2,
-    borderColor: '#0066CC',
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 5,
@@ -443,7 +429,6 @@ const s0 = StyleSheet.create({
   },
   webMapAttributionText: {
     fontSize: 10,
-    color: '#334155',
   },
   webPlaceList: {
     position: 'absolute',
@@ -466,15 +451,12 @@ const s0 = StyleSheet.create({
   },
   webPlaceCardSelected: {
     borderWidth: 2,
-    borderColor: '#0066CC',
   },
   webPlaceName: {
-    color: '#0F172A',
     fontSize: 13,
     fontWeight: '700',
   },
   webPlaceCategory: {
-    color: '#64748B',
     fontSize: 11,
     marginTop: 3,
   },
@@ -514,10 +496,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
 
       <GlassCard variant="heavy" style={[styles.controlGroup, { marginTop: 12 }]}>
         <TouchableOpacity onPress={onMyLocation} hitSlop={12} style={styles.controlButton} accessibilityLabel="My location">
-          <View style={[
-            styles.locationIcon,
-            { backgroundColor: theme.colors.primary },
-          ]} />
+          <View style={[styles.locationIcon, { backgroundColor: theme.colors.accent }]} />
         </TouchableOpacity>
       </GlassCard>
 

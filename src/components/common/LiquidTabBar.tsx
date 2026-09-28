@@ -54,11 +54,11 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
   const tabContainerStyle = [
     styles.tabContainer,
     {
-      backgroundColor: backgroundColor || (colorScheme === 'dark' ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)'),
-      borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)',
+      backgroundColor: backgroundColor || (colorScheme === 'dark' ? theme.glassStyles.heavyDark.backgroundColor : theme.glassStyles.heavy.backgroundColor),
+      borderColor: theme.colors.glassBorder,
       borderWidth: 1,
-      borderTopLeftRadius: variant === 'floating' ? theme.borderRadius.xxxl : 0,
-      borderTopRightRadius: variant === 'floating' ? theme.borderRadius.xxxl : 0,
+      borderTopLeftRadius: variant === 'floating' ? theme.borderRadius.sheet : 0,
+      borderTopRightRadius: variant === 'floating' ? theme.borderRadius.sheet : 0,
     },
     style,
   ];
@@ -70,7 +70,7 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
           styles.indicator,
           {
             width: `${tabWidth}%`,
-            backgroundColor: indicatorColor || theme.colors.primary,
+            backgroundColor: indicatorColor || theme.colors.accent,
             transform: [{ translateX: `${indicatorTranslateX}%` }],
           },
         ]}
@@ -93,7 +93,7 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
               style={[
                 styles.iconWrapper,
                 {
-                  opacity: tab.id === activeTab ? 1 : 0.6,
+                  opacity: tab.id === activeTab ? 1 : 0.5,
                   transform: [
                     { scale: tab.id === activeTab ? 1.1 : 1 },
                   ],
@@ -107,8 +107,9 @@ export const LiquidTabBar: React.FC<LiquidTabBarProps> = ({
               style={[
                 styles.label,
                 {
-                  color: tab.id === activeTab ? theme.colors.primary : theme.colors.textTertiary,
+                  color: tab.id === activeTab ? theme.colors.accent : theme.colors.inkSubtle,
                   fontWeight: tab.id === activeTab ? '700' : '500',
+                  fontFamily: theme.typography.fontFamily.body,
                 },
                 labelStyle,
               ]}
@@ -164,6 +165,7 @@ const s0 = StyleSheet.create({
   label: {
     fontSize: 11,
     lineHeight: 14,
+    includeFontPadding: false,
   },
   badge: {
     position: 'absolute',
@@ -180,73 +182,101 @@ const s0 = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     color: 'white',
+    includeFontPadding: false,
   },
 });
 
 export interface LiquidTabBarItemProps {
+  id: string;
   label: string;
   icon: React.ReactNode;
   selectedIcon?: React.ReactNode;
-  badge?: string | number;
-  active?: boolean;
-  onPress?: () => void;
+  active: boolean;
+  onPress: () => void;
   style?: any;
+  badge?: string | number;
 }
 
 export const LiquidTabBarItem: React.FC<LiquidTabBarItemProps> = ({
+  id,
   label,
   icon,
   selectedIcon,
-  badge,
-  active = false,
+  active,
   onPress,
   style,
+  badge,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
+  const [pressAnim] = React.useState(new Animated.Value(1));
+
+  const handlePressIn = () => {
+    Animated.timing(pressAnim, {
+      toValue: 0.92,
+      duration: 60,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(pressAnim, {
+      toValue: 1,
+      duration: 150,
+      easing: Easing.out(Easing.back(2)),
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      hitSlop={16}
-      style={[
-        styles.item,
-        style,
-      ]}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: active }}
-    >
-      <Animated.View
+    <Animated.View style={[{ transform: [{ scale: pressAnim }] }, style]}>
+      <TouchableOpacity
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        hitSlop={16}
         style={[
-          styles.itemIconWrapper,
-          {
-            opacity: active ? 1 : 0.5,
-            transform: [{ scale: active ? 1.15 : 1 }],
-          },
+          styles.item,
+          style,
         ]}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: active }}
       >
-        {active && selectedIcon ? selectedIcon : icon}
-      </Animated.View>
-      <Animated.Text
-        style={[
-          styles.itemLabel,
-          {
-            color: active ? theme.colors.primary : theme.colors.textTertiary,
-            fontWeight: active ? '700' : '500',
-          },
-        ]}
-      >
-        {label}
-      </Animated.Text>
-      {badge && (
-        <View style={[
-          styles.itemBadge,
-          { backgroundColor: theme.colors.accent },
-        ]}>
-          <Text style={styles.badgeText}>{badge}</Text>
-        </View>
-      )}
-    </TouchableOpacity>
+        <Animated.View
+          style={[
+            styles.itemIconWrapper,
+            {
+              opacity: active ? 1 : 0.5,
+              transform: [{ scale: active ? 1.15 : 1 }],
+            },
+          ]}
+        >
+          {active && selectedIcon ? selectedIcon : icon}
+        </Animated.View>
+        <Animated.Text
+          style={[
+            styles.itemLabel,
+            {
+              color: active ? theme.colors.accent : theme.colors.inkSubtle,
+              fontWeight: active ? '700' : '500',
+              fontFamily: theme.typography.fontFamily.body,
+            },
+          ]}
+        >
+          {label}
+        </Animated.Text>
+        {badge && (
+          <View style={[
+            styles.itemBadge,
+            { backgroundColor: theme.colors.accent },
+          ]}>
+            <Text style={styles.badgeText}>{badge}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
@@ -268,6 +298,7 @@ const s2 = StyleSheet.create({
   itemLabel: {
     fontSize: 11,
     lineHeight: 14,
+    includeFontPadding: false,
   },
   itemBadge: {
     position: 'absolute',
@@ -282,3 +313,4 @@ const s2 = StyleSheet.create({
   },
 });
 const styles = { ...s0, ...s2 };
+export default styles;

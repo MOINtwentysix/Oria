@@ -11,98 +11,97 @@ export default function PrivacyPolicyScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
+      <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
+          <Text style={[styles.backIcon, { color: theme.colors.ink }]}>‹</Text>
         </TouchableOpacity>
         <Text style={[
           styles.headerTitle,
-          { color: theme.colors.text },
+          { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
         ]}>
-          Privacy Policy
+          Datenschutz
         </Text>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          <View style={styles.lastUpdated}>
+          <View style={[styles.lastUpdated, { borderBottomColor: theme.colors.border }]}>
             <Text style={[
               styles.lastUpdatedText,
-              { color: theme.colors.textTertiary },
+              { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              Last updated: August 2026
+              Stand: September 2026
             </Text>
           </View>
 
           <GlassCard variant="light" style={styles.contentCard}>
             <Text style={[
               styles.legalContent,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
             ]}>
-PRIVACY POLICY FOR ORIA
+DATENSCHUTZERKLÄRUNG FÜR ORIA
 
-1. INFORMATION WE COLLECT
-- Account Information: When you create an account, we collect your name, email address, and authentication credentials via the M26 Account SSO service.
-- Location Data: With your permission, we collect precise location data to show nearby places and calculate routes.
-- Usage Data: We collect information about how you use the app, including searches, saved places, and AI interactions.
-- Device Information: We collect device identifiers, OS version, and app version for analytics and debugging.
+1. WIR ERHEBEN
+- Kontodaten: Name, E-Mail, Authentifizierung via M26 Account SSO
+- Standortdaten: Mit deiner Erlaubnis präziser Standort für Orte & Routen
+- Nutzungsdaten: Suchen, gespeicherte Orte, KI-Interaktionen
+- Gerätedaten: IDs, OS-Version, App-Version für Analysen
 
-2. HOW WE USE YOUR DATA
-- Provide core functionality: location-based place discovery, search, and navigation
-- Personalize your experience: recommendations, saved lists, trip planning
-- Improve our services: analytics, bug fixes, feature development
-- Communicate with you: notifications, updates, support
+2. VERWENDUNG
+- Kernfunktionen: Ortssuche, Navigation, Entdeckung
+- Personalisierung: Empfehlungen, Listen, Reiseplanung
+- Verbesserung: Analysen, Bugfixes, Features
+- Kommunikation: Benachrichtigungen, Updates, Support
 
-3. DATA SHARING
-- We do NOT sell your personal data
-- We share data with service providers: M26 Account SSO (auth), Neon (database), Foursquare (places), Mistral (AI), OSRM (routing)
-- We may share anonymized, aggregated data for analytics
-- We comply with legal requests when required by law
+3. WEITERGABE
+- KEIN Verkauf deiner Daten
+- Dienstleister: M26 SSO (Auth), Neon (DB), Foursquare (Orte), Mistral (KI), OSRM (Routing)
+- Anonymisierte Aggregaten für Analysen
+- Gesetzliche Anfragen wenn rechtlich erforderlich
 
-4. DATA RETENTION
-- Account data: retained while account is active
-- Location data: retained for 30 days for route history
-- Search history: retained for 90 days
-- You can request deletion at any time
+4. SPEICHERDAUER
+- Kontodaten: Solange Account aktiv
+- Standortdaten: 30 Tage für Routenhistorie
+- Suchhistorie: 90 Tage
+- Jederzeit löschbar auf Anfrage
 
-5. YOUR RIGHTS
-- Access your data
-- Correct inaccurate data
-- Delete your data
-- Export your data
-- Opt-out of analytics
-- Withdraw consent for location tracking
+5. DEINE RECHTE
+- Auskunft über deine Daten
+- Berichtigung unrichtiger Daten
+- Löschung deiner Daten
+- Datenexport
+- Opt-out aus Analysen
+- Widerruf Standortfreigabe
 
-6. SECURITY
-- Encryption in transit (TLS 1.3) and at rest
-- Regular security audits
-- Minimal data collection principle
+6. SICHERHEIT
+- Verschlüsselung in Transit (TLS 1.3) & at rest
+- Regelmäßige Security Audits
+- Datenminimierung
 
-7. CHILDREN'S PRIVACY
-Oria is not intended for children under 13. We do not knowingly collect data from children.
+7. KINDER
+Oria nicht für unter 13. Keine wissentliche Datenerhebung von Kindern.
 
-8. CONTACT
-For privacy questions: privacy@oria.app
+8. KONTAKT
+Datenschutz: privacy@oria.app
             </Text>
           </GlassCard>
 
           <GlassCard variant="light" style={styles.noticeCard}>
             <View style={styles.noticeHeader}>
-              <Text style={styles.noticeIcon}>\u26a0\ufe0f</Text>
+              <Text style={styles.noticeIcon}>⚠️</Text>
               <Text style={[
                 styles.noticeTitle,
-                { color: theme.colors.warning },
+                { color: theme.colors.warning, fontFamily: theme.typography.fontFamily.display },
               ]}>
-                Placeholder Content
+                Platzhalter-Inhalt
               </Text>
             </View>
             <Text style={[
               styles.noticeText,
-              { color: theme.colors.textSecondary },
+              { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              This is a placeholder for legal content that must be reviewed and approved by legal counsel before publication. 
-              The final version should include legally binding terms specific to Oria's operations, jurisdiction, and services.
+              Dies ist ein Platzhalter für rechtliche Inhalte, die vor Veröffentlichung von Rechtsanwälten geprüft und freigegeben werden müssen. Die finale Version muss rechtlich bindende Bedingungen enthalten, die spezifisch für Orias Betrieb, Zuständigkeit und Dienste sind.
             </Text>
           </GlassCard>
         </View>
@@ -114,17 +113,15 @@ For privacy questions: privacy@oria.app
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   backButton: {
     width: 44,
@@ -132,52 +129,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300', includeFontPadding: false },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
     gap: 16,
   },
   lastUpdated: {
-    paddingHorizontal: 4,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
   },
   lastUpdatedText: {
     fontSize: 13,
-    fontWeight: '500',
+    includeFontPadding: false,
   },
   contentCard: {
     padding: 20,
   },
   legalContent: {
-    fontSize: 14,
-    lineHeight: 22,
-    
+    fontSize: 15,
+    lineHeight: 24,
+    whiteSpace: 'pre',
+    includeFontPadding: false,
   },
   noticeCard: {
-    padding: 16,
+    padding: 20,
   },
   noticeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 12,
   },
   noticeIcon: {
     fontSize: 20,
   },
   noticeTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   noticeText: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
+    includeFontPadding: false,
   },
 });

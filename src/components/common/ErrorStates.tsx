@@ -1,186 +1,173 @@
 import React from 'react';
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
+import { GlassButton } from '@/components/ui';
 
 interface ErrorStateProps {
-  type: 'loading' | 'offline' | 'location-denied' | 'location-unavailable' | 'places-api-error' | 'ai-unavailable' | 'no-places' | 'rate-limit' | 'empty-saved' | 'empty-list' | 'session-expired' | 'invalid-search' | 'network-timeout' | 'generic';
+  title?: string;
   message?: string;
+  icon?: string;
   onRetry?: () => void;
-  onAction?: () => void;
-  actionLabel?: string;
+  retryLabel?: string;
   style?: any;
 }
 
-const errorConfigs = {
-  loading: { icon: '⏳', title: 'Loading...', description: 'Please wait while we fetch data' },
-  offline: { icon: '📡', title: 'You\'re Offline', description: 'Check your connection and try again' },
-  'location-denied': { icon: '📍', title: 'Location Access Needed', description: 'Enable location in Settings to discover nearby places' },
-  'location-unavailable': { icon: '📍', title: 'Location Unavailable', description: 'Unable to get your current location. Please try again.' },
-  'foursquare-error': { icon: '🗺️', title: 'Places Unavailable', description: 'Unable to load places. Please try again later.' },
-  'places-api-error': { icon: '🗺️', title: 'Places Unavailable', description: 'Unable to load places. Please try again later.' },
-  'ai-unavailable': { icon: '✨', title: 'AI Unavailable', description: 'Oria AI is currently unavailable. Please try again.' },
-  'no-places': { icon: '🔍', title: 'No Places Found', description: 'Try adjusting your search or filters' },
-  'rate-limit': { icon: '⏱️', title: 'Too Many Requests', description: 'Please wait a moment and try again' },
-  'empty-saved': { icon: '❤️', title: 'No Saved Places', description: 'Start exploring and save your favorites!' },
-  'empty-list': { icon: '📝', title: 'List is Empty', description: 'Add places to this list from the map' },
-  'session-expired': { icon: '🔐', title: 'Session Expired', description: 'Please sign in again to continue' },
-  'invalid-search': { icon: '🔍', title: 'Invalid Search', description: 'Please enter a valid search term' },
-  'network-timeout': { icon: '⏱️', title: 'Request Timeout', description: 'The request took too long. Please try again.' },
-  generic: { icon: '⚠️', title: 'Something Went Wrong', description: 'An unexpected error occurred' },
-};
-
 export const ErrorState: React.FC<ErrorStateProps> = ({
-  type,
-  message,
+  title = 'Etwas schiefgelaufen',
+  message = 'Bitte versuche es erneut.',
+  icon = '⚠️',
   onRetry,
-  onAction,
-  actionLabel,
+  retryLabel = 'Erneut versuchen',
   style,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
-  const config = errorConfigs[type] || errorConfigs.generic;
 
   return (
-    <View style={[
-      styles.container,
-      { backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)' },
-      style,
-    ]}>
-      <View style={styles.content}>
-        <Text style={styles.icon}>{config.icon}</Text>
-        <Text style={[
-          styles.title,
-          { color: theme.colors.text },
-        ]}>
-          {config.title}
-        </Text>
-        <Text style={[
-          styles.description,
-          { color: theme.colors.textSecondary },
-        ]}>
-          {message || config.description}
-        </Text>
-        <View style={styles.actions}>
-          {onRetry && (
-            <GlassButton size="md" onPress={onRetry}>
-              Try Again
-            </GlassButton>
-          )}
-          {onAction && actionLabel && (
-            <GlassButton size="md" onPress={onAction}>
-              {actionLabel}
-            </GlassButton>
-          )}
-        </View>
-      </View>
+    <View style={[styles.container, style]}>
+      <Text style={[styles.icon, { color: theme.colors.inkSubtle }]}>{icon}</Text>
+      <Text style={[
+        styles.title,
+        { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
+      ]}>
+        {title}
+      </Text>
+      <Text style={[
+        styles.message,
+        { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
+      ]}>
+        {message}
+      </Text>
+      {onRetry && (
+        <GlassButton variant="primary" size="md" onPress={onRetry} style={styles.retryButton}>
+          {retryLabel}
+        </GlassButton>
+      )}
     </View>
   );
 };
 
-import { GlassButton } from '@/components/ui';
+interface EmptyStateProps {
+  title?: string;
+  message?: string;
+  icon?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  style?: any;
+}
 
-const s0 = StyleSheet.create({
+export const EmptyState: React.FC<EmptyStateProps> = ({
+  title = 'Nichts gefunden',
+  message = 'Hier ist noch nichts zu sehen.',
+  icon = '📭',
+  actionLabel,
+  onAction,
+  style,
+}) => {
+  const { colorScheme } = useTheme();
+  const theme = getTheme(colorScheme);
+
+  return (
+    <View style={[styles.container, style]}>
+      <Text style={[styles.icon, { color: theme.colors.inkSubtle }]}>{icon}</Text>
+      <Text style={[
+        styles.title,
+        { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
+      ]}>
+        {title}
+      </Text>
+      <Text style={[
+        styles.message,
+        { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
+      ]}>
+        {message}
+      </Text>
+      {actionLabel && onAction && (
+        <GlassButton variant="primary" size="md" onPress={onAction} style={styles.actionButton}>
+          {actionLabel}
+        </GlassButton>
+      )}
+    </View>
+  );
+};
+
+interface LoadingStateProps {
+  message?: string;
+  style?: any;
+}
+
+export const LoadingState: React.FC<LoadingStateProps> = ({
+  message = 'Lädt...',
+  style,
+}) => {
+  const { colorScheme } = useTheme();
+  const theme = getTheme(colorScheme);
+
+  return (
+    <View style={[styles.loadingContainer, style]}>
+      <View style={[
+        styles.spinner,
+        { borderTopColor: theme.colors.accent },
+      ]} />
+      {message && (
+        <Text style={[
+          styles.loadingText,
+          { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
+        ]}>
+          {message}
+        </Text>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
-    borderRadius: 24,
-  },
-  content: {
-    alignItems: 'center',
     gap: 16,
   },
   icon: {
-    fontSize: 56,
+    fontSize: 64,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     textAlign: 'center',
+    includeFontPadding: false,
   },
-  description: {
+  message: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
   },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-});
-
-export const EmptyState: React.FC<{
-  icon: string;
-  title: string;
-  description: string;
-  actionLabel?: string;
-  onAction?: () => void;
-  style?: any;
-}> = ({ icon, title, description, actionLabel, onAction, style }) => {
-  const { colorScheme } = useTheme();
-  const theme = getTheme(colorScheme);
-
-  return (
-    <View style={[
-      styles.emptyContainer,
-      { backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)' },
-      style,
-    ]}>
-      <View style={styles.emptyContent}>
-        <Text style={styles.emptyIcon}>{icon}</Text>
-        <Text style={[
-          styles.emptyTitle,
-          { color: theme.colors.text },
-        ]}>
-          {title}
-        </Text>
-        <Text style={[
-          styles.emptyDescription,
-          { color: theme.colors.textSecondary },
-        ]}>
-          {description}
-        </Text>
-        {actionLabel && onAction && (
-          <GlassButton size="md" onPress={onAction} style={styles.emptyAction}>
-            {actionLabel}
-          </GlassButton>
-        )}
-      </View>
-    </View>
-  );
-};
-
-const s2 = StyleSheet.create({
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 40,
-    borderRadius: 24,
-  },
-  emptyContent: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  emptyIcon: {
-    fontSize: 56,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  emptyAction: {
+  retryButton: {
     marginTop: 8,
     minWidth: 160,
   },
+  actionButton: {
+    marginTop: 8,
+    minWidth: 160,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  spinner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: '#E2E8F0',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '500',
+    includeFontPadding: false,
+  },
 });
-const styles = { ...s0, ...s2 };

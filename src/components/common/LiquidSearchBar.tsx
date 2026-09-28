@@ -1,358 +1,214 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Image, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, Animated, Easing, Platform, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { GlassButton } from '@/components/ui';
+import { GlassChip } from '@/components/ui';
+import { CATEGORIES } from '@/constants';
 
 interface LiquidSearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
-  placeholder?: string;
   onFocus?: () => void;
   onBlur?: () => void;
-  onSubmit?: () => void;
-  onClear?: () => void;
-  onFilterPress?: () => void;
-  onVoicePress?: () => void;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  onSubmitEditing?: () => void;
+  placeholder?: string;
+  selectedCategories?: string[];
+  onCategoryPress?: (categoryId: string) => void;
   style?: any;
-  showFilter?: boolean;
-  showVoice?: boolean;
+  showsCategories?: boolean;
   autoFocus?: boolean;
-  disabled?: boolean;
   blurOnSubmit?: boolean;
 }
 
 export const LiquidSearchBar: React.FC<LiquidSearchBarProps> = ({
   value,
   onChangeText,
-  placeholder = 'Search places...',
   onFocus,
   onBlur,
-  onSubmit,
-  onClear,
-  onFilterPress,
-  onVoicePress,
-  leftIcon,
-  rightIcon,
+  onSubmitEditing,
+  placeholder = 'Orte suchen...',
+  selectedCategories = [],
+  onCategoryPress,
   style,
-  showFilter = true,
-  showVoice = false,
+  showsCategories = true,
   autoFocus = false,
-  disabled = false,
-  blurOnSubmit = false,
+  blurOnSubmit = true,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
   const [focused, setFocused] = React.useState(false);
-  const [expanded, setExpanded] = React.useState(false);
+  const [categoriesExpanded, setCategoriesExpanded] = React.useState(false);
 
-  const searchIcon = leftIcon || (
-    <View style={styles.searchIcon}>
-      <Text style={styles.searchIconText}>🔍</Text>
-    </View>
-  );
+  const handleFocus = () => {
+    setFocused(true);
+    onFocus?.();
+  };
 
-  const clearIcon = (
-    <TouchableOpacity
-      onPress={onClear}
-      hitSlop={12}
-      style={styles.clearButton}
-      accessibilityLabel="Clear search"
-    >
-      <View style={styles.clearIcon} />
-    </TouchableOpacity>
-  );
-
-  const filterIcon = showFilter && (
-    <TouchableOpacity
-      onPress={onFilterPress}
-      hitSlop={12}
-      style={styles.filterButton}
-      accessibilityLabel="Filter"
-      accessibilityState={{ expanded }}
-    >
-      <View style={styles.filterIcon}>
-        <Text style={styles.filterIconText}>⌃</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const voiceIcon = showVoice && (
-    <TouchableOpacity
-      onPress={onVoicePress}
-      hitSlop={12}
-      style={styles.voiceButton}
-      accessibilityLabel="Voice search"
-    >
-      <View style={styles.voiceIcon}>
-        <Text style={styles.voiceIconText}>🎤</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const containerStyle = [
-    styles.container,
-    {
-      backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.7)',
-      borderColor: focused ? theme.colors.primary : (colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)'),
-      borderWidth: focused ? 2 : 1,
-      shadowColor: focused ? theme.colors.primary : 'transparent',
-      shadowOffset: { width: 0, height: focused ? 8 : 0 },
-      shadowOpacity: focused ? 0.15 : 0,
-      shadowRadius: focused ? 24 : 0,
-      elevation: focused ? 8 : 0,
-    },
-    style,
-  ];
+  const handleBlur = () => {
+    setFocused(false);
+    setCategoriesExpanded(false);
+    onBlur?.();
+  };
 
   return (
-    <BlurView intensity={60} style={containerStyle}>
-      <View style={styles.row}>
-        {searchIcon}
-        <TextInput
-          style={[
-            styles.input,
-            {
-              color: theme.colors.text,
-              fontSize: 16,
-              flex: 1,
-            },
-          ]}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.textTertiary}
-          onFocus={(e) => { setFocused(true); setExpanded(true); onFocus?.(); }}
-          onBlur={(e) => { setFocused(false); onBlur?.(); }}
-          onSubmitEditing={onSubmit}
-          blurOnSubmit={blurOnSubmit}
-          autoFocus={autoFocus}
-          editable={!disabled}
-          selectionColor={theme.colors.primary}
-          autoCapitalize="none"
-          autoComplete="off"
-          autoCorrect={false}
-          spellCheck={false}
-        />
-        {value.length > 0 ? clearIcon : null}
-        {rightIcon}
-        {filterIcon}
-        {voiceIcon}
-      </View>
-    </BlurView>
+    <View style={[styles.container, style]}>
+      <BlurView intensity={80} style={[
+        styles.searchWrapper,
+        {
+          backgroundColor: focused ? theme.colors.glass : colorScheme === 'dark' ? 'rgba(13,27,30,0.82)' : 'rgba(254,251,246,0.9)',
+          borderColor: focused ? theme.colors.accent : theme.colors.glassBorder,
+          borderWidth: focused ? 2 : 1,
+          shadowColor: focused ? theme.colors.accent : 'transparent',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: focused ? 0.15 : 0,
+          shadowRadius: focused ? 16 : 0,
+          elevation: focused ? 6 : 0,
+        },
+      ]}>
+        <TouchableOpacity onPress={handleFocus} hitSlop={8} style={styles.searchTouchArea}>
+          <View style={styles.searchInner}>
+            <Text style={[
+              styles.searchIcon,
+              { color: focused ? theme.colors.accent : theme.colors.inkSubtle },
+            ]}>
+              ⌕
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  color: theme.colors.ink,
+                  fontSize: theme.typography.fontSize.md,
+                  fontFamily: theme.typography.fontFamily.body,
+                  flex: 1,
+                  placeholderTextColor: theme.colors.inkSubtle,
+                  selectionColor: theme.colors.accent,
+                },
+              ]}
+              value={value}
+              onChangeText={onChangeText}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onSubmitEditing={onSubmitEditing}
+              placeholder={placeholder}
+              autoFocus={autoFocus}
+              blurOnSubmit={blurOnSubmit}
+              autoCapitalize="sentences"
+              autoCorrect={true}
+              spellCheck={true}
+              editable={true}
+            />
+            {value.length > 0 && (
+              <TouchableOpacity onPress={() => onChangeText('')} hitSlop={8} style={styles.clearButton}>
+                <Text style={styles.clearIcon}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </TouchableOpacity>
+
+        {showsCategories && focused && (
+          <Animated.View
+            style={[
+              styles.categoriesWrapper,
+              {
+                opacity: categoriesExpanded ? 1 : 0,
+                height: categoriesExpanded ? undefined : 0,
+              },
+            ]}
+          >
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoriesContainer}
+              onScrollBeginDrag={() => setCategoriesExpanded(true)}
+            >
+              {CATEGORIES.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  onPress={() => onCategoryPress?.(category.id)}
+                  style={[
+                    styles.categoryChip,
+                    {
+                      backgroundColor: selectedCategories.includes(category.id)
+                        ? theme.colors[category.color as keyof typeof theme.colors] || theme.colors.accent
+                        : 'transparent',
+                      borderColor: selectedCategories.includes(category.id)
+                        ? theme.colors[category.color as keyof typeof theme.colors] || theme.colors.accent
+                        : theme.colors.border,
+                      borderWidth: selectedCategories.includes(category.id) ? 0 : 1,
+                    },
+                  ]}
+                  hitSlop={8}
+                >
+                  <Text style={[
+                    styles.categoryChipText,
+                    { color: selectedCategories.includes(category.id) ? 'white' : theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
+                  ]}>
+                    {category.icon} {category.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </Animated.View>
+        )}
+      </BlurView>
+    </View>
   );
 };
 
-const s0 = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: '100%',
+  },
+  searchWrapper: {
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  searchTouchArea: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    minHeight: 52,
   },
-  row: {
+  searchInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-    gap: 8,
+    gap: 10,
+  },
+  searchIcon: {
+    fontSize: 22,
+    fontWeight: '300',
   },
   input: {
     flex: 1,
-    fontSize: 16,
-  },
-  searchIcon: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchIconText: {
-    fontSize: 18,
+    includeFontPadding: false,
   },
   clearButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    padding: 4,
   },
   clearIcon: {
-    width: 16,
-    height: 16,
-    borderWidth: 2,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
-    opacity: 0.5,
-  },
-  filterButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.03)',
-  },
-  filterIcon: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterIconText: {
-    fontSize: 16,
-    transform: [{ rotate: '90deg' }],
-  },
-  voiceButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.03)',
-  },
-  voiceIcon: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  voiceIconText: {
     fontSize: 18,
+    color: '#8B9FA3',
   },
-});
-
-export interface LiquidCategoryPillProps {
-  categories: Array<{
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-    count?: number;
-  }>;
-  selectedCategories: string[];
-  onCategoryPress: (categoryId: string) => void;
-  style?: any;
-  scrollable?: boolean;
-  maxVisible?: number;
-}
-
-export const LiquidCategoryPill: React.FC<LiquidCategoryPillProps> = ({
-  categories,
-  selectedCategories,
-  onCategoryPress,
-  style,
-  scrollable = true,
-  maxVisible,
-}) => {
-  const { colorScheme } = useTheme();
-  const theme = getTheme(colorScheme);
-
-  const visibleCategories = maxVisible ? categories.slice(0, maxVisible) : categories;
-
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={[
-        styles.pillContainer,
-        { paddingHorizontal: 16 },
-        style,
-      ]}
-    >
-      {visibleCategories.map((category) => {
-        const selected = selectedCategories.includes(category.id);
-        const catColor = theme.colors[category.color as keyof typeof theme.colors] || theme.colors.primary;
-
-        return (
-          <TouchableOpacity
-            key={category.id}
-            onPress={() => onCategoryPress(category.id)}
-            hitSlop={8}
-            style={[
-              styles.pill,
-              {
-                backgroundColor: selected ? catColor : (colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.05)'),
-                borderColor: selected ? catColor : (colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)'),
-                borderWidth: selected ? 0 : 1,
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-          >
-            <View style={[
-              styles.pillIcon,
-              { backgroundColor: selected ? 'rgba(255,255,255,0.2)' : catColor },
-            ]}>
-              <Text style={styles.pillIconText}>{category.icon}</Text>
-            </View>
-            <Text style={[
-              styles.pillLabel,
-              { color: selected ? 'white' : theme.colors.text },
-            ]}>
-              {category.name}
-            </Text>
-            {category.count !== undefined && (
-              <View style={[
-                styles.pillCount,
-                { backgroundColor: selected ? 'rgba(255,255,255,0.3)' : catColor },
-              ]}>
-                <Text style={styles.pillCountText}>{category.count}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  );
-};
-
-const s2 = StyleSheet.create({
-  pillContainer: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingVertical: 8,
+  categoriesWrapper: {
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  categoriesContainer: {
     gap: 8,
-    paddingVertical: 8,
+    paddingBottom: 4,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 14,
-    borderRadius: 20,
+    paddingVertical: 8,
+    borderRadius: 9999,
   },
-  pillIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pillIconText: {
-    fontSize: 12,
-    color: 'white',
-  },
-  pillLabel: {
-    fontSize: 14,
+  categoryChipText: {
+    fontSize: 13,
     fontWeight: '600',
-  },
-  pillCount: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    minWidth: 20,
-    alignItems: 'center',
-  },
-  pillCountText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: 'white',
+    includeFontPadding: false,
   },
 });
-const styles = { ...s0, ...s2 };

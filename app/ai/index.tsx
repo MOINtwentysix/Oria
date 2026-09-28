@@ -103,28 +103,17 @@ export const AIScreen: React.FC = () => {
 
   if (!isSignedIn) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
         <View style={styles.emptyState}>
-          <Text style={[
-            styles.emptyIcon,
-            { color: theme.colors.textTertiary },
-          ]}>
-            ✨
+          <Text style={[styles.emptyIcon, { color: theme.colors.inkSubtle }]}>✨</Text>
+          <Text style={[styles.emptyTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+            Anmelden für Oria AI
           </Text>
-          <Text style={[
-            styles.emptyTitle,
-            { color: theme.colors.text },
-          ]}>
-            Sign in to use Oria AI
-          </Text>
-          <Text style={[
-            styles.emptySubtitle,
-            { color: theme.colors.textSecondary },
-          ]}>
-            Get personalized recommendations and plan trips
+          <Text style={[styles.emptySubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+            Persönliche Empfehlungen & Reiseplanung
           </Text>
           <GlassButton size="lg" onPress={() => router.push('/auth')}>
-            Sign In
+            Anmelden
           </GlassButton>
         </View>
       </SafeAreaView>
@@ -132,59 +121,52 @@ export const AIScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
+      <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
         <View style={styles.headerContent}>
-          <Text style={[
-            styles.title,
-            { color: theme.colors.text },
-          ]}>
+          <Text style={[styles.title, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
             Oria AI
           </Text>
-          <TouchableOpacity onPress={() => router.push('/profile')} hitSlop={12} style={styles.avatarButton}>
-            <GlassAvatar name={user?.firstName} uri={user?.imageUrl} size="sm" />
-          </TouchableOpacity>
+          {user && (
+            <TouchableOpacity onPress={() => router.push('/profile')} hitSlop={12} style={styles.avatarButton}>
+              <GlassAvatar name={user?.firstName} uri={user?.imageUrl} size="sm" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
+
           {showModeSelector && (
             <View style={styles.modeSelector}>
-              <Text style={[
-                styles.modeSelectorTitle,
-                { color: theme.colors.textSecondary },
-              ]}>
-                How can I help?
+              <Text style={[styles.modeSelectorTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>
+                Modus
               </Text>
               <View style={styles.modeCards}>
                 <AIModeCard
-                  title="Ask Oria"
-                  description="Ask about places nearby"
                   icon="💬"
-                  onPress={() => { setMode('chat'); setShowModeSelector(false); }}
+                  title="Chat"
+                  subtitle="Frag Oria nach Orten & Tipps"
+                  active={mode === 'chat'}
+                  onPress={() => setMode('chat')}
+                  color={theme.colors.accent}
                 />
                 <AIModeCard
-                  title="Plan My Trip"
-                  description="Create a personalized itinerary"
                   icon="🗺️"
+                  title="Reise planen"
+                  subtitle="KI-Route mit Google Maps Export"
+                  active={mode === 'trip'}
                   onPress={handlePlanTripPress}
+                  color={theme.colors.success}
                 />
                 <AIModeCard
-                  title="Find Something"
-                  description="Describe what you're looking for"
-                  icon="🔍"
-                  onPress={() => { setMode('chat'); setShowModeSelector(false); }}
-                />
-                <AIModeCard
-                  title="Surprise Me"
-                  description="Get a random recommendation"
-                  icon="🎲"
-                  onPress={() => {
-                    setMode('chat');
-                    setShowModeSelector(false);
-                    handleSend();
-                  }}
+                  icon="📋"
+                  title="Aus Liste"
+                  subtitle="Route aus deinen gespeicherten Orten"
+                  active={mode === 'list'}
+                  onPress={handlePlanFromList}
+                  color={theme.colors.warning}
                 />
               </View>
             </View>
@@ -193,42 +175,58 @@ export const AIScreen: React.FC = () => {
           {mode === 'chat' && (
             <View style={styles.chatContainer}>
               <View style={styles.messagesContainer}>
-                {messages.length === 0 && !showModeSelector ? (
+                {messages.length > 0 ? (
+                  <FlatList
+                    data={messages}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <AIChatMessage
+                        message={item}
+                        onPlacePress={handlePlaceCardPress}
+                      />
+                    )}
+                    ListEmptyComponent={
+                      <View style={styles.welcomeMessage}>
+                        <Text style={[
+                          styles.welcomeTitle,
+                          { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
+                        ]}>
+                          Wie kann ich dir helfen?
+                        </Text>
+                        <Text style={[
+                          styles.welcomeSubtitle,
+                          { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
+                        ]}>
+                          Frag nach Cafés, plane eine Route oder lass dich inspirieren
+                        </Text>
+                      </View>
+                    }
+                  />
+                ) : (
                   <View style={styles.welcomeMessage}>
                     <Text style={[
                       styles.welcomeTitle,
-                      { color: theme.colors.text },
+                      { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
                     ]}>
-                      How can I help you discover places?
+                      Wie kann ich dir helfen?
                     </Text>
                     <Text style={[
                       styles.welcomeSubtitle,
-                      { color: theme.colors.textSecondary },
+                      { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
                     ]}>
-                      Ask me about restaurants, activities, or anything nearby!
+                      Frag nach Cafés, plane eine Route oder lass dich inspirieren
                     </Text>
                   </View>
-                ) : (
-                  messages.map((msg, index) => (
-                    <AIChatMessage
-                      key={msg.id || index}
-                      message={msg}
-                      onPlaceCardPress={handlePlaceCardPress}
-                    />
-                  ))
                 )}
                 {error && (
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
+                  <View style={[styles.errorContainer, { backgroundColor: theme.colors.errorSoft }]}>
+                    <Text style={[styles.errorText, { color: theme.colors.error, fontFamily: theme.typography.fontFamily.body }]}>{error}</Text>
                   </View>
                 )}
                 {streaming && (
                   <View style={styles.typingIndicator}>
-                    <Text style={[
-                      styles.typingText,
-                      { color: theme.colors.textTertiary },
-                    ]}>
-                      Oria is thinking...
+                    <Text style={[styles.typingText, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body }]}>
+                      Oria denkt nach...
                     </Text>
                   </View>
                 )}
@@ -256,7 +254,7 @@ export const AIScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { borderTopColor: theme.colors.border }]}>
         <AIChatInput
           value={inputValue}
           onChangeText={setInputValue}
@@ -269,10 +267,10 @@ export const AIScreen: React.FC = () => {
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
+          { id: 'explore', label: 'Entdecken', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
           { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>✨</Text>, selectedIcon: <Text style={styles.tabIcon}>✨</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
+          { id: 'saved', label: 'Gespeichert', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
+          { id: 'profile', label: 'Profil', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
         ]}
         activeTab="ai"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}
@@ -288,14 +286,12 @@ export default AIScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   headerContent: {
     flexDirection: 'row',
@@ -306,6 +302,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.5,
+    includeFontPadding: false,
   },
   avatarButton: {
     padding: 4,
@@ -317,18 +314,19 @@ const styles = StyleSheet.create({
     paddingBottom: 150,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
     gap: 24,
   },
   modeSelector: {
     gap: 16,
   },
   modeSelectorTitle: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    includeFontPadding: false,
   },
   modeCards: {
     gap: 12,
@@ -344,12 +342,11 @@ const styles = StyleSheet.create({
   errorContainer: {
     padding: 16,
     borderRadius: 16,
-    backgroundColor: 'rgba(239,68,68,0.1)',
   },
   errorText: {
-    color: '#DC2626',
     fontSize: 14,
     lineHeight: 20,
+    includeFontPadding: false,
   },
   welcomeMessage: {
     flex: 1,
@@ -362,11 +359,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
+    includeFontPadding: false,
   },
   welcomeSubtitle: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
   },
   typingIndicator: {
     paddingVertical: 16,
@@ -375,13 +374,13 @@ const styles = StyleSheet.create({
   typingText: {
     fontSize: 14,
     fontWeight: '500',
+    includeFontPadding: false,
   },
   inputContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 16,
     paddingBottom: 100,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
   },
   tabBar: {
     position: 'absolute',
@@ -407,10 +406,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     textAlign: 'center',
+    includeFontPadding: false,
   },
   emptySubtitle: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
   },
 });

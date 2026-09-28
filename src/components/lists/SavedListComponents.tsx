@@ -1,14 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Animated, Easing, TextInput, FlatList } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, FlatList, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { GlassButton, GlassChip, GlassCard, GlassInput, GlassAvatar, GlassCardListItem } from '@/components/ui';
-import { Place, SavedList, SavedListItem } from '@/types';
-import { CATEGORIES } from '@/constants';
+import { GlassButton, GlassChip, GlassCard, GlassAvatar, GlassCardListItem, GlassInput } from '@/components/ui';
+import { SavedList, SavedPlace, SavedListItem } from '@/types';
 
 interface SavedListCardProps {
   list: SavedList;
-  onPress: () => void;
+  onPress?: () => void;
   onLongPress?: () => void;
   onShare?: () => void;
   onEdit?: () => void;
@@ -35,7 +34,9 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
       style={[
         styles.card,
         {
-          backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.6)' : 'rgba(255,255,255,0.6)',
+          backgroundColor: colorScheme === 'dark' ? theme.glassStyles.heavyDark.backgroundColor : theme.glassStyles.heavy.backgroundColor,
+          borderColor: theme.colors.glassBorder,
+          borderWidth: 1,
         },
         style,
       ]}
@@ -51,7 +52,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
       {!list.cover_image && (
         <View style={[
           styles.coverPlaceholder,
-          { backgroundColor: theme.colors.primary },
+          { backgroundColor: theme.colors.accent },
         ]}>
           <Text style={styles.coverPlaceholderText}>❤️</Text>
         </View>
@@ -62,25 +63,41 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
           <View style={styles.cardTitleRow}>
             <Text style={[
               styles.cardTitle,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
             ]}>
               {list.name}
             </Text>
             {list.is_default && (
-              <View style={styles.defaultBadge}>
-                <Text style={styles.defaultBadgeText}>Default</Text>
+              <View style={[
+                styles.defaultBadge,
+                { backgroundColor: theme.colors.accentSoft },
+              ]}>
+                <Text style={[
+                  styles.defaultBadgeText,
+                  { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
+                ]}>
+                  Standard
+                </Text>
               </View>
             )}
             {list.is_shared && (
-              <View style={styles.sharedBadge}>
-                <Text style={styles.sharedBadgeText}>👥 Shared</Text>
+              <View style={[
+                styles.sharedBadge,
+                { backgroundColor: theme.colors.successSoft },
+              ]}>
+                <Text style={[
+                  styles.sharedBadgeText,
+                  { color: theme.colors.success, fontFamily: theme.typography.fontFamily.body },
+                ]}>
+                  👥 Geteilt
+                </Text>
               </View>
             )}
           </View>
           {list.description && (
             <Text style={[
               styles.cardDescription,
-              { color: theme.colors.textSecondary },
+              { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
             ]}>
               {list.description}
             </Text>
@@ -91,29 +108,29 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
           <View style={styles.stat}>
             <Text style={[
               styles.statValue,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
             ]}>
               {list.place_count || 0}
             </Text>
             <Text style={[
               styles.statLabel,
-              { color: theme.colors.textTertiary },
+              { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              Places
+              Orte
             </Text>
           </View>
           <View style={styles.stat}>
             <Text style={[
               styles.statValue,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
             ]}>
               {list.member_count || 1}
             </Text>
             <Text style={[
               styles.statLabel,
-              { color: theme.colors.textTertiary },
+              { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              Members
+              Mitglieder
             </Text>
           </View>
         </View>
@@ -122,9 +139,9 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
           <TouchableOpacity onPress={onShare} style={styles.shareButton} hitSlop={8}>
             <Text style={[
               styles.shareButtonText,
-              { color: theme.colors.primary },
+              { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              Share List ↗️
+              Liste teilen ↗
             </Text>
           </TouchableOpacity>
         )}
@@ -157,7 +174,7 @@ const s1 = StyleSheet.create({
     gap: 12,
   },
   cardHeader: {
-    gap: 6,
+    gap: 8,
   },
   cardTitleRow: {
     flexDirection: 'row',
@@ -168,33 +185,32 @@ const s1 = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    flex: 1,
+    includeFontPadding: false,
   },
   defaultBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,102,204,0.15)',
+    borderRadius: 9999,
   },
   defaultBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#0066CC',
+    fontSize: 11,
+    fontWeight: '600',
+    includeFontPadding: false,
   },
   sharedBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,168,107,0.15)',
+    borderRadius: 9999,
   },
   sharedBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#00A86B',
+    fontSize: 11,
+    fontWeight: '600',
+    includeFontPadding: false,
   },
   cardDescription: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 14,
+    lineHeight: 21,
+    includeFontPadding: false,
   },
   cardStats: {
     flexDirection: 'row',
@@ -202,381 +218,88 @@ const s1 = StyleSheet.create({
     paddingTop: 4,
   },
   stat: {
-    alignItems: 'center',
     gap: 2,
   },
   statValue: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
+    includeFontPadding: false,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
+    includeFontPadding: false,
   },
   shareButton: {
-    paddingTop: 4,
-    paddingVertical: 8,
-    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(13,27,30,0.05)',
   },
   shareButtonText: {
     fontSize: 14,
     fontWeight: '600',
+    includeFontPadding: false,
   },
 });
 
-interface SavedPlaceItemProps {
-  item: SavedListItem;
-  onPress: () => void;
-  onRemove: () => void;
-  onMove?: () => void;
-  style?: any;
-}
-
-export const SavedPlaceItem: React.FC<SavedPlaceItemProps> = ({
-  item,
-  onPress,
-  onRemove,
-  onMove,
-  style,
-}) => {
-  const { colorScheme } = useTheme();
-  const theme = getTheme(colorScheme);
-
-  const place = item.place_data;
-  const firstPhoto = place.photos[0];
-  const photoUrl = firstPhoto?.url || firstPhoto ? `${firstPhoto.prefix}original${firstPhoto.suffix}` : null;
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[
-        styles.placeItem,
-        {
-          backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.5)' : 'rgba(255,255,255,0.5)',
-        },
-        style,
-      ]}
-      hitSlop={8}
-    >
-      <View style={styles.placeItemContent}>
-        {photoUrl && (
-          <Image
-            source={{ uri: photoUrl }}
-            style={styles.placeImage}
-            resizeMode="cover"
-          />
-        )}
-        {!photoUrl && (
-          <View style={[
-            styles.placeImagePlaceholder,
-            { backgroundColor: theme.colors.backgroundTertiary },
-          ]}>
-            <Text style={styles.placeImagePlaceholderText}>
-              {place.categories[0]?.icon || '📍'}
-            </Text>
-          </View>
-        )}
-
-        <View style={styles.placeInfo}>
-          <Text style={[
-            styles.placeName,
-            { color: theme.colors.text },
-          ]}>
-            {place.name}
-          </Text>
-
-          {place.categories[0] && (
-            <Text style={[
-              styles.placeCategory,
-              { color: theme.colors.textSecondary },
-            ]}>
-              {place.categories[0].icon} {place.categories[0].name}
-            </Text>
-          )}
-
-          {place.rating && (
-            <Text style={[
-              styles.placeRating,
-              { color: theme.colors.textSecondary },
-            ]}>
-              ⭐ {place.rating.toFixed(1)}
-            </Text>
-          )}
-
-          {item.notes && (
-            <Text style={[
-              styles.placeNotes,
-              { color: theme.colors.textTertiary },
-            ]}>
-              "{item.notes}"
-            </Text>
-          )}
-        </View>
-
-        <TouchableOpacity onPress={onRemove} hitSlop={12} style={styles.removeButton}>
-          <View style={styles.removeIcon} />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-const s4 = StyleSheet.create({
-  placeItem: {
-    borderRadius: 16,
-    marginBottom: 10,
-    overflow: 'hidden',
+const s2 = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(13,27,30,0.45)',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
-  placeItemContent: {
+  modalContent: {
+    borderRadius: 28,
+    overflow: 'hidden',
+    maxHeight: '85%',
+  },
+  modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(13,27,30,0.05)',
   },
-  placeImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 12,
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    includeFontPadding: false,
   },
-  placeImagePlaceholder: {
-    width: 64,
-    height: 64,
-    borderRadius: 12,
+  closeButton: {
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  placeImagePlaceholderText: {
+  closeIcon: {
     fontSize: 24,
+    fontWeight: '300',
+    includeFontPadding: false,
   },
-  placeInfo: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 2,
-  },
-  placeName: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  placeCategory: {
-    fontSize: 12,
-  },
-  placeRating: {
-    fontSize: 12,
-  },
-  placeNotes: {
-    fontSize: 12,
-    fontStyle: 'italic',
-  },
-  removeButton: {
-    padding: 8,
-  },
-  removeIcon: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
-    opacity: 0.5,
-  },
-});
-
-interface CreateListModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onCreate: (name: string, description?: string, isShared?: boolean) => void;
-  style?: any;
-}
-
-export const CreateListModal: React.FC<CreateListModalProps> = ({
-  visible,
-  onClose,
-  onCreate,
-  style,
-}) => {
-  const { colorScheme } = useTheme();
-  const theme = getTheme(colorScheme);
-
-  const [name, setName] = React.useState('');
-  const [description, setDescription] = React.useState('');
-  const [isShared, setIsShared] = React.useState(false);
-  const [error, setError] = React.useState('');
-
-  if (!visible) return null;
-
-  const handleCreate = () => {
-    if (!name.trim()) {
-      setError('Please enter a list name');
-      return;
-    }
-    onCreate(name.trim(), description.trim() || undefined, isShared);
-    onClose();
-  };
-
-  return (
-    <Animated.View
-      style={[
-        styles.modalContainer,
-        { opacity: visible ? 1 : 0 },
-        style,
-      ]}
-      pointerEvents={visible ? 'auto' : 'none'}
-    >
-      <TouchableOpacity onPress={onClose} style={styles.modalOverlay} activeOpacity={1} />
-
-      <BlurView intensity={95} style={[
-        styles.modal,
-        { backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)' },
-      ]}>
-        <View style={styles.modalHandle}>
-          <View style={[
-            styles.handle,
-            { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.3)' },
-          ]} />
-        </View>
-
-        <View style={styles.modalContent}>
-          <Text style={[
-            styles.modalTitle,
-            { color: theme.colors.text },
-          ]}>
-            Create New List
-          </Text>
-          <Text style={[
-            styles.modalSubtitle,
-            { color: theme.colors.textSecondary },
-          ]}>
-            Give your list a name and optional description
-          </Text>
-
-          <GlassInput
-            value={name}
-            onChangeText={setName}
-            placeholder="List name (e.g., Roadtrip 2026)"
-            label="Name"
-            autoCapitalize="words"
-            autoFocus
-            style={styles.modalInput}
-          />
-
-          <GlassInput
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Description (optional)"
-            label="Description"
-            multiline
-            numberOfLines={3}
-            style={styles.modalInput}
-          />
-
-          <View style={styles.toggleRow}>
-            <Text style={[
-              styles.toggleLabel,
-              { color: theme.colors.text },
-            ]}>
-              Make this list shared
-            </Text>
-            <TouchableOpacity
-              onPress={() => setIsShared(!isShared)}
-              style={[
-                styles.toggleSwitch,
-                { backgroundColor: isShared ? theme.colors.primary : theme.colors.border },
-              ]}
-            >
-              <Animated.View
-                style={[
-                  styles.toggleThumb,
-                  { transform: [{ translateX: isShared ? 24 : 0 }] },
-                ]}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {error && (
-            <Text style={[
-              styles.modalError,
-              { color: theme.colors.error },
-            ]}>
-              {error}
-            </Text>
-          )}
-
-          <View style={styles.modalActions}>
-            <GlassButton variant="ghost" size="lg" onPress={onClose}>
-              Cancel
-            </GlassButton>
-            <GlassButton size="lg" onPress={handleCreate}>
-              Create List
-            </GlassButton>
-          </View>
-        </View>
-      </BlurView>
-    </Animated.View>
-  );
-};
-
-const s2 = StyleSheet.create({
-  modalContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 200,
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#0F172A',
-    opacity: 0.5,
-  },
-  modal: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingBottom: 40,
-  },
-  modalHandle: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  handle: {
-    width: 36,
-    height: 5,
-    borderRadius: 3,
-  },
-  modalContent: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    gap: 20,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  modalSubtitle: {
-    fontSize: 15,
-    lineHeight: 22,
+  modalBody: {
+    padding: 20,
+    gap: 16,
   },
   modalInput: {
-    marginTop: 4,
+    marginBottom: 8,
   },
   toggleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 8,
   },
   toggleLabel: {
     fontSize: 15,
     fontWeight: '500',
+    includeFontPadding: false,
   },
-  toggleSwitch: {
+  toggleTrack: {
     width: 52,
     height: 28,
     borderRadius: 14,
@@ -588,411 +311,128 @@ const s2 = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: '#FEFBF6',
+    shadowColor: '#0D1B1E',
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  modalError: {
-    fontSize: 13,
-    fontWeight: '500',
-    marginTop: -8,
+    shadowRadius: 2,
+    elevation: 2,
   },
   modalActions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(13,27,30,0.05)',
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  createButton: {
+    flex: 1,
   },
 });
 
-interface ShareListModalProps {
+interface CreateListModalProps {
   visible: boolean;
-  list: SavedList;
   onClose: () => void;
-  onInvite: (email: string, role: 'editor' | 'viewer') => void;
-  members: Array<{ id: string; user_id: string; role: string; email: string; firstName?: string; lastName?: string; imageUrl?: string }>;
-  onRemoveMember: (memberId: string) => void;
-  onChangeRole: (memberId: string, role: 'editor' | 'viewer') => void;
-  style?: any;
+  onCreate: (name: string, description?: string, isShared?: boolean) => void;
 }
 
-export const ShareListModal: React.FC<ShareListModalProps> = ({
+export const CreateListModal: React.FC<CreateListModalProps> = ({
   visible,
-  list,
   onClose,
-  onInvite,
-  members,
-  onRemoveMember,
-  onChangeRole,
-  style,
+  onCreate,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
-  const [email, setEmail] = React.useState('');
-  const [role, setRole] = React.useState<'editor' | 'viewer'>('editor');
-  const [inviteError, setInviteError] = React.useState('');
+  const [name, setName] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [isShared, setIsShared] = React.useState(false);
 
   if (!visible) return null;
 
-  const handleInvite = () => {
-    if (!email.trim() || !email.includes('@')) {
-      setInviteError('Please enter a valid email');
-      return;
-    }
-    onInvite(email.trim(), role);
-    setEmail('');
-    setInviteError('');
-  };
-
-  const owner = members.find(m => m.role === 'owner');
-  const editors = members.filter(m => m.role === 'editor' && m.user_id !== owner?.user_id);
-  const viewers = members.filter(m => m.role === 'viewer');
-
   return (
-    <Animated.View
-      style={[
-        styles.modalContainer,
-        { opacity: visible ? 1 : 0 },
-        style,
-      ]}
-      pointerEvents={visible ? 'auto' : 'none'}
-    >
-      <TouchableOpacity onPress={onClose} style={styles.modalOverlay} activeOpacity={1} />
-
-      <BlurView intensity={95} style={[
-        styles.modal,
-        { backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)' },
-        { maxHeight: '90%' },
+    <View style={styles.modalOverlay}>
+      <View style={[
+        styles.modalContent,
+        {
+          backgroundColor: theme.colors.paper,
+          borderColor: theme.colors.glassBorder,
+          borderWidth: 1,
+        },
       ]}>
-        <View style={styles.modalHandle}>
-          <View style={[
-            styles.handle,
-            { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.3)' },
-          ]} />
+        <View style={styles.modalHeader}>
+          <Text style={[
+            styles.modalTitle,
+            { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
+          ]}>
+            Neue Liste
+          </Text>
+          <TouchableOpacity onPress={onClose} hitSlop={16} style={styles.closeButton}>
+            <Text style={[styles.closeIcon, { color: theme.colors.inkSubtle }]}>✕</Text>
+          </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={[
-                styles.modalTitle,
-                { color: theme.colors.text },
-              ]}>
-                Share "{list.name}"
-              </Text>
-              <TouchableOpacity onPress={onClose} hitSlop={16} style={styles.closeButton}>
-                <View style={styles.closeIcon} />
-              </TouchableOpacity>
-            </View>
+        <View style={styles.modalBody}>
+          <GlassInput
+            label="Name"
+            placeholder="z. B. Meine Lieblingscafés"
+            value={name}
+            onChangeText={setName}
+            autoFocus={true}
+            style={styles.modalInput}
+          />
 
+          <GlassInput
+            label="Beschreibung (optional)"
+            placeholder="Was macht diese Liste besonders?"
+            value={description}
+            onChangeText={setDescription}
+            multiline={true}
+            numberOfLines={3}
+            style={styles.modalInput}
+          />
+
+          <View style={styles.toggleRow}>
             <Text style={[
-              styles.modalSubtitle,
-              { color: theme.colors.textSecondary },
+              styles.toggleLabel,
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              Invite friends to collaborate on this list
+              Mit Freunden teilen
             </Text>
-
-            <View style={styles.inviteSection}>
-              <Text style={[
-                styles.sectionTitle,
-                { color: theme.colors.textSecondary },
-              ]}>
-                Invite People
-              </Text>
-
-              <GlassInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="friend@example.com"
-                label="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.modalInput}
+            <TouchableOpacity
+              onPress={() => setIsShared(!isShared)}
+              style={[
+                styles.toggleTrack,
+                { backgroundColor: isShared ? theme.colors.accent : theme.colors.inkSubtle },
+              ]}
+              hitSlop={8}
+            >
+              <Animated.View
+                style={[
+                  styles.toggleThumb,
+                  { transform: [{ translateX: isShared ? 24 : 0 }] },
+                ]}
               />
-
-              <View style={styles.roleSelector}>
-                <GlassChip
-                  variant={role === 'editor' ? 'selected' : 'outline'}
-                  size="sm"
-                  onPress={() => setRole('editor')}
-                >
-                  Editor
-                </GlassChip>
-                <GlassChip
-                  variant={role === 'viewer' ? 'selected' : 'outline'}
-                  size="sm"
-                  onPress={() => setRole('viewer')}
-                >
-                  Viewer
-                </GlassChip>
-              </View>
-
-              <GlassButton size="md" onPress={handleInvite} disabled={!email.trim()}>
-                Send Invite
-              </GlassButton>
-
-              {inviteError && (
-                <Text style={[
-                  styles.modalError,
-                  { color: theme.colors.error },
-                ]}>
-                  {inviteError}
-                </Text>
-              )}
-            </View>
-
-            <View style={styles.membersSection}>
-              <Text style={[
-                styles.sectionTitle,
-                { color: theme.colors.textSecondary },
-              ]}>
-                Members ({members.length})
-              </Text>
-
-              {owner && (
-                <View style={styles.memberGroup}>
-                  <Text style={[
-                    styles.memberGroupTitle,
-                    { color: theme.colors.textTertiary },
-                  ]}>
-                    Owner
-                  </Text>
-                  <GlassCardListItem
-                    title={`${owner.firstName || ''} ${owner.lastName || ''}`.trim() || owner.email}
-                    subtitle="Owner"
-                    leftIcon={<GlassAvatar name={owner.firstName} uri={owner.imageUrl} size="sm" />}
-
-                    padding="sm"
-                    divider={false}
-                  />
-                </View>
-              )}
-
-              {editors.length > 0 && (
-                <View style={styles.memberGroup}>
-                  <Text style={[
-                    styles.memberGroupTitle,
-                    { color: theme.colors.textTertiary },
-                  ]}>
-                    Editors
-                  </Text>
-                  {editors.map((member) => (
-                    <GlassCardListItem
-                      key={member.id}
-                      title={`${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email}
-                      subtitle="Editor"
-                      leftIcon={<GlassAvatar name={member.firstName} uri={member.imageUrl} size="sm" />}
-
-                      padding="sm"
-                      divider={false}
-                      trailing={
-                        <View style={styles.memberActions}>
-                          <TouchableOpacity
-                            onPress={() => onChangeRole(member.id, 'viewer')}
-                            hitSlop={8}
-                          >
-                            <Text style={[
-                              styles.roleChangeText,
-                              { color: theme.colors.textTertiary },
-                            ]}>
-                              Make Viewer
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => onRemoveMember(member.id)}
-                            hitSlop={8}
-                          >
-                            <Text style={[
-                              styles.removeMemberText,
-                              { color: theme.colors.error },
-                            ]}>
-                              Remove
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      }
-                    />
-                  ))}
-                </View>
-              )}
-
-              {viewers.length > 0 && (
-                <View style={styles.memberGroup}>
-                  <Text style={[
-                    styles.memberGroupTitle,
-                    { color: theme.colors.textTertiary },
-                  ]}>
-                    Viewers
-                  </Text>
-                  {viewers.map((member) => (
-                    <GlassCardListItem
-                      key={member.id}
-                      title={`${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email}
-                      subtitle="Viewer"
-                      leftIcon={<GlassAvatar name={member.firstName} uri={member.imageUrl} size="sm" />}
-
-                      padding="sm"
-                      divider={false}
-                      trailing={
-                        <View style={styles.memberActions}>
-                          <TouchableOpacity
-                            onPress={() => onChangeRole(member.id, 'editor')}
-                            hitSlop={8}
-                          >
-                            <Text style={[
-                              styles.roleChangeText,
-                              { color: theme.colors.primary },
-                            ]}>
-                              Make Editor
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => onRemoveMember(member.id)}
-                            hitSlop={8}
-                          >
-                            <Text style={[
-                              styles.removeMemberText,
-                              { color: theme.colors.error },
-                            ]}>
-                              Remove
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      }
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
-      </BlurView>
-    </Animated.View>
+        </View>
+
+        <View style={styles.modalActions}>
+          <GlassButton variant="secondary" size="md" onPress={onClose} style={styles.cancelButton}>
+            Abbrechen
+          </GlassButton>
+          <GlassButton variant="primary" size="md" onPress={() => { onCreate(name, description, isShared); onClose(); }} disabled={!name.trim()} style={styles.createButton}>
+            Erstellen
+          </GlassButton>
+        </View>
+      </View>
+    </View>
   );
 };
 
-const s3 = StyleSheet.create({
-  modalContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 200,
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#0F172A',
-    opacity: 0.5,
-  },
-  modal: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    maxHeight: '90%',
-  },
-  modalHandle: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  handle: {
-    width: 36,
-    height: 5,
-    borderRadius: 3,
-  },
-  modalScroll: {
-    flex: 1,
-  },
-  modalContent: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 40,
-    gap: 24,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    flex: 1,
-    paddingRight: 16,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeIcon: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderColor: 'currentColor',
-    borderRadius: 2,
-    transform: [{ rotate: '45deg' }],
-    opacity: 0.5,
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  inviteSection: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  modalInput: {
-    marginTop: 4,
-  },
-  roleSelector: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  modalError: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  membersSection: {
-    gap: 16,
-  },
-  memberGroup: {
-    gap: 8,
-  },
-  memberGroupTitle: {
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  memberActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  roleChangeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  removeMemberText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-});
-const styles = { ...s1, ...s2, ...s3, ...s4 };
+const styles = { ...s1, ...s2 };
+export default styles;

@@ -1,12 +1,12 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
 
 interface GlassButtonProps {
   children: React.ReactNode;
   style?: any;
-  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'glass';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'glass';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   fullWidth?: boolean;
   disabled?: boolean;
@@ -38,7 +38,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   const handlePressIn = () => {
     if (!disabled && !loading) {
       Animated.timing(pressAnim, {
-        toValue: 0.95,
+        toValue: 0.96,
         duration: 80,
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
@@ -55,74 +55,67 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     }).start();
   };
 
-  const getButtonStyles = () => {
-    const baseStyles = {
+  const getVariantStyles = () => {
+    const base = {
       primary: {
-        backgroundColor: theme.colors.primary,
-        borderColor: theme.colors.primary,
+        backgroundColor: theme.colors.accent,
         textColor: theme.colors.textOnPrimary,
+        borderColor: 'transparent',
         glass: false,
       },
       secondary: {
-        backgroundColor: theme.colors.backgroundTertiary,
+        backgroundColor: theme.colors.paperElevated,
+        textColor: theme.colors.ink,
         borderColor: theme.colors.border,
-        textColor: theme.colors.text,
-        glass: false,
-      },
-      accent: {
-        backgroundColor: theme.colors.accent,
-        borderColor: theme.colors.accent,
-        textColor: theme.colors.textOnPrimary,
         glass: false,
       },
       ghost: {
         backgroundColor: 'transparent',
+        textColor: theme.colors.accent,
         borderColor: 'transparent',
-        textColor: theme.colors.primary,
         glass: false,
       },
       glass: {
-        backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.7)',
-        borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)',
-        textColor: colorScheme === 'dark' ? theme.colors.text : theme.colors.text,
+        backgroundColor: 'transparent',
+        textColor: theme.colors.ink,
+        borderColor: theme.colors.glassBorder,
         glass: true,
       },
     };
-
-    return baseStyles[variant];
+    return base[variant];
   };
 
-  const buttonStyle = getButtonStyles();
+  const variantStyle = getVariantStyles();
 
   const sizeStyles = {
     sm: {
-      paddingVertical: 8,
+      paddingVertical: 10,
       paddingHorizontal: 16,
-      borderRadius: theme.borderRadius.lg,
+      borderRadius: theme.borderRadius.tight,
       fontSize: theme.textStyles.button.fontSize,
       iconSize: 16,
       gap: 8,
     },
     md: {
-      paddingVertical: 12,
+      paddingVertical: 14,
       paddingHorizontal: 20,
-      borderRadius: theme.borderRadius.xl,
+      borderRadius: theme.borderRadius.card,
       fontSize: theme.textStyles.button.fontSize,
       iconSize: 20,
       gap: 10,
     },
     lg: {
-      paddingVertical: 16,
-      paddingHorizontal: 24,
-      borderRadius: theme.borderRadius.xxl,
+      paddingVertical: 18,
+      paddingHorizontal: 28,
+      borderRadius: theme.borderRadius.card,
       fontSize: theme.textStyles.buttonLarge.fontSize,
       iconSize: 24,
       gap: 12,
     },
     xl: {
-      paddingVertical: 20,
+      paddingVertical: 22,
       paddingHorizontal: 32,
-      borderRadius: theme.borderRadius.xxxl,
+      borderRadius: theme.borderRadius.sheet,
       fontSize: theme.textStyles.buttonLarge.fontSize + 2,
       iconSize: 28,
       gap: 14,
@@ -142,11 +135,11 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       paddingHorizontal: s.paddingHorizontal,
       borderRadius: s.borderRadius,
       width: fullWidth ? '100%' : 'auto',
-      opacity: disabled || loading ? 0.6 : 1,
+      opacity: disabled || loading ? 0.5 : 1,
+      borderWidth: variantStyle.glass ? 1 : (variant === 'secondary' ? 1 : 0),
+      borderColor: variantStyle.borderColor,
+      backgroundColor: variantStyle.glass ? undefined : variantStyle.backgroundColor,
     },
-    !buttonStyle.glass && { backgroundColor: buttonStyle.backgroundColor },
-    buttonStyle.glass && {},
-    { borderWidth: buttonStyle.glass ? 1 : 0, borderColor: buttonStyle.borderColor },
     style,
   ];
 
@@ -155,7 +148,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     {
       fontSize: s.fontSize,
       fontWeight: theme.textStyles.button.fontWeight,
-      color: buttonStyle.textColor,
+      fontFamily: theme.typography.fontFamily.body,
+      color: variantStyle.textColor,
     },
   ];
 
@@ -163,7 +157,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     transform: [{ scale: pressAnim }],
   };
 
-  const ButtonComponent = buttonStyle.glass ? BlurView : View;
+  const ButtonComponent = variantStyle.glass ? BlurView : View;
 
   return (
     <TouchableOpacity
@@ -183,10 +177,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         >
           {loading ? (
             <Animated.View
-              style={[
-                styles.spinner,
-                { width: s.iconSize, height: s.iconSize },
-              ]}
+              style={[styles.spinner, { width: s.iconSize, height: s.iconSize, borderColor: variantStyle.textColor }]}
             />
           ) : (
             <>
@@ -207,10 +198,14 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
+    includeFontPadding: false,
   },
   spinner: {
     borderWidth: 2,
     borderRadius: 9999,
     borderColor: 'transparent',
+    borderTopColor: 'currentColor',
   },
 });
+
+export default GlassButton;

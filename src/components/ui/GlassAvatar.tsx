@@ -9,12 +9,41 @@ interface GlassAvatarProps {
   name?: string | null;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   style?: any;
-  borderColor?: string;
-  borderWidth?: number;
   onPress?: () => void;
-  hitSlop?: number;
-  children?: React.ReactNode;
+  showOnline?: boolean;
+  group?: GlassAvatarProps[];
+  maxGroup?: number;
 }
+
+const sizeMap = {
+  xs: { width: 24, height: 24, fontSize: 10, borderWidth: 1.5 },
+  sm: { width: 32, height: 32, fontSize: 12, borderWidth: 2 },
+  md: { width: 40, height: 40, fontSize: 14, borderWidth: 2 },
+  lg: { width: 48, height: 48, fontSize: 16, borderWidth: 2.5 },
+  xl: { width: 64, height: 64, fontSize: 22, borderWidth: 3 },
+  xxl: { width: 80, height: 80, fontSize: 28, borderWidth: 3 },
+};
+
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getColorFromName = (name: string) => {
+  const colors = [
+    '#E85D3A', '#2D8C4A', '#D14A2E', '#D4A83D',
+    '#1E5AA0', '#4A148C', '#B71C1C', '#006064',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
 
 export const GlassAvatar: React.FC<GlassAvatarProps> = ({
   source,
@@ -22,26 +51,25 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({
   name,
   size = 'md',
   style,
-  borderColor,
-  borderWidth = 2,
   onPress,
-  hitSlop = 8,
-  children,
+  showOnline = false,
+  group,
+  maxGroup = 3,
 }) => {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
 
+  const s = sizeMap[size];
+
   const [pressAnim] = React.useState(new Animated.Value(1));
 
   const handlePressIn = () => {
-    if (onPress) {
-      Animated.timing(pressAnim, {
-        toValue: 0.9,
-        duration: 80,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }).start();
-    }
+    Animated.timing(pressAnim, {
+      toValue: 0.92,
+      duration: 60,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
   };
 
   const handlePressOut = () => {
@@ -53,217 +81,159 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({
     }).start();
   };
 
-  const sizeMap = {
-    xs: 24,
-    sm: 32,
-    md: 40,
-    lg: 56,
-    xl: 72,
-    xxl: 96,
-  };
+  const initials = name ? getInitials(name) : '?';
+  const bgColor = name ? getColorFromName(name) : theme.colors.accent;
 
-  const fontSizeMap = {
-    xs: 9,
-    sm: 12,
-    md: 15,
-    lg: 20,
-    xl: 26,
-    xxl: 34,
-  };
+  const avatarSource = source || (uri ? { uri } : null);
 
-  const diameter = sizeMap[size];
-  const fontSize = fontSizeMap[size];
+  if (group && group.length > 0) {
+    return (
+      <View style={[styles.groupContainer, style]}>
+        {group.slice(0, maxGroup).map((avatar, index) => (
+          <GlassAvatar
+            key={index}
+            {...avatar}
+            size={size}
+            style={[
+              styles.groupAvatar,
+              { marginLeft: index === 0 ? 0 : -s.width * 0.3 },
+            ]}
+          />
+        ))}
+        {group.length > maxGroup && (
+          <View style={[
+            styles.groupMore,
+            { width: s.width, height: s.height, borderWidth: s.borderWidth },
+          ]}>
+            <Text style={[
+              styles.groupMoreText,
+              { fontSize: s.fontSize, color: theme.colors.inkMuted },
+            ]}>
+              +{group.length - maxGroup}
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  }
 
-  const initials = name
-    ?.split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  const getColorFromName = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = hash % 360;
-    return `hsl(${hue}, 65%, 55%)`;
-  };
-
-  const bgColor = name ? getColorFromName(name) : theme.colors.primary;
-
-  const containerStyle = [
-    styles.container,
+  const avatarStyle = [
+    styles.avatar,
     {
-      width: diameter,
-      height: diameter,
-      borderRadius: diameter / 2,
-      borderWidth,
-      borderColor: borderColor || (colorScheme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)'),
-      overflow: 'hidden',
+      width: s.width,
+      height: s.height,
+      borderRadius: s.width / 2,
+      borderWidth: s.borderWidth,
+      borderColor: theme.colors.accent,
     },
     style,
+  ];
+
+  const initialsStyle = [
+    styles.initials,
+    {
+      fontSize: s.fontSize,
+      fontWeight: '700',
+      color: theme.colors.textOnPrimary,
+      fontFamily: theme.typography.fontFamily.body,
+    },
   ];
 
   const animatedStyle = {
     transform: [{ scale: pressAnim }],
   };
 
-  const PressableWrapper = onPress ? TouchableOpacity : View;
+  const Content = onPress ? TouchableOpacity : View;
+
+  const onlineIndicatorStyle = [
+    styles.onlineIndicator,
+    {
+      width: s.width * 0.25,
+      height: s.width * 0.25,
+      borderWidth: s.borderWidth,
+      bottom: -2,
+      right: -2,
+      borderColor: colorScheme === 'dark' ? theme.colors.paper : theme.colors.paper,
+    },
+  ];
 
   return (
-    <PressableWrapper
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      hitSlop={hitSlop}
-      activeOpacity={1}
-      style={animatedStyle}
-    >
-      <BlurView intensity={40} style={containerStyle}>
-        {(source || uri) ? (
+    <Animated.View style={animatedStyle}>
+      <Content
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={avatarStyle}
+        activeOpacity={1}
+        hitSlop={4}
+        accessibilityRole={onPress ? 'button' : 'image'}
+        accessibilityLabel={name || 'Avatar'}
+      >
+        {avatarSource ? (
           <Image
-            source={source || { uri: uri! }}
-            style={styles.image}
+            source={avatarSource}
+            style={[
+              styles.image,
+              { width: s.width, height: s.height, borderRadius: s.width / 2 },
+            ]}
             resizeMode="cover"
           />
-        ) : name ? (
-          <View style={[styles.initialsContainer, { backgroundColor: bgColor }]}>
-            <Text style={[styles.initialsText, { fontSize, color: 'white' }]}>
-              {initials}
-            </Text>
-          </View>
         ) : (
-          <View style={[styles.placeholderContainer, { backgroundColor: theme.colors.backgroundTertiary }]}>
-            <Text style={[styles.placeholderText, { fontSize, color: theme.colors.textTertiary }]}>
-              ?
-            </Text>
+          <View style={[
+            styles.placeholder,
+            { width: s.width, height: s.height, borderRadius: s.width / 2, backgroundColor: bgColor },
+          ]}>
+            <Text style={initialsStyle}>{initials}</Text>
           </View>
         )}
-        {children}
-      </BlurView>
-    </PressableWrapper>
+        {showOnline && (
+          <View style={onlineIndicatorStyle} />
+        )}
+      </Content>
+    </Animated.View>
   );
 };
 
-const s0 = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({
+  avatar: {
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   image: {
-    width: '100%',
-    height: '100%',
     borderRadius: 9999,
   },
-  initialsContainer: {
-    width: '100%',
-    height: '100%',
+  placeholder: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  initials: {
+    includeFontPadding: false,
+  },
+  onlineIndicator: {
+    position: 'absolute',
     borderRadius: 9999,
+    backgroundColor: '#2D8C4A',
   },
-  initialsText: {
-    fontWeight: '700',
-  },
-  placeholderContainer: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 9999,
-  },
-  placeholderText: {
-    fontWeight: '700',
-  },
-});
-
-export interface GlassAvatarGroupProps {
-  avatars: Array<{
-    uri?: string | null;
-    name?: string | null;
-    source?: any;
-  }>;
-  size?: 'sm' | 'md' | 'lg';
-  maxVisible?: number;
-  style?: any;
-  onPress?: () => void;
-}
-
-export const GlassAvatarGroup: React.FC<GlassAvatarGroupProps> = ({
-  avatars,
-  size = 'md',
-  maxVisible = 4,
-  style,
-  onPress,
-}) => {
-  const { colorScheme } = useTheme();
-  const theme = getTheme(colorScheme);
-
-  const sizeMap = { sm: 32, md: 40, lg: 56 };
-  const diameter = sizeMap[size];
-  const overlap = diameter * 0.3;
-
-  const visibleAvatars = avatars.slice(0, maxVisible);
-  const remainingCount = avatars.length - maxVisible;
-
-  return (
-    <View style={[styles.groupContainer, { marginRight: -overlap * (visibleAvatars.length - 1) }, style]}>
-      {visibleAvatars.map((avatar, index) => (
-        <GlassAvatar
-          key={index}
-          uri={avatar.uri}
-          name={avatar.name}
-          source={avatar.source}
-          size={size}
-          style={[
-            styles.groupAvatar,
-            {
-              marginLeft: index === 0 ? 0 : -overlap,
-              borderWidth: 2,
-              borderColor: colorScheme === 'dark' ? theme.colors.background : theme.colors.background,
-              zIndex: maxVisible - index,
-            },
-          ]}
-        />
-      ))}
-      {remainingCount > 0 && (
-        <GlassAvatar
-          name={`+${remainingCount}`}
-          size={size}
-          style={[
-            styles.groupAvatar,
-            { marginLeft: -overlap, zIndex: 0 },
-          ]}
-        >
-          <View style={styles.plusBadge}>
-            <Text style={styles.plusText}>+{remainingCount}</Text>
-          </View>
-        </GlassAvatar>
-      )}
-    </View>
-  );
-};
-
-const s1 = StyleSheet.create({
   groupContainer: {
     flexDirection: 'row',
   },
   groupAvatar: {
-    position: 'relative',
+    borderWidth: 2,
+    borderColor: '#FEFBF6',
   },
-  plusBadge: {
-    position: 'absolute',
-    inset: 0,
+  groupMore: {
     borderRadius: 9999,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(13,27,30,0.04)',
+    borderColor: '#E8E0D8',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: -8,
   },
-  plusText: {
-    color: 'white',
+  groupMoreText: {
     fontWeight: '700',
-    fontSize: 12,
+    includeFontPadding: false,
   },
 });
-const styles = { ...s0, ...s1 };
+
+export default GlassAvatar;

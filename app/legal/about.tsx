@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Linking } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { GlassCard } from '@/components/ui';
+import { GlassButton, GlassCard } from '@/components/ui';
 import { useRouter } from 'expo-router';
 
-export default function AboutScreen() {
+export default function LegalScreen() {
   const { colorScheme } = useTheme();
   const theme = getTheme(colorScheme);
   const router = useRouter();
@@ -13,93 +14,46 @@ export default function AboutScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
+          <Text style={[styles.backIcon, { color: theme.colors.ink }]}>‹</Text>
         </TouchableOpacity>
         <Text style={[
           styles.headerTitle,
-          { color: theme.colors.text },
+          { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
         ]}>
-          About Oria
+          Rechtliches
         </Text>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          <View style={styles.lastUpdated}>
-            <Text style={[
-              styles.lastUpdatedText,
-              { color: theme.colors.textTertiary },
-            ]}>
-              Last updated: August 2026
-            </Text>
-          </View>
-
           <GlassCard variant="light" style={styles.contentCard}>
             <Text style={[
               styles.legalContent,
-              { color: theme.colors.text },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
             ]}>
-ABOUT ORIA
+RECHTLICHER HINWEIS
 
-Version: 1.0.0
-Build: 1
-Platform: iOS / Android
+Diese Seite ist ein Platzhalter für rechtliche Inhalte, die vor Veröffentlichung von Rechtsanwälten geprüft und freigegeben werden müssen. Die finale Version muss rechtlich bindende Bedingungen enthalten, die spezifisch für Orias Betrieb, Zuständigkeit und Dienste sind.
 
-Oria is a modern location discovery application built with:
-- React Native & Expo
-- TypeScript
-- Neon PostgreSQL
-- M26 Account SSO
-- Foursquare Places API
-- Mistral AI
-- OpenStreetMap / OSRM
-
-MISSION
-Help people discover amazing places around them, save favorites, collaborate with friends, and plan unforgettable trips.
-
-TEAM
-Built with \u2764\ufe0f by the Oria Team
-
-CONTACT
-General: hello@oria.app
-Support: support@oria.app
-Legal: legal@oria.app
-Privacy: privacy@oria.app
-
-SOCIAL
-Website: https://oria.app
-Twitter: @oria_app
-Instagram: @oria_app
-
-ACKNOWLEDGMENTS
-- Foursquare for comprehensive place data
-- Mistral AI for intelligent recommendations
-- OpenStreetMap contributors for routing data
-- Expo team for amazing developer tools
-- React Native community for open source libraries
-- All beta testers and early users
-
-THANK YOU
-Thank you for using Oria! We're just getting started.
+Kontakt: legal@oria.app
             </Text>
           </GlassCard>
 
           <GlassCard variant="light" style={styles.noticeCard}>
             <View style={styles.noticeHeader}>
-              <Text style={styles.noticeIcon}>\u26a0\ufe0f</Text>
+              <Text style={styles.noticeIcon}>⚠️</Text>
               <Text style={[
                 styles.noticeTitle,
-                { color: theme.colors.warning },
+                { color: theme.colors.warning, fontFamily: theme.typography.fontFamily.display },
               ]}>
-                Placeholder Content
+                Platzhalter-Inhalt
               </Text>
             </View>
             <Text style={[
               styles.noticeText,
-              { color: theme.colors.textSecondary },
+              { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              This is a placeholder for legal content that must be reviewed and approved by legal counsel before publication. 
-              The final version should include legally binding terms specific to Oria's operations, jurisdiction, and services.
+              Dies ist ein Platzhalter für rechtliche Inhalte, die vor Veröffentlichung von Rechtsanwälten geprüft und freigegeben werden müssen.
             </Text>
           </GlassCard>
         </View>
@@ -111,17 +65,17 @@ Thank you for using Oria! We're just getting started.
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: theme.colors.paper,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: theme.colors.border,
   },
   backButton: {
     width: 44,
@@ -129,52 +83,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300', includeFontPadding: false },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
     gap: 16,
-  },
-  lastUpdated: {
-    paddingHorizontal: 4,
-  },
-  lastUpdatedText: {
-    fontSize: 13,
-    fontWeight: '500',
   },
   contentCard: {
     padding: 20,
   },
   legalContent: {
-    fontSize: 14,
-    lineHeight: 22,
-    
+    fontSize: 15,
+    lineHeight: 24,
+    whiteSpace: 'pre',
+    includeFontPadding: false,
   },
   noticeCard: {
-    padding: 16,
+    padding: 20,
   },
   noticeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 12,
   },
   noticeIcon: {
     fontSize: 20,
   },
   noticeTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   noticeText: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
+    includeFontPadding: false,
   },
 });

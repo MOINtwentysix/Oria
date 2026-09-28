@@ -56,12 +56,12 @@ export const SearchResultsPanel: React.FC<SearchResultsPanelProps> = ({
       ]}
       pointerEvents={visible ? 'auto' : 'none'}
     >
-      <BlurView intensity={90} style={styles.panel}>
+      <BlurView intensity={90} style={[styles.panel, { backgroundColor: theme.colors.paperOverlay }]}>
         <View style={styles.header}>
           <LiquidSearchBar
             value={query}
             onChangeText={onQueryChange}
-            placeholder="Search places..."
+            placeholder="Orte suchen..."
             onClear={onClear}
             onFilterPress={onFilterPress}
             onVoicePress={onVoicePress}
@@ -105,13 +105,10 @@ export const SearchResultsPanel: React.FC<SearchResultsPanelProps> = ({
         </View>
 
         {error && (
-          <GlassCard variant="heavy" style={styles.errorCard}>
+          <GlassCard variant="heavy" style={[styles.errorCard, { borderColor: theme.colors.error }]}>
             <View style={styles.errorContent}>
               <Text style={styles.errorIcon}>⚠️</Text>
-              <Text style={[
-                styles.errorText,
-                { color: theme.colors.error },
-              ]}>
+              <Text style={[styles.errorText, { color: theme.colors.error, fontFamily: theme.typography.fontFamily.body }]}>
                 {error}
               </Text>
             </View>
@@ -122,7 +119,7 @@ export const SearchResultsPanel: React.FC<SearchResultsPanelProps> = ({
           <View style={styles.loadingContainer}>
             <GlassCard variant="heavy" style={styles.loadingCard}>
               <View style={styles.loadingContent}>
-                <Text style={styles.loadingText}>Searching...</Text>
+                <Text style={[styles.loadingText, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>Sucht...</Text>
               </View>
             </GlassCard>
           </View>
@@ -131,18 +128,8 @@ export const SearchResultsPanel: React.FC<SearchResultsPanelProps> = ({
             <GlassCard variant="heavy" style={styles.emptyCard}>
               <View style={styles.emptyContent}>
                 <Text style={styles.emptyIcon}>🔍</Text>
-                <Text style={[
-                  styles.emptyText,
-                  { color: theme.colors.textSecondary },
-                ]}>
-                  {ERROR_MESSAGES.noPlacesFound}
-                </Text>
-                <Text style={[
-                  styles.emptySubtext,
-                  { color: theme.colors.textTertiary },
-                ]}>
-                  Try adjusting your search or filters
-                </Text>
+                <Text style={[styles.emptyText, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>{ERROR_MESSAGES.noPlacesFound}</Text>
+                <Text style={[styles.emptySubtext, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body }]}>Versuche es mit anderer Suche oder Filtern</Text>
               </View>
             </GlassCard>
           </View>
@@ -152,74 +139,68 @@ export const SearchResultsPanel: React.FC<SearchResultsPanelProps> = ({
               <TouchableOpacity
                 key={place.id}
                 onPress={() => onPlacePress(place)}
-                style={styles.resultItem}
-                hitSlop={8}
+                style={[styles.resultCard, { backgroundColor: theme.colors.paperElevated, borderColor: theme.colors.border }]}
+                hitSlop={12}
               >
-                <View style={styles.resultItemContent}>
-                  {place.photos[0] && (
+                <View style={styles.resultImageWrapper}>
+                  {place.photos && place.photos[0] && (
                     <Image
                       source={{ uri: place.photos[0].url || `${place.photos[0].prefix}original${place.photos[0].suffix}` }}
                       style={styles.resultImage}
                       resizeMode="cover"
                     />
                   )}
-                  {!place.photos[0] && (
-                    <View style={[
-                      styles.resultImagePlaceholder,
-                      { backgroundColor: theme.colors.backgroundTertiary },
-                    ]}>
-                      <Text style={styles.resultImagePlaceholderText}>
-                        {place.categories[0]?.icon || '📍'}
-                      </Text>
+                  {!place.photos && (
+                    <View style={[styles.resultImagePlaceholder, { backgroundColor: theme.colors.border }]} />
+                  )}
+                  {place.saved && (
+                    <View style={styles.savedBadge}>
+                      <Text style={styles.savedBadgeText}>❤️</Text>
                     </View>
                   )}
-
-                  <View style={styles.resultInfo}>
-                    <View style={styles.resultTopRow}>
-                      <Text style={[
-                        styles.resultName,
-                        { color: theme.colors.text },
-                      ]}>
-                        {place.name}
-                      </Text>
-                      {place.rating && (
-                        <View style={styles.resultRating}>
-                          <Text style={styles.resultRatingText}>⭐ {place.rating.toFixed(1)}</Text>
-                        </View>
-                      )}
-                    </View>
-
-                    {place.categories[0] && (
-                      <View style={styles.resultCategory}>
-                        <Text style={[
-                          styles.resultCategoryText,
-                          { color: theme.colors.textSecondary },
-                        ]}>
-                          {place.categories[0].icon} {place.categories[0].name}
-                        </Text>
-                      </View>
-                    )}
-
-                    {place.location.formatted_address && (
-                      <Text style={[
-                        styles.resultAddress,
-                        { color: theme.colors.textTertiary },
-                      ]}>
-                        {place.location.formatted_address}
-                      </Text>
-                    )}
-
-                    {place.distance !== undefined && (
-                      <View style={styles.resultDistance}>
-                        <Text style={[
-                          styles.resultDistanceText,
-                          { color: theme.colors.primary },
-                        ]}>
-                          📍 {(place.distance / 1000).toFixed(1)} km
-                        </Text>
+                </View>
+                <View style={styles.resultInfo}>
+                  <View style={styles.resultHeader}>
+                    <Text style={[
+                      styles.resultName,
+                      { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
+                    ]} numberOfLines={1}>
+                      {place.name}
+                    </Text>
+                    {place.rating && (
+                      <View style={[styles.resultRating, { backgroundColor: theme.colors.accentSoft }]}>
+                        <Text style={[styles.resultRatingText, { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body }]}>⭐ {place.rating.toFixed(1)}</Text>
                       </View>
                     )}
                   </View>
+                  {place.categories[0] && (
+                    <View style={styles.resultCategory}>
+                      <Text style={[
+                        styles.resultCategoryText,
+                        { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
+                      ]}>
+                        {place.categories[0].icon || '📍'} {place.categories[0].name}
+                      </Text>
+                    </View>
+                  )}
+                  {place.address && (
+                    <Text style={[
+                      styles.resultAddress,
+                      { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
+                    ]} numberOfLines={1}>
+                      {place.address}
+                    </Text>
+                  )}
+                  {place.distance && (
+                    <View style={styles.resultDistance}>
+                      <Text style={[
+                        styles.resultDistanceText,
+                        { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
+                      ]}>
+                        {place.distance < 1000 ? `${Math.round(place.distance)}m` : `${(place.distance / 1000).toFixed(1)}km`}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </TouchableOpacity>
             ))}
@@ -241,12 +222,11 @@ const s0 = StyleSheet.create({
   },
   panel: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   chipsContainer: {
     paddingHorizontal: 16,
@@ -254,13 +234,12 @@ const s0 = StyleSheet.create({
   },
   chipsContent: {
     gap: 8,
-    paddingBottom: 8,
   },
   chipIcon: {
     fontSize: 12,
   },
   categoriesSection: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
     paddingBottom: 12,
   },
   errorCard: {
@@ -271,7 +250,7 @@ const s0 = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    padding: 14,
+    padding: 12,
   },
   errorIcon: {
     fontSize: 20,
@@ -279,96 +258,110 @@ const s0 = StyleSheet.create({
   errorText: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '500',
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 40,
   },
   loadingCard: {
-    paddingVertical: 30,
-    paddingHorizontal: 40,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
   loadingContent: {
     alignItems: 'center',
-    gap: 12,
   },
   loadingText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 15,
   },
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 40,
-    paddingVertical: 60,
+    paddingVertical: 40,
   },
   emptyCard: {
-    paddingVertical: 40,
-    paddingHorizontal: 30,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
     alignItems: 'center',
   },
   emptyContent: {
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   emptyIcon: {
-    fontSize: 48,
+    fontSize: 32,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
     textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 13,
     textAlign: 'center',
   },
   resultsList: {
-    flex: 1,
     paddingHorizontal: 16,
+    paddingTop: 8,
     paddingBottom: 100,
+    gap: 10,
   },
-  resultItem: {
-    marginBottom: 12,
+  resultCard: {
+    flexDirection: 'row',
     borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1,
   },
-  resultItemContent: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+  resultImageWrapper: {
+    position: 'relative',
+    width: 96,
+    height: 96,
   },
   resultImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    width: '100%',
+    height: '100%',
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
   },
   resultImagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    width: '100%',
+    height: '100%',
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  savedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.95)',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  resultImagePlaceholderText: {
-    fontSize: 28,
+  savedBadgeText: {
+    fontSize: 14,
   },
   resultInfo: {
     flex: 1,
     padding: 12,
-    justifyContent: 'center',
-    gap: 4,
+    justifyContent: 'space-between',
   },
-  resultTopRow: {
+  resultHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: 6,
   },
   resultName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     flex: 1,
     paddingRight: 8,
@@ -377,7 +370,6 @@ const s0 = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,184,0,0.15)',
   },
   resultRatingText: {
     fontSize: 12,
@@ -393,6 +385,7 @@ const s0 = StyleSheet.create({
   resultAddress: {
     fontSize: 12,
     lineHeight: 18,
+    marginBottom: 4,
   },
   resultDistance: {
     marginTop: 4,
@@ -434,14 +427,11 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
       ]}
       pointerEvents={visible ? 'auto' : 'none'}
     >
-      <BlurView intensity={90} style={styles.suggestionsPanel}>
+      <BlurView intensity={90} style={[styles.suggestionsPanel, { backgroundColor: theme.colors.paperOverlay }]}>
         {suggestions.length > 0 && (
           <View style={styles.suggestionsSection}>
-            <Text style={[
-              styles.suggestionsTitle,
-              { color: theme.colors.textSecondary },
-            ]}>
-              Suggestions
+            <Text style={[styles.suggestionsTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>
+              Vorschläge
             </Text>
             {suggestions.map((suggestion, index) => (
               <TouchableOpacity
@@ -450,18 +440,8 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
                 style={styles.suggestionItem}
                 hitSlop={12}
               >
-                <Text style={[
-                  styles.suggestionIcon,
-                  { color: theme.colors.primary },
-                ]}>
-                  🔍
-                </Text>
-                <Text style={[
-                  styles.suggestionText,
-                  { color: theme.colors.text },
-                ]}>
-                  {suggestion}
-                </Text>
+                <Text style={[styles.suggestionIcon, { color: theme.colors.accent }]}>🔍</Text>
+                <Text style={[styles.suggestionText, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body }]}>{suggestion}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -470,19 +450,11 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
         {recentSearches.length > 0 && (
           <View style={styles.suggestionsSection}>
             <View style={styles.recentHeader}>
-              <Text style={[
-                styles.suggestionsTitle,
-                { color: theme.colors.textSecondary },
-              ]}>
-                Recent
+              <Text style={[styles.suggestionsTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>
+                Kürzlich
               </Text>
               <TouchableOpacity onPress={onClearRecent} hitSlop={8}>
-                <Text style={[
-                  styles.clearRecentText,
-                  { color: theme.colors.textTertiary },
-                ]}>
-                  Clear
-                </Text>
+                <Text style={[styles.clearRecentText, { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body }]}>Löschen</Text>
               </TouchableOpacity>
             </View>
             {recentSearches.map((search, index) => (
@@ -492,18 +464,8 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
                 style={styles.suggestionItem}
                 hitSlop={12}
               >
-                <Text style={[
-                  styles.suggestionIcon,
-                  { color: theme.colors.textTertiary },
-                ]}>
-                  🕐
-                </Text>
-                <Text style={[
-                  styles.suggestionText,
-                  { color: theme.colors.text },
-                ]}>
-                  {search}
-                </Text>
+                <Text style={[styles.suggestionIcon, { color: theme.colors.inkSubtle }]}>🕐</Text>
+                <Text style={[styles.suggestionText, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body }]}>{search}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -554,7 +516,6 @@ const s1 = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   suggestionIcon: {
     fontSize: 18,

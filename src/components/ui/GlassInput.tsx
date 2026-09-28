@@ -122,6 +122,16 @@ export const GlassInput: React.FC<GlassInputProps> = ({
     },
   ];
 
+  const handleFocus = () => {
+    setFocused(true);
+    onFocus?.();
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    onBlur?.();
+  };
+
   return (
     <BlurView intensity={60} style={containerStyle}>
       <View style={inputContainerStyle}>
@@ -149,8 +159,9 @@ export const GlassInput: React.FC<GlassInputProps> = ({
                 color: error
                   ? theme.colors.error
                   : focused
-                  ? theme.colors.primary
-                  : theme.colors.textTertiary,
+                  ? theme.colors.accent
+                  : theme.colors.inkSubtle,
+                fontFamily: theme.typography.fontFamily.body,
               },
             ]}
           >
@@ -162,8 +173,9 @@ export const GlassInput: React.FC<GlassInputProps> = ({
           style={[
             styles.input,
             {
-              color: theme.colors.text,
+              color: theme.colors.ink,
               fontSize: theme.typography.fontSize.md,
+              fontFamily: theme.typography.fontFamily.body,
               flex: 1,
               paddingVertical: multiline ? theme.spacing.md : 0,
             },
@@ -181,12 +193,12 @@ export const GlassInput: React.FC<GlassInputProps> = ({
           multiline={multiline}
           numberOfLines={numberOfLines}
           maxLength={maxLength}
-          onFocus={onFocus}
-          onBlur={onBlur}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           onSubmitEditing={onSubmitEditing}
           blurOnSubmit={blurOnSubmit}
-          placeholderTextColor={theme.colors.textTertiary}
-          selectionColor={theme.colors.primary}
+          placeholderTextColor={theme.colors.inkSubtle}
+          selectionColor={theme.colors.accent}
           caretHidden={disabled}
         />
 
@@ -206,7 +218,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
         <Animated.Text
           style={[
             styles.errorText,
-            { color: theme.colors.error },
+            { color: theme.colors.error, fontFamily: theme.typography.fontFamily.body },
           ]}
         >
           {error}

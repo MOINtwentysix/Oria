@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import * as Linking from 'expo-linking';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
@@ -35,26 +35,34 @@ export const ProfileScreen: React.FC = () => {
 
   if (!isSignedIn) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
         <View style={styles.authPrompt}>
-          <Text style={[styles.authIcon, { color: theme.colors.textTertiary }]}>👤</Text>
-          <Text style={[styles.authTitle, { color: theme.colors.text }]}>Welcome to Oria</Text>
-          <Text style={[styles.authSubtitle, { color: theme.colors.textSecondary }]}>
-            Sign in to save places, create lists, and use Oria AI
+          <Text style={[styles.authIcon, { color: theme.colors.inkSubtle }]}>👤</Text>
+          <Text style={[styles.authTitle, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display }]}>
+            Willkommen bei Oria
+          </Text>
+          <Text style={[styles.authSubtitle, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
+            Anmelden, um Orte zu speichern, Listen zu erstellen und Oria AI zu nutzen
           </Text>
           <GlassButton size="lg" onPress={() => router.push('/auth')}>
-            Sign In
+            Anmelden
           </GlassButton>
-          <GlassButton size="lg" onPress={() => router.push('/onboarding')}>
-            Continue as Guest
+          <GlassButton variant="secondary" size="lg" onPress={() => router.push('/onboarding')}>
+            Als Gast fortfahren
           </GlassButton>
         </View>
       </SafeAreaView>
     );
   }
 
+  const themeOptions = [
+    { id: 'light', label: 'Hell', icon: '☀️' },
+    { id: 'dark', label: 'Dunkel', icon: '🌙' },
+    { id: 'system', label: 'System', icon: '💻' },
+  ];
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
       <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
 
@@ -66,10 +74,10 @@ export const ProfileScreen: React.FC = () => {
               style={styles.avatar}
             />
             <View style={styles.profileInfo}>
-              <Text style={[styles.profileName, { color: theme.colors.text }]}>
+              <Text style={[styles.profileName, { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body }]}>
                 {user?.firstName || ''} {user?.lastName || ''}
               </Text>
-              <Text style={[styles.profileEmail, { color: theme.colors.textSecondary }]}>
+              <Text style={[styles.profileEmail, { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body }]}>
                 {user?.emailAddresses?.[0]?.emailAddress}
               </Text>
               <View style={styles.profileBadges}>
@@ -80,7 +88,7 @@ export const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Konto</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>Konto</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <View style={styles.accountButtonContainer}>
                 <GlassButton size="lg" fullWidth onPress={() => Linking.openURL(accountSettingsUrl)}>
@@ -91,103 +99,49 @@ export const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Einstellungen</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>Einstellungen</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <GlassCardListItem
                 title="Interessen"
                 subtitle="Entdeckungen anpassen"
                 leftIcon={<Text style={styles.settingIcon}>❤️</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
                 padding="md"
                 divider={true}
                 onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
                 title="Suchradius"
-                subtitle={`${preferences?.preferred_radius || 5000}m default`}
+                subtitle={`${preferences?.preferred_radius || 5000} m`}
                 leftIcon={<Text style={styles.settingIcon}>📍</Text>}
                 rightIcon={<Text style={styles.settingArrow}>→</Text>}
-
                 padding="md"
                 divider={true}
                 onPress={() => Linking.openURL(accountSettingsUrl)}
               />
               <GlassCardListItem
-                title="Benachrichtigungen"
-                subtitle="Push- und E-Mail-Einstellungen"
-                leftIcon={<Text style={styles.settingIcon}>🔔</Text>}
-                rightIcon={
-                  <Switch
-                    value={preferences?.notifications_enabled ?? true}
-                    onValueChange={(v) => updatePreferences({ notifications_enabled: v })}
-                    thumbColor={theme.colors.primary}
-                    trackColor={{ false: theme.colors.border, true: theme.colors.primaryLight }}
-                  />
-                }
-
+                title="Design"
+                subtitle={uiTheme === 'system' ? 'System' : uiTheme === 'dark' ? 'Dunkel' : 'Hell'}
+                leftIcon={<Text style={styles.settingIcon}>🎨</Text>}
+                rightIcon={<Text style={styles.settingArrow}>→</Text>}
                 padding="md"
                 divider={true}
+                onPress={() => {}}
               />
               <GlassCardListItem
-                title="Standortfreigabe"
-                subtitle="Standort mit Freunden teilen"
-                leftIcon={<Text style={styles.settingIcon}>📍</Text>}
-                rightIcon={
-                  <Switch
-                    value={preferences?.location_sharing ?? false}
-                    onValueChange={(v) => updatePreferences({ location_sharing: v })}
-                    thumbColor={theme.colors.primary}
-                    trackColor={{ false: theme.colors.border, true: theme.colors.primaryLight }}
-                  />
-                }
-
+                title="Benachrichtigungen"
+                subtitle="Push & E-Mail"
+                leftIcon={<Text style={styles.settingIcon}>🔔</Text>}
+                rightIcon={<Text style={styles.settingArrow}>→</Text>}
                 padding="md"
                 divider={false}
+                onPress={() => {}}
               />
             </GlassCard>
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Darstellung</Text>
-            <GlassCard variant="light" style={styles.settingsCard}>
-              <View style={styles.themeOptions}>
-                {(['light', 'dark', 'system'] as const).map((t) => (
-                  <TouchableOpacity
-                    key={t}
-                    onPress={() => handleThemeChange(t)}
-                    style={[
-                      styles.themeOption,
-                      {
-                        borderColor: uiTheme === t ? theme.colors.primary : theme.colors.border,
-                        backgroundColor: uiTheme === t
-                          ? (colorScheme === 'dark' ? 'rgba(0,102,204,0.15)' : 'rgba(0,102,204,0.08)')
-                          : 'transparent',
-                      },
-                    ]}
-                    hitSlop={8}
-                  >
-                    <View style={[styles.themeOptionIcon, { backgroundColor: t === 'light' ? '#F7F9FC' : t === 'dark' ? '#1E293B' : theme.colors.primary }]}>
-                      <Text style={styles.themeOptionIconText}>
-                        {t === 'light' ? '☀️' : t === 'dark' ? '🌙' : '💻'}
-                      </Text>
-                    </View>
-                    <Text style={[styles.themeOptionLabel, { color: uiTheme === t ? theme.colors.primary : theme.colors.text }]}>
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </Text>
-                    {uiTheme === t && (
-                      <View style={[styles.themeOptionCheck, { backgroundColor: theme.colors.primary }]}>
-                        <Text style={styles.themeOptionCheckText}>✓</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </GlassCard>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Über</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display }]}>Rechtliches</Text>
             <GlassCard variant="light" style={styles.settingsCard}>
               <GlassCardListItem title="Datenschutz" padding="md" divider={true} onPress={() => router.push('/legal/privacy')} />
               <GlassCardListItem title="Nutzungsbedingungen" padding="md" divider={true} onPress={() => router.push('/legal/terms')} />
@@ -197,8 +151,8 @@ export const ProfileScreen: React.FC = () => {
             </GlassCard>
           </View>
 
-          <View style={styles.dangerZone}>
-            <Text style={[styles.dangerTitle, { color: theme.colors.error }]}>Gefahrenzone</Text>
+          <View style={[styles.dangerZone, { borderTopColor: theme.colors.border }]}>
+            <Text style={[styles.dangerTitle, { color: theme.colors.error, fontFamily: theme.typography.fontFamily.display }]}>Gefahrenzone</Text>
             <GlassCard variant="light" style={styles.dangerCard}>
               <GlassCardListItem title="Abmelden" padding="md" divider={false} onPress={handleSignOut} />
             </GlassCard>
@@ -209,10 +163,10 @@ export const ProfileScreen: React.FC = () => {
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
+          { id: 'explore', label: 'Entdecken', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
           { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>✨</Text>, selectedIcon: <Text style={styles.tabIcon}>✨</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
+          { id: 'saved', label: 'Gespeichert', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
+          { id: 'profile', label: 'Profil', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
         ]}
         activeTab="profile"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}
@@ -226,36 +180,29 @@ export const ProfileScreen: React.FC = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC' },
+  container: { flex: 1 },
   scrollView: { flex: 1 },
   scrollContent: { paddingBottom: 140 },
-  content: { paddingHorizontal: 20, paddingVertical: 20, paddingBottom: 150, gap: 24 },
+  content: { paddingHorizontal: 24, paddingVertical: 24, paddingBottom: 150, gap: 24 },
   profileHeader: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingTop: 10 },
   avatar: {},
   profileInfo: { flex: 1, gap: 4 },
-  profileName: { fontSize: 24, fontWeight: '700' },
-  profileEmail: { fontSize: 15 },
+  profileName: { fontSize: 24, fontWeight: '700', includeFontPadding: false },
+  profileEmail: { fontSize: 15, includeFontPadding: false },
   profileBadges: { flexDirection: 'row', gap: 8, marginTop: 8 },
   section: { gap: 12 },
-  sectionTitle: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', includeFontPadding: false },
   settingsCard: { borderRadius: 20, overflow: 'hidden' },
   accountButtonContainer: { padding: 16 },
   settingIcon: { fontSize: 20 },
-  settingArrow: { fontSize: 18, fontWeight: '700' },
-  themeOptions: { flexDirection: 'row', gap: 12, padding: 16 },
-  themeOption: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 16, paddingHorizontal: 12, borderRadius: 16, borderWidth: 2 },
-  themeOptionIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  themeOptionIconText: { fontSize: 18 },
-  themeOptionLabel: { fontSize: 14, fontWeight: '600' },
-  themeOptionCheck: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  themeOptionCheckText: { fontSize: 12, fontWeight: '700', color: 'white' },
-  dangerZone: { marginTop: 8, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', gap: 12 },
-  dangerTitle: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  settingArrow: { fontSize: 18, fontWeight: '700', includeFontPadding: false },
+  dangerZone: { marginTop: 8, paddingTop: 16, borderTopWidth: 1, gap: 12 },
+  dangerTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', includeFontPadding: false },
   dangerCard: { borderRadius: 20, overflow: 'hidden' },
   tabBar: { position: 'absolute', bottom: 0, left: 16, right: 16, marginBottom: 20 },
   tabIcon: { fontSize: 22 },
   authPrompt: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 20 },
   authIcon: { fontSize: 64 },
-  authTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center' },
-  authSubtitle: { fontSize: 15, textAlign: 'center', lineHeight: 22 },
+  authTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', includeFontPadding: false },
+  authSubtitle: { fontSize: 15, textAlign: 'center', lineHeight: 22, includeFontPadding: false },
 });

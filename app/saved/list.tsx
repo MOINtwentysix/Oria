@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, TextInput } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme, getTheme } from '@/design-system/ThemeProvider';
-import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput } from '@/components/ui';
+import { GlassButton, GlassCard, GlassAvatar, GlassChip, GlassInput, GlassCardListItem } from '@/components/ui';
 import { LiquidTabBar } from '@/components/common';
 import { useAuth } from '@/services/auth';
 import { useUIStore, useSavedStore } from '@/store';
@@ -55,16 +55,16 @@ export const SavedListScreen: React.FC = () => {
 
   if (!list) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
         <View style={styles.emptyState}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-            <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
+            <Text style={[styles.backIcon, { color: theme.colors.ink }]}>‹</Text>
           </TouchableOpacity>
           <Text style={[
             styles.emptyTitle,
-            { color: theme.colors.text },
+            { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
           ]}>
-            No list selected
+            Keine Liste ausgewählt
           </Text>
         </View>
       </SafeAreaView>
@@ -74,10 +74,13 @@ export const SavedListScreen: React.FC = () => {
   const isOwner = true;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.paper }]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={styles.backButton}>
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>‹</Text>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={16} style={[
+          styles.backButton,
+          { backgroundColor: theme.colors.glass },
+        ]}>
+          <Text style={[styles.backIcon, { color: theme.colors.ink }]}>‹</Text>
         </TouchableOpacity>
 
         <View style={styles.headerContent}>
@@ -91,7 +94,7 @@ export const SavedListScreen: React.FC = () => {
           {!list.cover_image && (
             <View style={[
               styles.coverPlaceholder,
-              { backgroundColor: theme.colors.primary },
+              { backgroundColor: theme.colors.accent },
             ]}>
               <Text style={styles.coverPlaceholderText}>❤️</Text>
             </View>
@@ -101,25 +104,41 @@ export const SavedListScreen: React.FC = () => {
             <View style={styles.headerTitleRow}>
               <Text style={[
                 styles.listName,
-                { color: theme.colors.text },
+                { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
               ]}>
                 {list.name}
               </Text>
               {list.is_default && (
-                <View style={styles.defaultBadge}>
-                  <Text style={styles.defaultBadgeText}>Default</Text>
+                <View style={[
+                  styles.defaultBadge,
+                  { backgroundColor: theme.colors.accentSoft },
+                ]}>
+                  <Text style={[
+                    styles.defaultBadgeText,
+                    { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
+                  ]}>
+                    Standard
+                  </Text>
                 </View>
               )}
               {list.is_shared && (
-                <View style={styles.sharedBadge}>
-                  <Text style={styles.sharedBadgeText}>👥 Shared</Text>
+                <View style={[
+                  styles.sharedBadge,
+                  { backgroundColor: theme.colors.successSoft },
+                ]}>
+                  <Text style={[
+                    styles.sharedBadgeText,
+                    { color: theme.colors.success, fontFamily: theme.typography.fontFamily.body },
+                  ]}>
+                    👥 Geteilt
+                  </Text>
                 </View>
               )}
             </View>
             {list.description && (
               <Text style={[
                 styles.listDescription,
-                { color: theme.colors.textSecondary },
+                { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
               ]}>
                 {list.description}
               </Text>
@@ -128,29 +147,29 @@ export const SavedListScreen: React.FC = () => {
               <View style={styles.stat}>
                 <Text style={[
                   styles.statValue,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  {items.length}
+                  {list.place_count || 0}
                 </Text>
                 <Text style={[
                   styles.statLabel,
-                  { color: theme.colors.textTertiary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
                 ]}>
-                  Places
+                  Orte
                 </Text>
               </View>
               <View style={styles.stat}>
                 <Text style={[
                   styles.statValue,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.display },
                 ]}>
                   {list.member_count || 1}
                 </Text>
                 <Text style={[
                   styles.statLabel,
-                  { color: theme.colors.textTertiary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
                 ]}>
-                  Members
+                  Mitglieder
                 </Text>
               </View>
             </View>
@@ -158,56 +177,73 @@ export const SavedListScreen: React.FC = () => {
         </View>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={handleInvite} hitSlop={12} style={styles.actionButton}>
+          {isOwner && (
+            <TouchableOpacity
+              onPress={handleInvite}
+              style={[
+                styles.actionButton,
+                { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
+              ]}
+              hitSlop={8}
+            >
+              <Text style={styles.actionButtonIcon}>✉️</Text>
+              <Text style={[
+                styles.actionButtonTextPrimary,
+                { color: theme.colors.textOnPrimary, fontFamily: theme.typography.fontFamily.body },
+              ]}>
+                Teilen
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={handlePlanTrip}
+            style={[
+              styles.actionButton,
+              { backgroundColor: 'transparent', borderColor: theme.colors.border },
+            ]}
+            hitSlop={8}
+          >
+            <Text style={styles.actionButtonIcon}>🗺️</Text>
             <Text style={[
               styles.actionButtonText,
-              { color: theme.colors.primary },
+              { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
             ]}>
-              👥 Share
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handlePlanTrip} hitSlop={12} style={[
-            styles.actionButton,
-            { backgroundColor: theme.colors.primary },
-          ]}>
-            <Text style={styles.actionButtonTextPrimary}>
-              ✨ Plan Trip
+              Reise planen
             </Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.searchBar}>
-        <GlassInput
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search in list..."
-          leftIcon={<Text style={styles.searchIcon}>🔍</Text>}
-          style={styles.searchInput}
-        />
-      </View>
-
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          {items.length === 0 ? (
+
+          <GlassInput
+            style={styles.searchBar}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Orte in dieser Liste suchen..."
+            leftIcon={<Text style={styles.searchIcon}>⌕</Text>}
+          />
+
+          {visibleItems.length === 0 ? (
             <View style={styles.emptyList}>
               <GlassCard variant="light" style={styles.emptyListCard}>
                 <View style={styles.emptyListContent}>
                   <Text style={styles.emptyListIcon}>📍</Text>
                   <Text style={[
                     styles.emptyListTitle,
-                    { color: theme.colors.text },
+                    { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    No places in this list yet
+                    Noch keine Orte in dieser Liste
                   </Text>
                   <Text style={[
                     styles.emptyListSubtitle,
-                    { color: theme.colors.textSecondary },
+                    { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    Search for places and save them here
+                    Tippe auf das + auf der Karte, um Orte hinzuzufügen
                   </Text>
-                  <GlassButton size="md" onPress={() => router.push('/search')}>
-                    Find Places
+                  <GlassButton variant="primary" size="md" style={styles.emptyListButton} onPress={() => router.push('/explore')}>
+                    Orte entdecken
                   </GlassButton>
                 </View>
               </GlassCard>
@@ -218,26 +254,25 @@ export const SavedListScreen: React.FC = () => {
                 <SavedPlaceItem
                   key={item.id}
                   item={item}
-                  onPress={() => router.push('/explore')}
+                  onPress={() => {}}
                   onRemove={() => handleRemoveItem(item.id)}
                   style={styles.placeItem}
                 />
               ))}
             </View>
           )}
+
+          <View style={styles.separator} />
         </View>
       </ScrollView>
 
       <ShareListModal
         visible={showShareModal}
-        list={list}
         onClose={() => setShowShareModal(false)}
+        list={list}
         onInvite={async (email, role) => {
-          if (user) {
-            await inviteToList(list.id, email, role);
-          }
+          await inviteToList(list.id, email, role);
         }}
-        members={[]}
         onRemoveMember={async (memberId) => {
           await removeListMember(list.id, memberId);
         }}
@@ -248,10 +283,10 @@ export const SavedListScreen: React.FC = () => {
 
       <LiquidTabBar
         tabs={[
-          { id: 'explore', label: 'Explore', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
+          { id: 'explore', label: 'Entdecken', icon: <Text style={styles.tabIcon}>🗺️</Text>, selectedIcon: <Text style={styles.tabIcon}>🗺️</Text> },
           { id: 'ai', label: 'Oria AI', icon: <Text style={styles.tabIcon}>✨</Text>, selectedIcon: <Text style={styles.tabIcon}>✨</Text> },
-          { id: 'saved', label: 'Saved', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
-          { id: 'profile', label: 'Profile', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
+          { id: 'saved', label: 'Gespeichert', icon: <Text style={styles.tabIcon}>❤️</Text>, selectedIcon: <Text style={styles.tabIcon}>❤️</Text> },
+          { id: 'profile', label: 'Profil', icon: <Text style={styles.tabIcon}>👤</Text>, selectedIcon: <Text style={styles.tabIcon}>👤</Text> },
         ]}
         activeTab="saved"
         onTabPress={(tabId) => router.push(`/${tabId}` as any)}
@@ -267,7 +302,6 @@ export default SavedListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   header: {
     position: 'relative',
@@ -279,17 +313,11 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300' },
+  backIcon: { fontSize: 38, lineHeight: 38, fontWeight: '300', includeFontPadding: false },
   headerContent: {
     flexDirection: 'row',
     gap: 16,
@@ -326,32 +354,32 @@ const styles = StyleSheet.create({
   listName: {
     fontSize: 22,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   defaultBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,102,204,0.15)',
   },
   defaultBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#0066CC',
+    includeFontPadding: false,
   },
   sharedBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,168,107,0.15)',
   },
   sharedBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#00A86B',
+    includeFontPadding: false,
   },
   listDescription: {
     fontSize: 14,
     lineHeight: 20,
+    includeFontPadding: false,
   },
   headerStats: {
     flexDirection: 'row',
@@ -365,10 +393,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   statLabel: {
     fontSize: 11,
     fontWeight: '500',
+    includeFontPadding: false,
   },
   headerActions: {
     flexDirection: 'row',
@@ -385,16 +415,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(0,102,204,0.3)',
   },
   actionButtonText: {
     fontSize: 15,
     fontWeight: '600',
+    includeFontPadding: false,
   },
   actionButtonTextPrimary: {
     fontSize: 15,
     fontWeight: '700',
-    color: 'white',
+    includeFontPadding: false,
+  },
+  actionButtonIcon: {
+    fontSize: 18,
   },
   searchBar: {
     paddingHorizontal: 20,
@@ -408,6 +441,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 150,
   },
   content: {
     paddingHorizontal: 20,
@@ -431,11 +467,17 @@ const styles = StyleSheet.create({
   emptyListTitle: {
     fontSize: 20,
     fontWeight: '700',
+    includeFontPadding: false,
   },
   emptyListSubtitle: {
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    includeFontPadding: false,
+  },
+  emptyListButton: {
+    marginTop: 8,
+    minWidth: 160,
   },
   listContainer: {
     gap: 10,
@@ -467,5 +509,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     textAlign: 'center',
+    includeFontPadding: false,
   },
 });

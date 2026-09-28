@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useCallback } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, useState } from 'react';
+import * as Font from 'expo-font';
 import { Colors } from './Colors';
 import { Spacing, BorderRadius, Shadows, GlassStyles, Layout } from './Layout';
 import { Typography, TextStyles } from './Typography';
@@ -10,20 +11,25 @@ interface ThemeContextType {
   colorScheme: ColorScheme;
   toggleTheme: () => void;
   setColorScheme: (scheme: ColorScheme) => void;
+  fontsLoaded: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// NOTE: The app currently hardcodes light backgrounds across all screens.
-// Forcing 'light' keeps text/UI colors consistent with those backgrounds.
-// If true dark-mode is added later, make the backgrounds theme-aware (`theme.colors.background`)
-// and re-enable Appearance detection below.
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const colorScheme: ColorScheme = 'light';
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+      'AlbertSans': require('@/assets/fonts/AlbertSans.ttf'),
+      'Almarai': require('@/assets/fonts/Almarai-Regular.ttf'),
+      'Almarai-Bold': require('@/assets/fonts/Almarai-Bold.ttf'),
+    }).then(() => setFontsLoaded(true)).catch(() => setFontsLoaded(true));
+  }, []);
 
   const toggleTheme = useCallback(() => {
     // Theme is locked to light while backgrounds are hardcoded.
-    // setColorSchemeState(prev => prev === 'light' ? 'dark' : 'light');
   }, []);
 
   const setColorScheme = useCallback((_scheme: ColorScheme) => {
@@ -31,7 +37,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ colorScheme, toggleTheme, setColorScheme }}>
+    <ThemeContext.Provider value={{ colorScheme, toggleTheme, setColorScheme, fontsLoaded }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -48,6 +54,11 @@ export const useTheme = (): ThemeContextType => {
 export const useColorScheme = (): ColorScheme => {
   const { colorScheme } = useTheme();
   return colorScheme;
+};
+
+export const useFontsLoaded = (): boolean => {
+  const { fontsLoaded } = useTheme();
+  return fontsLoaded;
 };
 
 export const getTheme = (colorScheme: 'light' | 'dark') => ({

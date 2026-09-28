@@ -41,10 +41,9 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
   const matchingCategory = CATEGORIES.find(
     (c) => category?.name?.toLowerCase().includes(c.name.toLowerCase())
   );
-  const categoryColor =
-    (matchingCategory?.color
-      ? theme.colors[matchingCategory.color as keyof typeof theme.colors]
-      : undefined) || theme.colors.primary;
+  const categoryColor = matchingCategory?.color 
+    ? theme.colors[matchingCategory.color as keyof typeof theme.colors] 
+    : theme.colors.accent;
 
   const formatDistance = (meters?: number) => {
     if (!meters) return '';
@@ -71,20 +70,20 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
     >
       <TouchableOpacity
         onPress={onClose}
-        style={styles.overlay}
+        style={[styles.overlay, { backgroundColor: theme.colors.overlay }]}
         activeOpacity={1}
       />
 
       <BlurView intensity={95} style={[
         styles.sheet,
         {
-          backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)',
+          backgroundColor: theme.colors.paperOverlay,
         },
       ]}>
         <View style={styles.handleWrapper}>
           <View style={[
             styles.handle,
-            { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(15,23,42,0.3)' },
+            { backgroundColor: theme.colors.inkSubtle },
           ]} />
         </View>
 
@@ -114,7 +113,7 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               <View style={styles.headerTopRow}>
                 <Text style={[
                   styles.name,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                 ]}>
                   {place.name}
                 </Text>
@@ -133,12 +132,12 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
                   </View>
                   {place.rating && (
                     <View style={styles.ratingRow}>
-                      <Text style={styles.ratingText}>⭐ {place.rating.toFixed(1)}</Text>
+                      <Text style={[styles.ratingText, { color: theme.colors.warning }]}>⭐ {place.rating.toFixed(1)}</Text>
                     </View>
                   )}
                   {place.distance && (
                     <View style={styles.distanceRow}>
-                      <Text style={styles.distanceText}>📍 {formatDistance(place.distance)}</Text>
+                      <Text style={[styles.distanceText, { color: theme.colors.inkMuted }]}>📍 {formatDistance(place.distance)}</Text>
                     </View>
                   )}
                 </View>
@@ -151,82 +150,52 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               <View style={styles.detailSection}>
                 <Text style={[
                   styles.detailLabel,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  About
+                  Beschreibung
                 </Text>
                 <Text style={[
                   styles.detailText,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                 ]}>
                   {place.description}
                 </Text>
               </View>
             )}
 
-            {place.location.formatted_address && (
+            {place.address && (
               <View style={styles.detailSection}>
                 <Text style={[
                   styles.detailLabel,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  Address
+                  Adresse
                 </Text>
                 <Text style={[
                   styles.detailText,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                 ]}>
-                  {place.location.formatted_address}
+                  {place.address}
                 </Text>
               </View>
             )}
 
-            {place.hours?.display && (
+            {formatHours(place.hours) && (
               <View style={styles.detailSection}>
                 <Text style={[
                   styles.detailLabel,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  Hours
+                  Öffnungszeiten
                 </Text>
-                <Text style={[
-                  styles.detailText,
-                  { color: theme.colors.text },
-                ]}>
-                  {place.hours.display}
-                </Text>
-                {place.hours.open_now !== undefined && (
-                  <View style={[
-                    styles.openStatus,
-                    { backgroundColor: place.hours.open_now ? theme.colors.successLight : theme.colors.errorLight },
-                  ]}>
-                    <Text style={[
-                      styles.openStatusText,
-                      { color: place.hours.open_now ? theme.colors.success : theme.colors.error },
-                    ]}>
-                      {place.hours.open_now ? 'Open now' : 'Closed now'}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
-
-{place.website && (
-              <View style={styles.detailSection}>
-                <Text style={[
-                  styles.detailLabel,
-                  { color: theme.colors.textSecondary },
-                ]}>
-                  Website
-                </Text>
-                <TouchableOpacity style={styles.linkButton} onPress={() => Linking.openURL(place.website!)}>
+                <View style={[styles.openStatus, { backgroundColor: theme.colors.successSoft }]}>
                   <Text style={[
-                    styles.linkText,
-                    { color: theme.colors.primary },
+                    styles.openStatusText,
+                    { color: theme.colors.success, fontFamily: theme.typography.fontFamily.body },
                   ]}>
-                    {place.website}
+                    Geöffnet: {formatHours(place.hours)}
                   </Text>
-                </TouchableOpacity>
+                </View>
               </View>
             )}
 
@@ -234,16 +203,43 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               <View style={styles.detailSection}>
                 <Text style={[
                   styles.detailLabel,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  Phone
+                  Telefon
                 </Text>
-                <TouchableOpacity style={styles.linkButton} onPress={() => Linking.openURL(`tel:${place.phone}`)}>
+                <TouchableOpacity
+                  style={styles.linkButton}
+                  onPress={() => Linking.openURL(`tel:${place.phone}`)}
+                  hitSlop={12}
+                >
                   <Text style={[
                     styles.linkText,
-                    { color: theme.colors.primary },
+                    { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
                   ]}>
                     {place.phone}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {place.website && (
+              <View style={styles.detailSection}>
+                <Text style={[
+                  styles.detailLabel,
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
+                ]}>
+                  Website
+                </Text>
+                <TouchableOpacity
+                  style={styles.linkButton}
+                  onPress={() => Linking.openURL(place.website)}
+                  hitSlop={12}
+                >
+                  <Text style={[
+                    styles.linkText,
+                    { color: theme.colors.accent, fontFamily: theme.typography.fontFamily.body },
+                  ]}>
+                    {place.website}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -253,18 +249,19 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               <View style={styles.detailSection}>
                 <Text style={[
                   styles.detailLabel,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.display },
                 ]}>
-                  Photos
+                  Fotos
                 </Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoScroll}>
                   {place.photos.slice(1, 6).map((photo, index) => (
-                    <Image
-                      key={photo.id || index}
-                      source={{ uri: photo.url || `${photo.prefix}original${photo.suffix}` }}
-                      style={styles.photoThumbnail}
-                      resizeMode="cover"
-                    />
+                    <View key={index} style={styles.photoWrapper}>
+                      <Image
+                        source={{ uri: photo.url || `${photo.prefix}original${photo.suffix}` }}
+                        style={styles.photoThumbnail}
+                        resizeMode="cover"
+                      />
+                    </View>
                   ))}
                 </ScrollView>
               </View>
@@ -277,30 +274,28 @@ export const PlaceBottomSheet: React.FC<PlaceBottomSheetProps> = ({
               size="lg"
               fullWidth
               onPress={() => onSave(place)}
-              icon={
-                <Text style={styles.actionIcon}>{saved ? '❤️' : '🤍'}</Text>
-              }
+              icon={<Text style={styles.actionIcon}>{saved ? '❤️' : '🤍'}</Text>}
             >
-              {saved ? 'Saved' : 'Save Place'}
+              {saved ? 'Gespeichert' : 'Ort speichern'}
             </GlassButton>
 
             <View style={styles.secondaryActions}>
               <GlassButton
-
+                variant="secondary"
                 size="md"
                 onPress={() => onDirections(place)}
                 icon={<Text style={styles.actionIcon}>🧭</Text>}
               >
-                Directions
+                Route
               </GlassButton>
 
               <GlassButton
-
+                variant="secondary"
                 size="md"
                 onPress={() => onShare(place)}
                 icon={<Text style={styles.actionIcon}>↗️</Text>}
               >
-                Share
+                Teilen
               </GlassButton>
             </View>
           </View>
@@ -327,7 +322,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#0F172A',
     opacity: 0.3,
   },
   sheet: {
@@ -440,7 +434,6 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#FFB800',
   },
   distanceRow: {
     flexDirection: 'row',
@@ -490,6 +483,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     paddingVertical: 4,
+  },
+  photoWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   photoThumbnail: {
     width: 100,

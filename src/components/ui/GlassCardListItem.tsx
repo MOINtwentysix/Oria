@@ -74,19 +74,19 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
   const getVariantStyle = () => {
     const base = {
       default: {
-        backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.6)' : 'rgba(255,255,255,0.6)',
+        backgroundColor: colorScheme === 'dark' ? 'rgba(20,40,46,0.6)' : 'rgba(254,251,246,0.6)',
         borderColor: 'transparent',
         glass: false,
       },
       elevated: {
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.paperElevated,
         borderColor: 'transparent',
         glass: false,
         shadow: theme.shadows.sm,
       },
       glass: {
-        backgroundColor: colorScheme === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.7)',
-        borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.3)',
+        backgroundColor: colorScheme === 'dark' ? 'rgba(20,40,46,0.7)' : 'rgba(254,251,246,0.7)',
+        borderColor: colorScheme === 'dark' ? 'rgba(245,240,232,0.1)' : 'rgba(254,251,246,0.3)',
         glass: true,
       },
       bordered: {
@@ -115,7 +115,7 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
       paddingVertical: p.vertical,
       paddingHorizontal: p.horizontal,
       borderBottomWidth: divider ? 1 : 0,
-      borderBottomColor: theme.colors.borderLight,
+      borderBottomColor: theme.colors.border,
       opacity: disabled ? 0.6 : 1,
     },
     variantStyle.glass ? {} : { backgroundColor: variantStyle.backgroundColor },
@@ -157,7 +157,7 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
                     {
                       width: 56,
                       height: 56,
-                      borderRadius: theme.borderRadius.lg,
+                      borderRadius: theme.borderRadius.card,
                     },
                     imageStyle,
                   ]}
@@ -176,16 +176,19 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
               <View style={styles.titleRow}>
                 <Text style={[
                   styles.title,
-                  { color: theme.colors.text },
+                  { color: theme.colors.ink, fontFamily: theme.typography.fontFamily.body },
                 ]}>
                   {title}
                 </Text>
                 {badge && (
                   <View style={[
                     styles.badge,
-                    { backgroundColor: badgeColor || theme.colors.primary },
+                    { backgroundColor: badgeColor || theme.colors.accent },
                   ]}>
-                    <Text style={styles.badgeText}>{badge}</Text>
+                    <Text style={[
+                      styles.badgeText,
+                      { fontFamily: theme.typography.fontFamily.body },
+                    ]}>{badge}</Text>
                   </View>
                 )}
               </View>
@@ -193,7 +196,7 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
               {subtitle && (
                 <Text style={[
                   styles.subtitle,
-                  { color: theme.colors.textSecondary },
+                  { color: theme.colors.inkMuted, fontFamily: theme.typography.fontFamily.body },
                 ]}>
                   {subtitle}
                 </Text>
@@ -202,7 +205,7 @@ export const GlassCardListItem: React.FC<GlassCardListItemProps> = ({
               {description && (
                 <Text style={[
                   styles.description,
-                  { color: theme.colors.textTertiary },
+                  { color: theme.colors.inkSubtle, fontFamily: theme.typography.fontFamily.body },
                 ]}>
                   {description}
                 </Text>
@@ -267,15 +270,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
     flexWrap: 'wrap',
+    includeFontPadding: false,
   },
   subtitle: {
     fontSize: 14,
     fontWeight: '400',
     marginBottom: 2,
+    includeFontPadding: false,
   },
   description: {
     fontSize: 13,
     fontWeight: '400',
+    includeFontPadding: false,
   },
   badge: {
     paddingHorizontal: 8,
@@ -289,6 +295,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: 'white',
+    includeFontPadding: false,
   },
   trailingContainer: {
     flexDirection: 'row',
@@ -296,3 +303,5 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 });
+
+export default GlassCardListItem;

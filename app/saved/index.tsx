@@ -169,8 +169,6 @@ export const SavedScreen: React.FC = () => {
   );
 };
 
-export default SavedScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -314,5 +312,3 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 });
-
-export default SavedScreen;

@@ -448,5 +448,3 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 });
-
-export default LandingPage;

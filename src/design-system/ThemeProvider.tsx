@@ -22,9 +22,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     Font.loadAsync({
-      'AlbertSans': require('@/assets/fonts/AlbertSans.ttf'),
-      'Almarai': require('@/assets/fonts/Almarai-Regular.ttf'),
-      'Almarai-Bold': require('@/assets/fonts/Almarai-Bold.ttf'),
+      // Keep binary asset paths relative: Metro's `@/` alias is intentionally
+      // mapped to `src/`, while fonts live at the repository root in `assets/`.
+      'AlbertSans': require('../../assets/fonts/AlbertSans.ttf'),
+      'Almarai': require('../../assets/fonts/Almarai-Regular.ttf'),
+      'Almarai-Bold': require('../../assets/fonts/Almarai-Bold.ttf'),
     }).then(() => setFontsLoaded(true)).catch(() => setFontsLoaded(true));
   }, []);
 

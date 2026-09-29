@@ -1,1 +1,15 @@
-{"rewrites":[{"source":"/api/(.*)","destination":"/api/[...path]"},{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "buildCommand": "npm run build:web",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/[...path].ts": {
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!_expo|assets|api|favicon.ico|metadata.json|.*\\.).*)",
+      "destination": "/"
+    }
+  ]
+}

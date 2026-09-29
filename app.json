@@ -1,1 +1,27 @@
-{"expo":{"name":"Oria","slug":"oria","version":"1.0.0","scheme":"oria","orientation":"portrait","userInterfaceStyle":"light","assetBundlePatterns":["**/*"],"web":{"bundler":"metro","output":"static","favicon":"./assets/favicon.png"},"plugins":["expo-router","expo-location","expo-web-browser"],"experiments":{"typedRoutes":true}}}
+{
+  "expo": {
+    "name": "Oria",
+    "slug": "oria",
+    "version": "1.0.0",
+    "scheme": "oria",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-web-browser",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -9,19 +9,22 @@ const write = (state: StoredState) => AsyncStorage.setItem(storageKey, JSON.stri
 type AppState = {
   saved: Place[];
   lists: SavedList[];
+  pendingPlace: Place | null;
   addSaved: (place: Place) => void;
   removeSaved: (id: string) => void;
   createList: (name: string) => void;
+  setPendingPlace: (place: Place | null) => void;
 };
 
 export const useAppState = create<AppState>((set, get) => ({
-  saved: [], lists: [],
+  saved: [], lists: [], pendingPlace: null,
   addSaved: (place) => set((state) => {
     const next = state.saved.some((item) => item.id === place.id) ? state : { saved: [place, ...state.saved] };
     write({ saved: next.saved, lists: state.lists }); return next;
   }),
   removeSaved: (id) => set((state) => { const next = { saved: state.saved.filter((item) => item.id !== id) }; write({ saved: next.saved, lists: state.lists }); return next; }),
   createList: (name) => set((state) => { const next = { lists: [{ id: `list-${Date.now()}`, name, places: [], createdAt: new Date().toISOString() }, ...state.lists] }; write({ saved: state.saved, lists: next.lists }); return next; }),
+  setPendingPlace: (place) => set({ pendingPlace: place }),
 }));
 
 AsyncStorage.getItem(storageKey).then((raw) => {

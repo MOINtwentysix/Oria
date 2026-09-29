@@ -17,6 +17,13 @@ export const theme = {
     danger: '#FF8C7A',
     mapWater: '#0A2335',
   },
+  fonts: {
+    regular: 'Archivo_400Regular',
+    medium: 'Archivo_500Medium',
+    semibold: 'Archivo_600SemiBold',
+    bold: 'Archivo_700Bold',
+    black: 'Archivo_800ExtraBold',
+  },
   radius: { sm: 12, md: 18, lg: 28, pill: 999 },
   space: (n: number) => n * 4,
 };

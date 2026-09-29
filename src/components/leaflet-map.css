@@ -3,6 +3,8 @@
   height: 100%;
   background: #0a2335;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  isolation: isolate;
+  z-index: 0;
 }
 
 /* The small subset of Leaflet's layout stylesheet needed for a map without

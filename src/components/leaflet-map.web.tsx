@@ -40,11 +40,11 @@ function CenterReporter({ onCenterChange }: Pick<MapCanvasProps, 'onCenterChange
 
 export default function LeafletMap({ center = { latitude: 52.52, longitude: 13.405 }, places, selectedPlace, userLocation, onSelect, onCenterChange }: MapCanvasProps) {
   return <MapContainer className="oria-leaflet" center={[center.latitude, center.longitude]} zoom={14} minZoom={3} scrollWheelZoom zoomControl={false} attributionControl={false}>
-    <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" subdomains="abcd" maxZoom={20} />
+    <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
     <MapMover center={center} />
     <CenterReporter onCenterChange={onCenterChange} />
     {userLocation && <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon} interactive={false} />}
     {places.map((place) => <Marker key={place.id} position={[place.latitude, place.longitude]} icon={markerIcon(place.icon, selectedPlace?.id === place.id)} zIndexOffset={selectedPlace?.id === place.id ? 1000 : 0} eventHandlers={{ click: () => onSelect(place) }} />)}
-    <span className="oria-map-credit">© OpenStreetMap · © CARTO</span>
+    <span className="oria-map-credit">© OpenStreetMap</span>
   </MapContainer>;
 }

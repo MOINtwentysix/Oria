@@ -8,6 +8,7 @@ type OverpassElement = {
   center?: { lat: number; lon: number };
   tags?: Record<string, string>;
 };
+type NominatimResult = { osm_type: string; osm_id: number; lat: string; lon: string; name?: string; display_name: string; category?: string; type?: string; address?: Record<string, string> };
 
 const ICONS: Record<string, string> = {
   cafe: '☕', restaurant: '🍽', bar: '◒', pub: '◒', bakery: '◐', fast_food: '◉', biergarten: '◒',
@@ -51,24 +52,28 @@ async function requestPlaces(center: Coordinates, query: string) {
   return data.elements || [];
 }
 
-// Local development has no Vercel function. Keep the same data source available
-// there, while production uses the server-side proxy above.
+const pause = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+// Local development has no Vercel function. Use Nominatim as a fast, public
+// fallback there (and if a proxy happens to be unavailable in production).
 async function requestPlacesDirectly(center: Coordinates, query: string) {
-  const escaped = query.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&').replace(/"/g, '');
-  const named = query ? `["name"~"${escaped}",i]` : '["name"]';
-  const around = `(around:1800,${center.latitude},${center.longitude})`;
-  const overpass = `[out:json][timeout:12];(node${named}${around}["amenity"~"cafe|restaurant|bar|pub|bakery|fast_food|biergarten|library|arts_centre|theatre"];node${named}${around}["tourism"~"museum|gallery|attraction|viewpoint"];node${named}${around}["leisure"~"park|garden|nature_reserve"];);out 60;`;
-  const endpoints = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
-  let lastError: unknown;
-  for (const endpoint of endpoints) {
-    try {
-      const response = await fetch(`${endpoint}?data=${encodeURIComponent(overpass)}`, { headers: { Accept: 'application/json' } });
-      if (!response.ok) throw new Error(`Overpass returned ${response.status}`);
-      const data = await response.json() as { elements?: OverpassElement[] };
-      return data.elements || [];
-    } catch (error) { lastError = error; }
+  const terms = query ? [query.slice(0, 80)] : ['cafe', 'restaurant', 'museum'];
+  const longitudeDelta = 0.035; const latitudeDelta = 0.024;
+  const viewbox = [center.longitude - longitudeDelta, center.latitude + latitudeDelta, center.longitude + longitudeDelta, center.latitude - latitudeDelta].join(',');
+  const elements: OverpassElement[] = [];
+  for (const [index, term] of terms.entries()) {
+    const params = new URLSearchParams({ q: term, format: 'jsonv2', limit: '20', addressdetails: '1', bounded: '1', viewbox });
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error(`Nominatim returned ${response.status}`);
+    const results = await response.json() as NominatimResult[];
+    elements.push(...results.map((result) => {
+      const address = result.address || {};
+      const category = ['amenity', 'tourism', 'leisure'].includes(result.category || '') ? result.category as 'amenity' | 'tourism' | 'leisure' : 'amenity';
+      return { type: result.osm_type, id: Number(result.osm_id), lat: Number(result.lat), lon: Number(result.lon), tags: { name: result.name || result.display_name.split(',')[0], [category]: result.type || 'place', 'addr:street': address.road || '', 'addr:housenumber': address.house_number || '', 'addr:postcode': address.postcode || '', 'addr:city': address.city || address.town || address.village || '' } };
+    }));
+    if (index < terms.length - 1) await pause(1050);
   }
-  throw lastError || new Error('Die Orte sind gerade nicht erreichbar.');
+  return elements;
 }
 
 export async function discoverPlaces(center: Coordinates, query = ''): Promise<Place[]> {

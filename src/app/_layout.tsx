@@ -1,0 +1,21 @@
+import { DarkTheme, DefaultTheme, ThemeProvider, Slot } from 'expo-router';
+import { ClerkProvider } from '@clerk/clerk-expo';
+import { StatusBar } from 'expo-status-bar';
+import { useColorScheme } from 'react-native';
+import { tokenCache, CLERK_PUBLISHABLE_KEY } from '../services/clerk';
+
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <ClerkProvider
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+      tokenCache={tokenCache}
+    >
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <Slot />
+      </ThemeProvider>
+    </ClerkProvider>
+  );
+}

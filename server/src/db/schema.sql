@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL,
     name VARCHAR(255),
     avatar_url TEXT,
-    tier VARCHAR(16) DEFAULT 'free' CHECK (tier IN ('free', 'pro')),
+    tier VARCHAR(16) DEFAULT 'free',
     ai_requests_used INT DEFAULT 0,
-    ai_requests_limit INT DEFAULT 50, -- 50 for free, -1 for pro
-    lists_limit INT DEFAULT 10,       -- 10 for free, -1 for pro
+    ai_requests_limit INT DEFAULT -1, -- -1 = unlimited
+    lists_limit INT DEFAULT -1,       -- -1 = unlimited
     quota_reset_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '30 days'),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

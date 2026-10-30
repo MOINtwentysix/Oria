@@ -19,10 +19,10 @@ router.post('/sync', async (req: Request, res: Response) => {
       const id = `user_${Date.now()}`;
       await query(
         `INSERT INTO users (id, clerk_id, email, name, avatar_url, tier, ai_requests_used, ai_requests_limit, lists_limit)
-         VALUES ($1, $2, $3, $4, $5, 'free', 0, 50, 10)`,
+         VALUES ($1, $2, $3, $4, $5, 'free', 0, -1, -1)`,
         [id, clerkId, email, name || 'Explorer', avatarUrl || null]
       );
-      return res.status(201).json({ status: 'created', tier: 'free', aiRequestsUsed: 0 });
+      return res.status(201).json({ status: 'created', tier: 'free', aiRequestsUsed: 0, aiRequestsLimit: -1, listsLimit: -1 });
     } else {
       const user = checkRes.rows[0];
       await query(

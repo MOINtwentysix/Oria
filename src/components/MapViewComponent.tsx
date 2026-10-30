@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, useColorScheme, Platform } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, useColorScheme, Platform, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Place } from '../types';
 
@@ -21,6 +21,11 @@ export function MapViewComponent({
 }: MapViewComponentProps) {
   const scheme = useColorScheme() ?? 'light';
   const webViewRef = useRef<any>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Send update messages to WebView when props change
   useEffect(() => {
@@ -187,6 +192,14 @@ export function MapViewComponent({
   };
 
   if (Platform.OS === 'web') {
+    if (!mounted) {
+      return (
+        <View style={[styles.container, styles.loadingCenter]}>
+          <ActivityIndicator size="small" />
+        </View>
+      );
+    }
+
     return (
       <View style={styles.container}>
         <iframe
@@ -222,5 +235,9 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
     backgroundColor: 'transparent',
+  },
+  loadingCenter: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -36,7 +36,5 @@ export const tokenCache = {
   },
 };
 
-// Configurable Clerk Publishable Key (reads from env or provides fallback)
-export const CLERK_PUBLISHABLE_KEY =
-  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  'pk_test_b3JpYS1sb2NhdGlvbi1kaXNjb3ZlcnktdGVzdC5jbGVyay5hY2NvdW50cy5kZXYk';
+// Configurable Clerk Publishable Key (reads from env; only active if user configures it)
+export const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';

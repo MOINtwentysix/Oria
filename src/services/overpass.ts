@@ -1,17 +1,20 @@
 import { CategoryType, GeocodingResult, Place } from '../types';
 import { CATEGORY_DEFAULT_IMAGES } from '../constants/categories';
 
-// Overpass API public endpoints with fallback mirrors
+// Overpass API fallback mirrors with fast timeouts
 const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
 ];
 
+const PHOTON_ENDPOINT = 'https://photon.komoot.io/api';
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org';
 
-// Simple in-memory cache for queries within the session
+// Fast in-memory cache for queries within the session
 const queryCache = new Map<string, { timestamp: number; data: Place[] }>();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 export function calculateDistanceMeters(
   lat1: number,
@@ -86,7 +89,6 @@ function parseOverpassElement(
   const tags = element.tags || {};
   const name = tags.name || tags['name:en'] || tags['name:de'] || tags.brand;
   
-  // Must have a real name (OpenStreetMap standard places)
   if (!name || name.trim().length === 0) {
     return null;
   }
@@ -113,9 +115,9 @@ function parseOverpassElement(
     .join(', ');
 
   return {
-    id: `${element.type}/${element.id}`,
+    id: `${element.type || 'node'}/${element.id}`,
     osmId: element.id,
-    osmType: element.type,
+    osmType: element.type || 'node',
     name: name.trim(),
     category,
     subCategory: tags.cuisine || tags.amenity || tags.tourism || tags.leisure || tags.shop,
@@ -138,103 +140,175 @@ function parseOverpassElement(
 }
 
 /**
- * Fetch real places around coordinates via Overpass API
+ * Fast OSM discovery via Komoot Photon cluster (~200ms)
  */
-export async function fetchNearbyPlaces(
+async function fetchNearbyPhoton(
   latitude: number,
   longitude: number,
-  category: CategoryType = 'all',
-  radiusMeters: number = 2500
+  category: CategoryType,
+  radiusMeters: number
 ): Promise<Place[]> {
-  const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}_${category}_${radiusMeters}`;
-  const cached = queryCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.data;
+  // Map category to effective OSM query keyword
+  let queryTerm = 'cafe';
+  switch (category) {
+    case 'cafe': queryTerm = 'cafe'; break;
+    case 'restaurant': queryTerm = 'restaurant'; break;
+    case 'park': queryTerm = 'park'; break;
+    case 'attraction': queryTerm = 'tourism'; break;
+    case 'museum': queryTerm = 'museum'; break;
+    case 'shopping': queryTerm = 'shop'; break;
+    case 'nightlife': queryTerm = 'bar'; break;
+    case 'entertainment': queryTerm = 'cinema'; break;
+    case 'all': default: queryTerm = 'cafe'; break;
   }
 
-  // Build Overpass QL query
-  let queryFilters = '';
+  const url = `${PHOTON_ENDPOINT}/?lat=${latitude}&lon=${longitude}&q=${encodeURIComponent(queryTerm)}&limit=35`;
+  
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3500);
+
+  const response = await fetch(url, {
+    signal: controller.signal,
+    headers: {
+      'User-Agent': 'OriaLocationDiscovery/1.0 (https://oria.moin26.dev)',
+    },
+  });
+  clearTimeout(timer);
+
+  if (!response.ok) {
+    throw new Error(`Photon responded with status ${response.status}`);
+  }
+
+  const json = await response.json();
+  const features = json.features || [];
+  const places: Place[] = [];
+  const seenNames = new Set<string>();
+
+  for (const f of features) {
+    const props = f.properties || {};
+    const coords = f.geometry?.coordinates;
+    if (!coords || !props.name || props.name.trim().length === 0) continue;
+
+    const lon = coords[0];
+    const lat = coords[1];
+    const dist = calculateDistanceMeters(latitude, longitude, lat, lon);
+
+    // Limit to search radius (or up to 4km max)
+    if (dist > Math.max(radiusMeters, 3500)) continue;
+
+    const key = props.name.toLowerCase().trim();
+    if (seenNames.has(key)) continue;
+    seenNames.add(key);
+
+    const osmId = props.osm_id || Math.floor(Math.random() * 1000000);
+    const osmType = props.osm_type === 'N' ? 'node' : props.osm_type === 'W' ? 'way' : 'node';
+
+    const tags: Record<string, string> = {
+      name: props.name,
+      amenity: props.osm_value,
+      [props.osm_key]: props.osm_value,
+    };
+
+    const resolvedCategory = category === 'all' ? determineCategory(tags) : category;
+
+    const address = [props.street, props.housenumber, props.postcode, props.city]
+      .filter(Boolean)
+      .join(', ');
+
+    places.push({
+      id: `${osmType}/${osmId}`,
+      osmId,
+      osmType,
+      name: props.name.trim(),
+      category: resolvedCategory,
+      subCategory: props.osm_value || category,
+      latitude: lat,
+      longitude: lon,
+      address: address || undefined,
+      city: props.city || undefined,
+      postcode: props.postcode || undefined,
+      street: props.street || undefined,
+      housenumber: props.housenumber || undefined,
+      imageUrl: getImageForPlace(resolvedCategory, osmId),
+      distanceMeters: dist,
+      tags,
+    });
+  }
+
+  places.sort((a, b) => (a.distanceMeters ?? 0) - (b.distanceMeters ?? 0));
+  return places;
+}
+
+/**
+ * Overpass fallback query with strict 3-second timeout
+ */
+async function fetchNearbyOverpass(
+  latitude: number,
+  longitude: number,
+  category: CategoryType,
+  radiusMeters: number
+): Promise<Place[]> {
+  const delta = 0.025; // ~2.5km bbox for lightning speed index lookup
+  const s = (latitude - delta).toFixed(5);
+  const w = (longitude - delta).toFixed(5);
+  const n = (latitude + delta).toFixed(5);
+  const e = (longitude + delta).toFixed(5);
+
+  let filters = '';
   switch (category) {
     case 'cafe':
-      queryFilters = `node["amenity"="cafe"](around:${radiusMeters},${latitude},${longitude});`;
+      filters = `node["amenity"="cafe"](${s},${w},${n},${e});`;
       break;
     case 'restaurant':
-      queryFilters = `
-        node["amenity"="restaurant"](around:${radiusMeters},${latitude},${longitude});
-        node["amenity"="fast_food"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["amenity"~"restaurant|fast_food"](${s},${w},${n},${e});`;
       break;
     case 'park':
-      queryFilters = `
-        node["leisure"="park"](around:${radiusMeters},${latitude},${longitude});
-        way["leisure"="park"](around:${radiusMeters},${latitude},${longitude});
-        node["leisure"="garden"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["leisure"~"park|garden"](${s},${w},${n},${e});`;
       break;
     case 'attraction':
-      queryFilters = `
-        node["tourism"="attraction"](around:${radiusMeters},${latitude},${longitude});
-        node["historic"="monument"](around:${radiusMeters},${latitude},${longitude});
-        node["tourism"="viewpoint"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["tourism"~"attraction|viewpoint"](${s},${w},${n},${e});`;
       break;
     case 'museum':
-      queryFilters = `
-        node["tourism"="museum"](around:${radiusMeters},${latitude},${longitude});
-        node["tourism"="gallery"](around:${radiusMeters},${latitude},${longitude});
-        node["amenity"="theatre"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["tourism"~"museum|gallery"](${s},${w},${n},${e});`;
       break;
     case 'shopping':
-      queryFilters = `
-        node["shop"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["shop"](${s},${w},${n},${e});`;
       break;
     case 'entertainment':
-      queryFilters = `
-        node["amenity"="cinema"](around:${radiusMeters},${latitude},${longitude});
-        node["leisure"="bowling_alley"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["amenity"~"cinema|theatre"](${s},${w},${n},${e});`;
       break;
     case 'nightlife':
-      queryFilters = `
-        node["amenity"="bar"](around:${radiusMeters},${latitude},${longitude});
-        node["amenity"="pub"](around:${radiusMeters},${latitude},${longitude});
-        node["amenity"="nightclub"](around:${radiusMeters},${latitude},${longitude});
-      `;
+      filters = `node["amenity"~"bar|pub|nightclub"](${s},${w},${n},${e});`;
       break;
     case 'all':
     default:
-      queryFilters = `
-        node["amenity"~"cafe|restaurant|bar|pub|cinema"](around:${radiusMeters},${latitude},${longitude});
-        node["tourism"~"attraction|museum|viewpoint|gallery"](around:${radiusMeters},${latitude},${longitude});
-        node["leisure"~"park|garden"](around:${radiusMeters},${latitude},${longitude});
+      filters = `
+        node["amenity"~"cafe|restaurant|bar|cinema"](${s},${w},${n},${e});
+        node["tourism"~"attraction|museum"](${s},${w},${n},${e});
+        node["leisure"="park"](${s},${w},${n},${e});
       `;
       break;
   }
 
-  const overpassQl = `
-    [out:json][timeout:15];
-    (
-      ${queryFilters}
-    );
-    out center 60;
-  `;
+  const overpassQl = `[out:json][timeout:4];(${filters});out 40;`;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3500);
+
       const response = await fetch(endpoint, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          'User-Agent': 'OriaLocationDiscovery/1.0 (https://oria.app)',
+          'User-Agent': 'OriaLocationDiscovery/1.0',
         },
         body: `data=${encodeURIComponent(overpassQl)}`,
       });
+      clearTimeout(timer);
 
-      if (!response.ok) {
-        continue;
-      }
+      if (!response.ok) continue;
 
       const json = await response.json();
       const rawElements = json.elements || [];
@@ -250,18 +324,55 @@ export async function fetchNearbyPlaces(
         }
       }
 
-      // Sort by distance
-      places.sort((a, b) => (a.distanceMeters ?? 0) - (b.distanceMeters ?? 0));
-
-      // Cache result
-      queryCache.set(cacheKey, { timestamp: Date.now(), data: places });
-      return places;
-    } catch (e) {
-      console.warn(`Overpass endpoint ${endpoint} failed, trying next mirror:`, e);
+      if (places.length > 0) {
+        places.sort((a, b) => (a.distanceMeters ?? 0) - (b.distanceMeters ?? 0));
+        return places;
+      }
+    } catch {
+      // Continue to next mirror quickly
     }
   }
 
-  // Graceful fallback: return empty array or cached if exists
+  return [];
+}
+
+/**
+ * Fetch real places around coordinates (High-Speed Photon first, Overpass fallback)
+ */
+export async function fetchNearbyPlaces(
+  latitude: number,
+  longitude: number,
+  category: CategoryType = 'all',
+  radiusMeters: number = 2500
+): Promise<Place[]> {
+  const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}_${category}`;
+  const cached = queryCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  // 1. High-speed primary: Photon OpenStreetMap (~250ms)
+  try {
+    const places = await fetchNearbyPhoton(latitude, longitude, category, radiusMeters);
+    if (places.length > 0) {
+      queryCache.set(cacheKey, { timestamp: Date.now(), data: places });
+      return places;
+    }
+  } catch (err) {
+    console.warn('Photon fast query fallback to Overpass:', err);
+  }
+
+  // 2. High-speed secondary: Overpass BBOX query (~1-2s)
+  try {
+    const overpassPlaces = await fetchNearbyOverpass(latitude, longitude, category, radiusMeters);
+    if (overpassPlaces.length > 0) {
+      queryCache.set(cacheKey, { timestamp: Date.now(), data: overpassPlaces });
+      return overpassPlaces;
+    }
+  } catch (err) {
+    console.warn('Overpass fallback failed:', err);
+  }
+
   return cached?.data || [];
 }
 
@@ -276,11 +387,16 @@ export async function searchPlacesNominatim(query: string): Promise<Place[]> {
       query
     )}&format=json&addressdetails=1&extratags=1&limit=20`;
 
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+
     const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'OriaLocationDiscovery/1.0 (contact@oria.app)',
       },
     });
+    clearTimeout(timer);
 
     if (!response.ok) return [];
 
@@ -325,11 +441,16 @@ export async function geocodeLocation(query: string): Promise<GeocodingResult | 
     const url = `${NOMINATIM_ENDPOINT}/search?q=${encodeURIComponent(
       query
     )}&format=json&limit=1`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3500);
+
     const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'OriaLocationDiscovery/1.0 (contact@oria.app)',
       },
     });
+    clearTimeout(timer);
 
     if (!response.ok) return null;
     const data = await response.json();

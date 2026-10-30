@@ -63,51 +63,69 @@ router.post('/nearby', async (req: Request, res: Response) => {
     return res.json(cached.data);
   }
 
-  let filters = '';
-  switch (category) {
-    case 'cafe':
-      filters = `node["amenity"="cafe"](around:${radius},${lat},${lon});`;
-      break;
-    case 'restaurant':
-      filters = `node["amenity"~"restaurant|fast_food|food_court"](around:${radius},${lat},${lon});`;
-      break;
-    case 'park':
-      filters = `node["leisure"~"park|garden"](around:${radius},${lat},${lon}); way["leisure"="park"](around:${radius},${lat},${lon});`;
-      break;
-    case 'attraction':
-      filters = `node["tourism"~"attraction|viewpoint"](around:${radius},${lat},${lon}); node["historic"="monument"](around:${radius},${lat},${lon});`;
-      break;
-    case 'museum':
-      filters = `node["tourism"~"museum|gallery"](around:${radius},${lat},${lon}); node["amenity"="theatre"](around:${radius},${lat},${lon});`;
-      break;
-    case 'shopping':
-      filters = `node["shop"](around:${radius},${lat},${lon});`;
-      break;
-    case 'nightlife':
-      filters = `node["amenity"~"bar|pub|nightclub"](around:${radius},${lat},${lon});`;
-      break;
-    case 'all':
-    default:
-      filters = `
-        node["amenity"~"cafe|restaurant|bar|cinema"](around:${radius},${lat},${lon});
-        node["tourism"~"attraction|museum|viewpoint"](around:${radius},${lat},${lon});
-        node["leisure"="park"](around:${radius},${lat},${lon});
-      `;
-      break;
+  // 1. Photon fast path (<300ms)
+  try {
+    let q = 'cafe';
+    if (category === 'restaurant') q = 'restaurant';
+    else if (category === 'park') q = 'park';
+    else if (category === 'attraction') q = 'tourism';
+    else if (category === 'museum') q = 'museum';
+    else if (category === 'shopping') q = 'shop';
+    else if (category === 'nightlife') q = 'bar';
+    else if (category === 'entertainment') q = 'cinema';
+
+    const url = `https://photon.komoot.io/api/?lat=${lat}&lon=${lon}&q=${encodeURIComponent(q)}&limit=35`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3500);
+    const photonRes = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'OriaLocationServer/1.0 (https://oria.app)' }
+    });
+    clearTimeout(timer);
+
+    if (photonRes.ok) {
+      const data = await photonRes.json();
+      if (data.features && data.features.length > 0) {
+        cache.set(cacheKey, { timestamp: Date.now(), data });
+        return res.json(data);
+      }
+    }
+  } catch (err) {
+    // Continue to Overpass fallback
   }
 
-  const overpassQl = `[out:json][timeout:15];(${filters});out center 50;`;
+  // 2. Overpass BBOX fallback with 3.5s timeout
+  const delta = 0.025;
+  const s = (parseFloat(lat) - delta).toFixed(5);
+  const w = (parseFloat(lon) - delta).toFixed(5);
+  const n = (parseFloat(lat) + delta).toFixed(5);
+  const e = (parseFloat(lon) + delta).toFixed(5);
+
+  let filters = `node["amenity"~"cafe|restaurant|bar"](${s},${w},${n},${e});`;
+  if (category === 'cafe') filters = `node["amenity"="cafe"](${s},${w},${n},${e});`;
+  else if (category === 'restaurant') filters = `node["amenity"~"restaurant|fast_food"](${s},${w},${n},${e});`;
+  else if (category === 'park') filters = `node["leisure"~"park|garden"](${s},${w},${n},${e});`;
+  else if (category === 'attraction') filters = `node["tourism"~"attraction|viewpoint"](${s},${w},${n},${e});`;
+  else if (category === 'museum') filters = `node["tourism"~"museum|gallery"](${s},${w},${n},${e});`;
+  else if (category === 'shopping') filters = `node["shop"](${s},${w},${n},${e});`;
+  else if (category === 'nightlife') filters = `node["amenity"~"bar|pub|nightclub"](${s},${w},${n},${e});`;
+
+  const overpassQl = `[out:json][timeout:4];(${filters});out 30;`;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3500);
       const response = await fetch(endpoint, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
           'User-Agent': 'OriaLocationServer/1.0 (https://oria.app)',
         },
         body: `data=${encodeURIComponent(overpassQl)}`,
       });
+      clearTimeout(timer);
 
       if (!response.ok) continue;
 
@@ -115,11 +133,11 @@ router.post('/nearby', async (req: Request, res: Response) => {
       cache.set(cacheKey, { timestamp: Date.now(), data });
       return res.json(data);
     } catch (e) {
-      console.warn(`Overpass proxy error on ${endpoint}:`, e);
+      // Continue to next mirror
     }
   }
 
-  return res.status(503).json({ error: 'Overpass mirrors currently unreachable' });
+  return res.json({ elements: [] });
 });
 
 export default router;

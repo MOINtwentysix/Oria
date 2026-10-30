@@ -15,6 +15,10 @@ const BACKEND_URL =
 
 let isBackendAvailable = true;
 
+export function getIsBackendAvailable(): boolean {
+  return isBackendAvailable;
+}
+
 /**
  * Check if backend server is responsive
  */
@@ -33,7 +37,7 @@ export async function checkBackendHealth(): Promise<boolean> {
 }
 
 /**
- * Fetch nearby places (via backend cache or direct Overpass)
+ * Fetch nearby places (direct high-speed OSM discovery with in-memory cache)
  */
 export async function fetchPlaces(
   lat: number,
@@ -41,22 +45,6 @@ export async function fetchPlaces(
   category: CategoryType = 'all',
   radius: number = 2500
 ): Promise<Place[]> {
-  if (isBackendAvailable) {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/places/nearby`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lon, category, radius }),
-      });
-      if (res.ok) {
-        return overpassService.fetchNearbyPlaces(lat, lon, category, radius);
-      }
-    } catch {
-      isBackendAvailable = false;
-    }
-  }
-
-  // Resilient direct fallback
   return overpassService.fetchNearbyPlaces(lat, lon, category, radius);
 }
 

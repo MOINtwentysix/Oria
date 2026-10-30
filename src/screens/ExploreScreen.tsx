@@ -72,10 +72,13 @@ export function ExploreScreen({ onOpenRoutePlanner }: ExploreScreenProps) {
         const data = await fetchNearbyPlaces(lat, lon, category, 2500);
         setPlaces(data);
 
-        // Check saved status
+        // Check saved status in parallel for instant UI responsiveness
         const statusMap: Record<string, boolean> = {};
-        for (const p of data.slice(0, 15)) {
-          statusMap[p.id] = await isPlaceSaved(p.id);
+        const checks = await Promise.all(
+          data.slice(0, 20).map(async (p) => [p.id, await isPlaceSaved(p.id)] as const)
+        );
+        for (const [id, saved] of checks) {
+          statusMap[id] = saved;
         }
         setSavedStatusMap(statusMap);
       } catch (err) {

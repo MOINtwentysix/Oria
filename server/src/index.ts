@@ -32,7 +32,7 @@ app.get('/api/health', async (req, res) => {
     service: 'Oria Location Discovery API',
     version: '1.0.0',
     database: dbStatus,
-    aiProvider: process.env.GEMINI_API_KEY ? 'gemini' : process.env.OPENAI_API_KEY ? 'openai' : 'grounded-engine',
+    aiProvider: process.env.MISTRAL_API_KEY ? 'mistral' : process.env.GEMINI_API_KEY ? 'gemini' : process.env.OPENAI_API_KEY ? 'openai' : 'grounded-engine',
     timestamp: new Date().toISOString(),
   });
 });

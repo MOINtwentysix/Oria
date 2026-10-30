@@ -70,9 +70,20 @@ async function initDb() {
   }
 }
 
-app.listen(PORT, async () => {
-  console.log(`✨ Oria Backend Server running on http://localhost:${PORT}`);
-  await initDb();
+let dbInitialized = false;
+app.use(async (req, res, next) => {
+  if (!dbInitialized && process.env.DATABASE_URL) {
+    dbInitialized = true;
+    initDb().catch((e) => console.warn('Neon DB init error:', e));
+  }
+  next();
 });
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, async () => {
+    console.log(`✨ Oria Backend Server running on http://localhost:${PORT}`);
+    await initDb();
+  });
+}
 
 export default app;

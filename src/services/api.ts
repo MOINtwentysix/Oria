@@ -4,10 +4,14 @@ import * as overpassService from './overpass';
 import * as routingService from './routing';
 import * as storageService from './storage';
 
-// Base backend server URL (configurable, defaults to local machine IP / localhost)
+// Base backend server URL (configurable, defaults to relative / on web or localhost on native)
 const BACKEND_URL =
   process.env.EXPO_PUBLIC_BACKEND_URL ||
-  (Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001');
+  (Platform.OS === 'web'
+    ? ''
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:3001'
+    : 'http://localhost:3001');
 
 let isBackendAvailable = true;
 

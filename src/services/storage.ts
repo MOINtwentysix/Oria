@@ -15,13 +15,6 @@ const DEFAULT_PROFILE: UserProfile = {
   clerkId: 'guest',
   email: 'explorer@oria.app',
   name: 'Oria Explorer',
-  subscription: {
-    tier: 'free',
-    aiRequestsUsed: 4,
-    aiRequestsLimit: 50,
-    listsLimit: 10,
-    resetDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
-  },
   listsCount: 3,
   savedPlacesCount: 6,
   privacy: {
@@ -107,12 +100,6 @@ export async function createNewList(
   isPrivate: boolean = true
 ): Promise<SavedList> {
   const lists = await getSavedLists();
-  const profile = await getUserProfile();
-  
-  if (profile.subscription.tier === 'free' && lists.length >= profile.subscription.listsLimit) {
-    throw new Error('LIST_LIMIT_REACHED');
-  }
-
   const shareCode = Math.random().toString(36).substring(2, 9);
   const newList: SavedList = {
     id: `list_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
@@ -214,31 +201,6 @@ export async function updateUserProfile(profile: Partial<UserProfile>): Promise<
   const updated = { ...current, ...profile };
   await AsyncStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(updated));
   return updated;
-}
-
-export async function incrementAIRequestCount(): Promise<{ allowed: boolean; remaining: number }> {
-  const profile = await getUserProfile();
-  const { tier, aiRequestsUsed, aiRequestsLimit } = profile.subscription;
-
-  if (tier === 'free' && aiRequestsUsed >= aiRequestsLimit) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  profile.subscription.aiRequestsUsed = aiRequestsUsed + 1;
-  await AsyncStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
-  
-  const remaining =
-    tier === 'pro' ? 999999 : Math.max(0, aiRequestsLimit - profile.subscription.aiRequestsUsed);
-  return { allowed: true, remaining };
-}
-
-export async function upgradeToPro(): Promise<UserProfile> {
-  const profile = await getUserProfile();
-  profile.subscription.tier = 'pro';
-  profile.subscription.aiRequestsLimit = -1;
-  profile.subscription.listsLimit = -1;
-  await AsyncStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
-  return profile;
 }
 
 export async function getRecentSearches(): Promise<string[]> {

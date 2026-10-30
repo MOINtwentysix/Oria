@@ -10,21 +10,20 @@ import {
   View,
   useColorScheme,
   Platform,
+  Linking,
 } from 'react-native';
 import {
   User,
-  Sparkles,
   Shield,
   Trash2,
-  Bookmark,
   MapPin,
   ChevronRight,
-  Zap,
+  ExternalLink,
   Route as RouteIcon,
+  Globe,
 } from 'lucide-react-native';
 import { UserProfile } from '../types';
 import { BorderRadius, Colors, Shadows, Spacing } from '../constants/theme';
-import { OriaProModal } from '../components/OriaProModal';
 import {
   clearAllUserData,
   getUserProfile,
@@ -35,12 +34,13 @@ interface ProfileScreenProps {
   onOpenRoutePlanner?: () => void;
 }
 
+const ACCOUNTS_URL = 'https://accounts.moin26.dev/user';
+
 export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isProModalVisible, setIsProModalVisible] = useState<boolean>(false);
 
   const loadProfile = useCallback(async () => {
     const data = await getUserProfile();
@@ -57,6 +57,14 @@ export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
       privacy: { ...profile.privacy, allowAnalytics: val },
     });
     setProfile(updated);
+  };
+
+  const handleOpenAccountManagement = async () => {
+    try {
+      await Linking.openURL(ACCOUNTS_URL);
+    } catch {
+      Alert.alert('Link Error', `Could not open ${ACCOUNTS_URL}`);
+    }
   };
 
   const handleClearData = () => {
@@ -79,8 +87,6 @@ export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
   };
 
   if (!profile) return null;
-
-  const isPro = profile.subscription.tier === 'pro';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -105,63 +111,25 @@ export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
             <View style={[styles.avatarCircle, { backgroundColor: colors.primaryLight }]}>
               <User size={32} color={colors.primary} />
             </View>
-            {isPro && (
-              <View style={[styles.proBadge, { backgroundColor: colors.accent }]}>
-                <Sparkles size={11} color="#FFFFFF" />
-              </View>
-            )}
           </View>
 
           <View style={styles.userInfo}>
             <Text style={[styles.userName, { color: colors.text }]}>{profile.name}</Text>
             <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{profile.email}</Text>
-            <View style={styles.tierPillRow}>
-              <View
-                style={[
-                  styles.tierTag,
-                  {
-                    backgroundColor: isPro ? colors.accentLight : colors.backgroundSelected,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.tierTagText,
-                    { color: isPro ? colors.accent : colors.textSecondary },
-                  ]}
-                >
-                  {isPro ? 'ORIA PRO MEMBER' : 'ORIA FREE TIER'}
-                </Text>
-              </View>
-            </View>
+            <TouchableOpacity
+              style={styles.manageAccountBtn}
+              onPress={handleOpenAccountManagement}
+            >
+              <Text style={[styles.manageAccountText, { color: colors.primary }]}>
+                Manage Account & Profile
+              </Text>
+              <ExternalLink size={13} color={colors.primary} />
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Plan Upgrade Banner if Free Tier */}
-        {!isPro && (
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={[
-              styles.upgradeBanner,
-              { backgroundColor: colors.accentLight, borderColor: colors.accent },
-            ]}
-            onPress={() => setIsProModalVisible(true)}
-          >
-            <View style={styles.bannerIcon}>
-              <Sparkles size={22} color={colors.accent} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.bannerTitle, { color: colors.accent }]}>Upgrade to Oria Pro</Text>
-              <Text style={[styles.bannerSubtitle, { color: colors.textSecondary }]}>
-                Unlimited Oria AI discovery, unlimited lists & multi-stop itinerary exports.
-              </Text>
-            </View>
-            <ChevronRight size={18} color={colors.accent} />
-          </TouchableOpacity>
-        )}
-
-        {/* Usage & Discovery Stats */}
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>USAGE & LIMITS</Text>
+        {/* Account Management via accounts.moin26.dev */}
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>ACCOUNT & SECURITY</Text>
         <View
           style={[
             styles.sectionCard,
@@ -169,39 +137,18 @@ export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
             Shadows.soft,
           ]}
         >
-          <View style={styles.statRow}>
+          <TouchableOpacity style={styles.actionRow} onPress={handleOpenAccountManagement}>
             <View style={styles.statLeft}>
-              <Zap size={18} color={colors.accent} />
-              <View>
-                <Text style={[styles.statTitle, { color: colors.text }]}>Oria AI Requests</Text>
+              <Globe size={18} color={colors.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.statTitle, { color: colors.text }]}>Account Center</Text>
                 <Text style={[styles.statSubtitle, { color: colors.textSecondary }]}>
-                  {isPro ? 'Unlimited requests' : '50 requests included per month'}
+                  Edit profile, password, email & delete account at accounts.moin26.dev
                 </Text>
               </View>
             </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              {isPro
-                ? '∞'
-                : `${profile.subscription.aiRequestsUsed} / ${profile.subscription.aiRequestsLimit}`}
-            </Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.statRow}>
-            <View style={styles.statLeft}>
-              <Bookmark size={18} color={colors.primary} />
-              <View>
-                <Text style={[styles.statTitle, { color: colors.text }]}>Saved Lists</Text>
-                <Text style={[styles.statSubtitle, { color: colors.textSecondary }]}>
-                  {isPro ? 'Unlimited lists' : 'Up to 10 collections on Free'}
-                </Text>
-              </View>
-            </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              {isPro ? '∞' : `${profile.listsCount} / ${profile.subscription.listsLimit}`}
-            </Text>
-          </View>
+            <ExternalLink size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
         </View>
 
         {/* Tools & Planning */}
@@ -280,7 +227,7 @@ export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
             <View style={styles.statLeft}>
               <Trash2 size={18} color={colors.danger} />
               <View>
-                <Text style={[styles.statTitle, { color: colors.danger }]}>Clear All My Data</Text>
+                <Text style={[styles.statTitle, { color: colors.danger }]}>Clear Offline Device Cache</Text>
                 <Text style={[styles.statSubtitle, { color: colors.textSecondary }]}>
                   GDPR Article 17 Right to Erasure
                 </Text>
@@ -290,20 +237,13 @@ export function ProfileScreen({ onOpenRoutePlanner }: ProfileScreenProps) {
           </TouchableOpacity>
         </View>
 
-        {/* OpenStreetMap Community Footer */}
+        {/* Footer */}
         <View style={styles.footerWrap}>
           <Text style={[styles.footerText, { color: colors.textTertiary }]}>
-            Oria Version 1.0.0 • Powered by OpenStreetMap, Overpass & OSRM
+            Oria Version 1.0.0 • AI powered by Mistral AI (mistral-small-latest) • Maps by OpenStreetMap
           </Text>
         </View>
       </ScrollView>
-
-      {/* Pro Upgrade Modal */}
-      <OriaProModal
-        visible={isProModalVisible}
-        onClose={() => setIsProModalVisible(false)}
-        onUpgraded={loadProfile}
-      />
     </SafeAreaView>
   );
 }
@@ -343,18 +283,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  proBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
   userInfo: {
     marginLeft: 14,
     flex: 1,
@@ -367,44 +295,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
-  tierPillRow: {
-    marginTop: 6,
-    flexDirection: 'row',
-  },
-  tierTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
-  },
-  tierTagText: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  upgradeBanner: {
+  manageAccountBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    marginBottom: Spacing.xl,
-    gap: 12,
+    gap: 4,
+    marginTop: 8,
   },
-  bannerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  bannerSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
-    lineHeight: 16,
+  manageAccountText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   sectionTitle: {
     fontSize: 12,
@@ -419,13 +318,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     marginBottom: Spacing.md,
   },
-  statRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-  },
   statLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -439,10 +331,6 @@ const styles = StyleSheet.create({
   statSubtitle: {
     fontSize: 12,
     marginTop: 2,
-  },
-  statValue: {
-    fontSize: 14,
-    fontWeight: '700',
   },
   actionRow: {
     flexDirection: 'row',

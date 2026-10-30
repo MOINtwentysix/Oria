@@ -39,10 +39,8 @@ export function LiquidGlassView({
         style={[
           glassStyle,
           {
-            // @ts-ignore Web-only CSS backdrop filter
             backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-          },
+          } as any,
           style,
         ]}
         {...props}

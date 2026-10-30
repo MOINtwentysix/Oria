@@ -2,6 +2,8 @@ import { Request, Response, Router } from 'express';
 import { query } from '../db';
 
 const router = Router();
+const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || '';
+const MISTRAL_MODEL = 'mistral-small-latest';
 
 /**
  * POST /api/ai/recommend
@@ -14,34 +16,7 @@ router.post('/recommend', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
-  // 1. Server-side Rate Limiting & Usage Tracking via Neon PostgreSQL
-  try {
-    const userRes = await query(
-      `SELECT tier, ai_requests_used, ai_requests_limit FROM users WHERE clerk_id = $1`,
-      [userId]
-    );
-
-    if (userRes.rows.length > 0) {
-      const user = userRes.rows[0];
-      if (user.tier === 'free' && user.ai_requests_used >= user.ai_requests_limit) {
-        return res.status(429).json({
-          error: 'QUOTA_EXCEEDED',
-          message:
-            'You have reached your 50 free monthly AI discovery requests. Upgrade to Oria Pro for unlimited recommendations.',
-        });
-      }
-
-      // Increment count in Neon DB
-      await query(
-        `UPDATE users SET ai_requests_used = ai_requests_used + 1, updated_at = NOW() WHERE clerk_id = $1`,
-        [userId]
-      );
-    }
-  } catch (dbErr) {
-    console.warn('[AI Route] DB quota check skipped (decoupled mode):', dbErr);
-  }
-
-  // 2. Fetch real Overpass data for location grounding
+  // 1. Fetch real Overpass data for location grounding
   const lat = userLat || 48.137154;
   const lon = userLon || 11.576124;
 
@@ -83,49 +58,51 @@ router.post('/recommend', async (req: Request, res: Response) => {
     console.warn('Overpass grounding query error:', err);
   }
 
-  // 3. Grounded response generation (Configurable AI Provider)
-  // If GEMINI_API_KEY or OPENAI_API_KEY is present in env, call it with strict grounding instructions
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-
+  // 2. Call Mistral AI (mistral-small-latest)
   let answerText = '';
 
-  if (geminiKey) {
+  if (MISTRAL_API_KEY) {
     try {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
-      const systemInstruction = `You are Oria AI, an Apple-inspired premium location concierge.
-Ground your response ONLY in the real places provided below. Never invent places, addresses, or fake hours.
-Real Places: ${JSON.stringify(realPlaces.slice(0, 5))}`;
-
-      const geminiRes = await fetch(geminiUrl, {
+      const mistralRes = await fetch('https://api.mistral.ai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${MISTRAL_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents: [
+          model: MISTRAL_MODEL,
+          messages: [
+            {
+              role: 'system',
+              content: `You are Oria AI, an Apple-inspired concierge for location discovery.
+Ground your response ONLY in the real places provided below. Never invent places, addresses, or fake hours.
+Real Places: ${JSON.stringify(realPlaces.slice(0, 5))}`,
+            },
             {
               role: 'user',
-              parts: [{ text: `${systemInstruction}\n\nUser Question: ${prompt}` }],
+              content: prompt,
             },
           ],
+          temperature: 0.5,
+          max_tokens: 600,
         }),
       });
 
-      if (geminiRes.ok) {
-        const geminiData = await geminiRes.json();
-        answerText =
-          geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (mistralRes.ok) {
+        const mistralData = await mistralRes.json();
+        answerText = mistralData.choices?.[0]?.message?.content || '';
       }
     } catch (e) {
-      console.warn('Gemini request failed:', e);
+      console.warn('Mistral API call failed:', e);
     }
   }
 
-  // Fallback if no external provider or API key not yet inserted
+  // Fallback if Mistral key is not yet set
   if (!answerText) {
     const top = realPlaces.slice(0, 4);
     if (top.length > 0) {
       answerText = `I discovered these verified real places near your location matching "${prompt}":\n\n` +
-        top.map((p, idx) => `• **${p.name}** (${p.category})${p.address ? ` on ${p.address}` : ''}${p.openingHours ? ` — Open: ${p.openingHours}` : ''}`).join('\n') +
+        top.map((p) => `• **${p.name}** (${p.category})${p.address ? ` on ${p.address}` : ''}${p.openingHours ? ` — Open: ${p.openingHours}` : ''}`).join('\n') +
         `\n\nAll recommendations are verified OpenStreetMap locations.`;
     } else {
       answerText = `I couldn't find any specific verified spots matching "${prompt}" in the immediate vicinity. Try expanding your search radius or exploring another category!`;

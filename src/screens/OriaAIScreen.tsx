@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -15,17 +15,15 @@ import {
 import {
   Send,
   Sparkles,
-  Zap,
 } from 'lucide-react-native';
-import { AIMessage, Place, UserProfile } from '../types';
+import { AIMessage, Place } from '../types';
 import { BorderRadius, Colors, Shadows, Spacing } from '../constants/theme';
 import { LiquidGlassView } from '../components/LiquidGlassView';
 import { PlaceCard } from '../components/PlaceCard';
 import { PlaceDetailModal } from '../components/PlaceDetailModal';
 import { SaveToListModal } from '../components/SaveToListModal';
-import { OriaProModal } from '../components/OriaProModal';
 import { sendAIMessage } from '../services/ai';
-import { getUserProfile, isPlaceSaved } from '../services/storage';
+import { isPlaceSaved } from '../services/storage';
 
 interface OriaAIScreenProps {
   onOpenRoutePlanner?: (initialPlace?: Place) => void;
@@ -36,7 +34,7 @@ const INITIAL_MESSAGES: AIMessage[] = [
     id: 'welcome_1',
     role: 'assistant',
     content:
-      "Hello! I am **Oria AI**, your personal location discovery assistant.\n\nEvery recommendation I provide is strictly grounded in real, verified OpenStreetMap data — never fictional places. How can I help you explore today?",
+      "Hello! I am **Oria AI**, powered by Mistral AI.\n\nEvery recommendation I provide is strictly grounded in real, verified OpenStreetMap data — never fictional places. What would you like to explore today?",
     suggestedPrompts: [
       '☕ Find quiet cafés near me',
       '🌳 Scenic parks & green spaces',
@@ -54,24 +52,13 @@ export function OriaAIScreen({ onOpenRoutePlanner }: OriaAIScreenProps) {
   const [messages, setMessages] = useState<AIMessage[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Modals
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [isDetailVisible, setIsDetailVisible] = useState<boolean>(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState<boolean>(false);
-  const [isProModalVisible, setIsProModalVisible] = useState<boolean>(false);
   const [placeToSave, setPlaceToSave] = useState<Place | null>(null);
   const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    const p = await getUserProfile();
-    setUserProfile(p);
-  };
 
   const handleSendPrompt = async (textToSend: string) => {
     const text = textToSend.trim();
@@ -96,15 +83,12 @@ export function OriaAIScreen({ onOpenRoutePlanner }: OriaAIScreenProps) {
       const response = await sendAIMessage({ prompt: text });
       setMessages((prev) => [...prev, response]);
 
-      // Check saved statuses of returned places
       if (response.recommendedPlaces) {
         for (const p of response.recommendedPlaces) {
           const saved = await isPlaceSaved(p.id);
           setSavedMap((prev) => ({ ...prev, [p.id]: saved }));
         }
       }
-
-      await loadProfile();
     } catch (err) {
       console.error('AI chat error:', err);
     } finally {
@@ -115,14 +99,9 @@ export function OriaAIScreen({ onOpenRoutePlanner }: OriaAIScreenProps) {
     }
   };
 
-  const isFreeTier = userProfile?.subscription.tier === 'free';
-  const used = userProfile?.subscription.aiRequestsUsed || 0;
-  const limit = userProfile?.subscription.aiRequestsLimit || 50;
-  const progressRatio = isFreeTier ? Math.min(1, used / limit) : 0;
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header with Usage Metrics */}
+      {/* Header */}
       <View style={styles.topHeader}>
         <View style={styles.headerTitleRow}>
           <View style={[styles.aiBadge, { backgroundColor: colors.accentLight }]}>
@@ -131,46 +110,10 @@ export function OriaAIScreen({ onOpenRoutePlanner }: OriaAIScreenProps) {
           <View>
             <Text style={[styles.title, { color: colors.text }]}>Oria AI</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Grounded Location Concierge
+              Mistral AI Location Discovery
             </Text>
           </View>
         </View>
-
-        {/* Subscription / Quota Tag */}
-        <TouchableOpacity
-          style={[
-            styles.quotaPill,
-            {
-              backgroundColor: isFreeTier ? colors.backgroundSelected : colors.accentLight,
-              borderColor: isFreeTier ? colors.cardBorder : colors.accent,
-            },
-          ]}
-          onPress={() => setIsProModalVisible(true)}
-        >
-          {isFreeTier ? (
-            <View style={styles.quotaRow}>
-              <Text style={[styles.quotaText, { color: colors.textSecondary }]}>
-                {used}/{limit} requests
-              </Text>
-              <View style={[styles.progressBarBg, { backgroundColor: colors.divider }]}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${progressRatio * 100}%`,
-                      backgroundColor: progressRatio > 0.8 ? colors.danger : colors.accent,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          ) : (
-            <View style={styles.proRow}>
-              <Zap size={13} color={colors.accent} />
-              <Text style={[styles.proText, { color: colors.accent }]}>PRO Unlimited</Text>
-            </View>
-          )}
-        </TouchableOpacity>
       </View>
 
       {/* Chat Messages */}
@@ -272,7 +215,7 @@ export function OriaAIScreen({ onOpenRoutePlanner }: OriaAIScreenProps) {
               >
                 <ActivityIndicator size="small" color={colors.accent} />
                 <Text style={[styles.typingText, { color: colors.textSecondary }]}>
-                  Grounding places with OpenStreetMap...
+                  Synthesizing with Mistral AI & OpenStreetMap...
                 </Text>
               </View>
             </View>
@@ -348,13 +291,6 @@ export function OriaAIScreen({ onOpenRoutePlanner }: OriaAIScreenProps) {
           }
         }}
       />
-
-      {/* Oria Pro Modal */}
-      <OriaProModal
-        visible={isProModalVisible}
-        onClose={() => setIsProModalVisible(false)}
-        onUpgraded={loadProfile}
-      />
     </SafeAreaView>
   );
 }
@@ -392,39 +328,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-  },
-  quotaPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  quotaRow: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  quotaText: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  progressBarBg: {
-    width: 60,
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  proRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  proText: {
-    fontSize: 11,
-    fontWeight: '700',
   },
   chatScroll: {
     flex: 1,

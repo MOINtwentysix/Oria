@@ -29,7 +29,6 @@ import { BorderRadius, Colors, Shadows, Spacing } from '../constants/theme';
 import { PlaceCard } from '../components/PlaceCard';
 import { PlaceDetailModal } from '../components/PlaceDetailModal';
 import { MapViewComponent } from '../components/MapViewComponent';
-import { OriaProModal } from '../components/OriaProModal';
 import {
   createNewList,
   deleteList,
@@ -55,7 +54,6 @@ export function ListsScreen({ onOpenRoutePlanner }: ListsScreenProps) {
   const [newDesc, setNewDesc] = useState<string>('');
   const [newIsPrivate, setNewIsPrivate] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
-  const [isProModalVisible, setIsProModalVisible] = useState<boolean>(false);
 
   // Place detail modal
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
@@ -83,12 +81,8 @@ export function ListsScreen({ onOpenRoutePlanner }: ListsScreenProps) {
       setNewDesc('');
       setErrorMsg('');
       await loadLists();
-    } catch (err: any) {
-      if (err.message === 'LIST_LIMIT_REACHED') {
-        setErrorMsg('Free tier allows up to 10 lists. Upgrade to Pro for unlimited lists!');
-      } else {
-        setErrorMsg('Error creating list.');
-      }
+    } catch {
+      setErrorMsg('Error creating collection.');
     }
   };
 
@@ -284,17 +278,6 @@ export function ListsScreen({ onOpenRoutePlanner }: ListsScreenProps) {
               {errorMsg ? (
                 <View style={[styles.errorBox, { backgroundColor: colors.accentLight }]}>
                   <Text style={[styles.errorText, { color: colors.accent }]}>{errorMsg}</Text>
-                  <TouchableOpacity
-                    style={{ marginTop: 6 }}
-                    onPress={() => {
-                      setIsCreateModalVisible(false);
-                      setIsProModalVisible(true);
-                    }}
-                  >
-                    <Text style={{ color: colors.accent, fontWeight: '700', fontSize: 12 }}>
-                      Upgrade to Pro →
-                    </Text>
-                  </TouchableOpacity>
                 </View>
               ) : null}
 
@@ -358,12 +341,6 @@ export function ListsScreen({ onOpenRoutePlanner }: ListsScreenProps) {
           if (onOpenRoutePlanner) onOpenRoutePlanner(p);
         }}
         isSaved={true}
-      />
-
-      {/* Oria Pro Modal */}
-      <OriaProModal
-        visible={isProModalVisible}
-        onClose={() => setIsProModalVisible(false)}
       />
     </SafeAreaView>
   );

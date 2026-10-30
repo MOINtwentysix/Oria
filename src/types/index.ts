@@ -78,21 +78,12 @@ export interface PlannedRoute {
   createdAt: string;
 }
 
-export interface UserSubscription {
-  tier: 'free' | 'pro';
-  aiRequestsUsed: number;
-  aiRequestsLimit: number; // 50 for free, unlimited (-1) for pro
-  listsLimit: number; // 10 for free, unlimited (-1) for pro
-  resetDate?: string;
-}
-
 export interface UserProfile {
   id: string;
   clerkId: string;
   email: string;
   name: string;
   avatarUrl?: string;
-  subscription: UserSubscription;
   listsCount: number;
   savedPlacesCount: number;
   privacy: {

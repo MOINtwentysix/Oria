@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { clerkMiddleware } from '@clerk/express';
 import placesRouter from './routes/places';
 import routingRouter from './routes/routing';
 import aiRouter from './routes/ai';
@@ -18,6 +19,14 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Clerk Backend Authentication
+if (process.env.CLERK_SECRET_KEY) {
+  app.use(clerkMiddleware());
+  console.log('🔒 [Clerk Auth] JWT Verification enabled.');
+} else {
+  console.log('ℹ️  [Clerk Auth] CLERK_SECRET_KEY nicht gesetzt. Backend läuft im Entwicklermodus.');
+}
 
 // Health & Status
 app.get('/api/health', async (req, res) => {
